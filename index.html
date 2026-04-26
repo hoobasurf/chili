@@ -476,28 +476,15 @@ async function loadAssetsZip() {
 
   // 2. Sinon telecharger avec fallback multi-proxy
   if(!zipBuffer) {
-    const _RAW = 'https://github.com/user-attachments/files/27100943/assets.zip';
-    const proxies = [
-      'https://corsproxy.io/?' + encodeURIComponent(_RAW),
-      'https://api.allorigins.win/raw?url=' + encodeURIComponent(_RAW),
-      'https://proxy.cors.sh/' + _RAW,
-      _RAW,
-    ];
-    let lastErr = null;
-    for(let i = 0; i < proxies.length; i++) {
-      setLoadStatus('Telechargement... (' + (i+1) + '/' + proxies.length + ')', 10 + i*8);
-      try {
-        const resp = await fetch(proxies[i]);
-        if(!resp.ok) throw new Error('HTTP ' + resp.status);
-        zipBuffer = await resp.arrayBuffer();
-        console.log('Proxy OK:', proxies[i]);
-        break;
-      } catch(e) {
-        lastErr = e;
-        console.warn('Proxy echoue:', proxies[i], e.message);
-      }
+    const _RAW = 'https://magenta-pegasus-537cbf.netlify.app/assets.zip';
+    setLoadStatus('Telechargement des assets...', 15);
+    try {
+      const resp = await fetch(_RAW);
+      if(!resp.ok) throw new Error('HTTP ' + resp.status);
+      zipBuffer = await resp.arrayBuffer();
+    } catch(e) {
+      throw new Error('Telechargement echoue: ' + e.message);
     }
-    if(!zipBuffer) throw new Error('Tous les proxies ont echoue: ' + (lastErr && lastErr.message));
 
     // Mettre en cache
     try {
