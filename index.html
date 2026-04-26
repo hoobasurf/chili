@@ -171,58 +171,6 @@ transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:999;pointer-events:n
 }
 .toast.show{transform:translateX(-50%) translateY(0);}
 
-/* ===== STRIP HORIZONTAL ===== */
-.strip-wrap{
-width:100%;overflow-x:auto;overflow-y:hidden;
-scrollbar-width:none;-webkit-overflow-scrolling:touch;
-padding:8px 0 4px;
-}
-.strip-wrap::-webkit-scrollbar{display:none;}
-.strip{display:flex;gap:8px;padding:0 12px;width:max-content;}
-.strip-card{
-flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:3px;
-cursor:pointer;border-radius:12px;padding:5px 5px 4px;
-border:2px solid transparent;transition:all .15s;
-background:rgba(255,255,255,.06);
-}
-.strip-card:hover{background:rgba(255,255,255,.12);transform:translateY(-2px);}
-.strip-card.active{border-color:var(–pink);background:rgba(255,110,180,.18);}
-.strip-card canvas{display:block;image-rendering:pixelated;}
-.strip-card .slabel{font-size:.55rem;font-weight:800;color:rgba(255,255,255,.45);text-align:center;}
-.strip-card.active .slabel{color:rgba(255,255,255,.8);}
-.strip-none canvas{opacity:.3;}
-
-/* CATEGORY PILLS */
-.cat-pills{display:flex;gap:6px;padding:8px 12px 4px;overflow-x:auto;scrollbar-width:none;flex-shrink:0;}
-.cat-pills::-webkit-scrollbar{display:none;}
-.cat-pill{
-flex-shrink:0;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.1);
-border-radius:20px;padding:6px 12px;font-size:.72rem;font-weight:800;
-color:rgba(255,255,255,.4);cursor:pointer;transition:all .2s;white-space:nowrap;
-}
-.cat-pill:hover{color:rgba(255,255,255,.7);background:rgba(255,255,255,.12);}
-.cat-pill.active{background:rgba(255,110,180,.2);border-color:var(–pink);color:white;}
-
-/* Cacher l’ancien editor panel sur mobile */
-@media(max-width:900px){
-.panel-editor{display:none !important;}
-.main{flex-direction:column;align-items:center;padding-bottom:0;}
-.panel-preview{width:100%;flex-direction:column;align-items:center;padding:8px 0 0;}
-.avatar-stage{width:180px;height:238px;}
-.avatar-stage canvas{width:162px;height:214px;}
-.pseudo-wrap{max-width:260px;width:100%;}
-.btn-save,.btn-random{max-width:260px;width:100%;}
-}
-.mobile-editor{
-width:100%;background:rgba(255,255,255,.04);
-border-top:1px solid rgba(255,255,255,.09);
-display:flex;flex-direction:column;
-flex-shrink:0;
-}
-@media(min-width:901px){
-.mobile-editor{display:none;}
-}
-
 @media(max-width:680px){
 .main{flex-direction:column;align-items:center;}
 .panel-preview{width:100%;flex-direction:row;justify-content:center;flex-wrap:wrap;padding:8px 12px;}
@@ -395,15 +343,6 @@ flex-shrink:0;
   </div>
 </div>
 
-<!-- MOBILE EDITOR : strip horizontal -->
-
-<div class="mobile-editor" id="mobile-editor">
-  <div class="cat-pills" id="cat-pills"></div>
-  <div class="strip-wrap">
-    <div class="strip" id="strip"></div>
-  </div>
-</div>
-
 <div class="toast" id="toast"></div>
 
 <script>
@@ -416,18 +355,14 @@ for(let i=0;i<60;i++){
   starsEl.appendChild(s);
 }
 
-// ===== URL DU ZIP (corrigée) =====
-// Proxy CORS pour contourner le blocage Safari iOS sur user-attachments
-const _RAW_ZIP = 'https://github.com/user-attachments/files/27100943/assets.zip';
-const ASSETS_ZIP_URL = 'https://corsproxy.io/?' + encodeURIComponent(_RAW_ZIP);
+// ===== URL DES ASSETS =====
+const ASSETS_ZIP_URL = 'https://magenta-pegasus-537cbf.netlify.app/assets.zip';
 const CACHE_NAME = 'macadam-assets-v1';
 
-// Blob URLs extraites du zip : { 'body_1.png': 'blob:...', ... }
+// Blob URLs extraites du zip : { 'body/1.png': 'blob:...', ... }
 const assetBlobs = {};
 
-// ===== PARSER ZIP NATIF (sans dépendance externe) =====
-// Utilise DecompressionStream (supporté Safari 16.4+, Chrome 80+, Firefox 113+)
-
+// ===== PARSER ZIP NATIF =====
 function readU16LE(buf, offset) {
   return buf[offset] | (buf[offset+1] << 8);
 }
@@ -436,7 +371,6 @@ function readU32LE(buf, offset) {
 }
 
 async function inflateRaw(compressedBytes) {
-  // Wrap en DEFLATE stream avec zlib header pour DecompressionStream
   const ds = new DecompressionStream('deflate-raw');
   const writer = ds.writable.getWriter();
   writer.write(compressedBytes);
@@ -459,7 +393,6 @@ async function parseZip(buffer) {
   const bytes = new Uint8Array(buffer);
   const files = {};
 
-  // Trouver End of Central Directory (EOCD) depuis la fin
   let eocdOffset = -1;
   for(let i = bytes.length - 22; i >= 0; i--) {
     if(bytes[i]===0x50 && bytes[i+1]===0x4B && bytes[i+2]===0x05 && bytes[i+3]===0x06) {
@@ -470,15 +403,13 @@ async function parseZip(buffer) {
   if(eocdOffset < 0) throw new Error('ZIP: EOCD introuvable');
 
   const cdCount  = readU16LE(bytes, eocdOffset + 10);
-  const cdSize   = readU32LE(bytes, eocdOffset + 12);
   const cdOffset = readU32LE(bytes, eocdOffset + 16);
 
   let pos = cdOffset;
   for(let fi = 0; fi < cdCount; fi++) {
-    if(readU32LE(bytes, pos) !== 0x02014B50) break; // Central dir signature
+    if(readU32LE(bytes, pos) !== 0x02014B50) break;
     const compression  = readU16LE(bytes, pos + 10);
     const compSize     = readU32LE(bytes, pos + 20);
-    const uncompSize   = readU32LE(bytes, pos + 24);
     const nameLen      = readU16LE(bytes, pos + 28);
     const extraLen     = readU16LE(bytes, pos + 30);
     const commentLen   = readU16LE(bytes, pos + 32);
@@ -486,9 +417,8 @@ async function parseZip(buffer) {
     const name         = new TextDecoder().decode(bytes.slice(pos+46, pos+46+nameLen));
     pos += 46 + nameLen + extraLen + commentLen;
 
-    if(name.endsWith('/')) continue; // dossier
+    if(name.endsWith('/')) continue;
 
-    // Lire l'en-tête local pour trouver les données
     const lNameLen  = readU16LE(bytes, localOffset + 26);
     const lExtraLen = readU16LE(bytes, localOffset + 28);
     const dataStart = localOffset + 30 + lNameLen + lExtraLen;
@@ -496,19 +426,15 @@ async function parseZip(buffer) {
 
     let fileData;
     if(compression === 0) {
-      // Stored (non compressé)
       fileData = compData;
     } else if(compression === 8) {
-      // DEFLATE
       fileData = await inflateRaw(compData);
     } else {
       console.warn(`ZIP: compression ${compression} non supportée pour ${name}`);
       continue;
     }
 
-    // Clé = nom sans préfixe de dossier
-    const key = name; // garder le chemin complet: 'body/1.png', 'EYELASHES/1.png', etc.
-    files[key] = fileData;
+    files[name] = fileData;
   }
   return files;
 }
@@ -525,7 +451,6 @@ async function loadAssetsZip() {
 
   let zipBuffer = null;
 
-  // 1. Chercher dans Cache API
   try {
     const cache = await caches.open(CACHE_NAME);
     const cached = await cache.match(ASSETS_ZIP_URL);
@@ -535,30 +460,25 @@ async function loadAssetsZip() {
     }
   } catch(e) { console.warn('Cache API indisponible:', e); }
 
-  // 2. Sinon telecharger avec fallback multi-proxy
   if(!zipBuffer) {
-    const _RAW = 'https://magenta-pegasus-537cbf.netlify.app/assets.zip';
-    setLoadStatus('Telechargement des assets...', 15);
+    setLoadStatus('Téléchargement des assets…', 15);
     try {
-      const resp = await fetch(_RAW);
+      const resp = await fetch(ASSETS_ZIP_URL);
       if(!resp.ok) throw new Error('HTTP ' + resp.status);
       zipBuffer = await resp.arrayBuffer();
     } catch(e) {
-      throw new Error('Telechargement echoue: ' + e.message);
+      throw new Error('Téléchargement échoué: ' + e.message);
     }
 
-    // Mettre en cache
     try {
       const cache = await caches.open(CACHE_NAME);
-      await cache.put(_RAW, new Response(zipBuffer.slice(0)));
+      await cache.put(ASSETS_ZIP_URL, new Response(zipBuffer.slice(0)));
     } catch(e) {}
   }
 
-  // 3. Parser ZIP natif
   setLoadStatus('Décompression…', 60);
   const files = await parseZip(zipBuffer);
 
-  // 4. Créer Blob URLs
   setLoadStatus('Préparation des sprites…', 85);
   for(const [key, data] of Object.entries(files)) {
     if(!key.endsWith('.png')) continue;
@@ -567,12 +487,12 @@ async function loadAssetsZip() {
   }
 
   setLoadStatus('Prêt !', 100);
-
 }
 
-// ===== IMAGE CACHE (une seule déclaration) =====
+// ===== IMAGE CACHE =====
 const imgCache = {};
 function loadImg(filename) {
+  if(!filename) return Promise.resolve(null);
   const blobUrl = assetBlobs[filename];
   if(!blobUrl) return Promise.resolve(null);
   if(imgCache[filename]) return imgCache[filename];
@@ -617,37 +537,122 @@ const HAIR_COLORS = [
   { suffix:'h', hex:'#00BBDD', label:'Bleu' },
 ];
 
-// ===== COUCHES DE RENDU =====
-// Mapping vers les vrais chemins du zip
-// body/1.png, EYELASHES/1.png, hair/COLOR/1b.png, bangs/COLOR/1.png, etc.
-function img(path) { return path; }
-function hairFile(folder, num, color) {
-  // Toujours passer par COLOR/ - '' = brun fonce (couleur de base)
-  const suffix = color || '';
-  return `${folder}/COLOR/${num}${suffix}.png`;
+// ===== HELPER CHEMINS CHEVEUX =====
+// Structure ZIP :
+//   hair/N.png            → silhouette (forme) des cheveux
+//   hair/COLOR/N.png      → couleur brun foncé (suffix '')
+//   hair/COLOR/Nb.png     → noir, etc.
+//   hair_back/N.png       → arrière silhouette
+//   hair_back/COLOR/N.png → arrière coloré
+//   bangs/N.png           → frange silhouette
+//   bangs/COLOR/N.png     → frange colorée
+//   hair_bonus/N.png      → bonus silhouette
+//   hair_bonus/COLOR/N.png→ bonus coloré
+
+function hairColorFile(folder, num, colorSuffix) {
+  // Fichier colorisé dans COLOR/
+  return `${folder}/COLOR/${num}${colorSuffix}.png`;
 }
+
+function hairBaseFile(folder, num) {
+  // Silhouette de base (structure, noir/contours) dans le dossier racine
+  return `${folder}/${num}.png`;
+}
+
+// ===== COUCHES DE RENDU =====
+// ORDRE CORRECT :
+// 1. Corps (peau) — body/N.png
+// 2. Arrière des cheveux (base) — hair_back/N.png
+// 3. Arrière des cheveux (couleur) — hair_back/COLOR/Nsuffix.png
+// 4. Vêtements du bas
+// 5. Robe
+// 6. Haut
+// 7. Yeux (cils, pupilles, sourcils)
+// 8. Bouche
+// 9. Cheveux avant (base) — hair/N.png
+// 10. Cheveux avant (couleur) — hair/COLOR/Nsuffix.png
+// 11. Hair bonus (base + couleur)
+// 12. Frange (base + couleur)
+// 13. Chaussures
+// 14. Gants
+// 15. Barbe
+// 16. Highlights — body/full.png (EN DERNIER par-dessus tout)
 
 async function getLayers() {
   const layers = [];
   const hc = S.hairColor;
-  const add = (f) => layers.push(f);
+  const add = (f) => { if(f) layers.push(f); };
 
-  add(`body/full.png`);   // structure de base
-  add(`body/${S.body}.png`); // teinte de peau
-  if(S.hair) add(hairFile('hair_back', S.hair, hc));
-  if(S.bottom)  { add(`bottom/${S.bottom}.png`); add(`bottom/color/${S.bottom}.png`); }
-  if(S.dress)   { add(`dress/${S.dress}.png`);   add(`dress/COLORS/${S.dress}.png`); }
-  if(S.top && !S.dress) { add(`top/${S.top}.png`); add(`top/colors/${S.top}.png`); }
+  // Corps (peau)
+  add(`body/${S.body}.png`);
+
+  // Arrière cheveux
+  if(S.hair) {
+    add(hairBaseFile('hair_back', S.hair));
+    add(hairColorFile('hair_back', S.hair, hc));
+  }
+
+  // Vêtements bas
+  if(S.bottom && !S.dress) {
+    add(`bottom/${S.bottom}.png`);
+    add(`bottom/color/${S.bottom}.png`);
+  }
+
+  // Robe
+  if(S.dress) {
+    add(`dress/${S.dress}.png`);
+    add(`dress/COLORS/${S.dress}.png`);
+  }
+
+  // Haut (seulement si pas de robe)
+  if(S.top && !S.dress) {
+    add(`top/${S.top}.png`);
+    add(`top/colors/${S.top}.png`);
+  }
+
+  // Yeux
   if(S.eyelashes) add(`EYELASHES/${S.eyelashes}.png`);
   if(S.pupils)    add(`PUPILS/${S.pupils}.png`);
   if(S.eyebrows)  add(`EYEBROWS/${S.eyebrows}.png`);
-  if(S.mouth)     add(`MOUTH/${S.mouth}.png`);
-  if(S.hair)      add(hairFile('hair', S.hair, hc));
-  if(S.hairBonus) add(hairFile('hair_bonus', S.hairBonus, hc));
-  if(S.bangs)     add(hairFile('bangs', S.bangs, hc));
-  if(S.shoes)   { add(`shoes/${S.shoes}.png`);   add(`shoes/COLOR/${S.shoes}.png`); }
-  if(S.gloves)  { add(`gloves/${S.gloves}.png`); add(`gloves/COLOR/${S.gloves}.png`); }
-  if(S.beard)     add(`BEARD/${S.beard}.png`);
+
+  // Bouche
+  if(S.mouth) add(`MOUTH/${S.mouth}.png`);
+
+  // Cheveux avant
+  if(S.hair) {
+    add(hairBaseFile('hair', S.hair));
+    add(hairColorFile('hair', S.hair, hc));
+  }
+
+  // Hair bonus
+  if(S.hairBonus) {
+    add(hairBaseFile('hair_bonus', S.hairBonus));
+    add(hairColorFile('hair_bonus', S.hairBonus, hc));
+  }
+
+  // Frange
+  if(S.bangs) {
+    add(hairBaseFile('bangs', S.bangs));
+    add(hairColorFile('bangs', S.bangs, hc));
+  }
+
+  // Chaussures
+  if(S.shoes) {
+    add(`shoes/${S.shoes}.png`);
+    add(`shoes/COLOR/${S.shoes}.png`);
+  }
+
+  // Gants
+  if(S.gloves) {
+    add(`gloves/${S.gloves}.png`);
+    add(`gloves/COLOR/${S.gloves}.png`);
+  }
+
+  // Barbe
+  if(S.beard) add(`BEARD/${S.beard}.png`);
+
+  // Highlights / contours blancs — EN DERNIER
+  add(`body/full.png`);
 
   return layers;
 }
@@ -686,7 +691,7 @@ const DISPLAY_W = 60, DISPLAY_H = 94;
 async function renderThumb(canvas, layers) {
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0,0,THUMB_W,THUMB_H);
-  const imgs = await Promise.all(layers.map(src => loadImg(src)));
+  const imgs = await Promise.all(layers.filter(Boolean).map(src => loadImg(src)));
   for(const img of imgs) {
     if(img) ctx.drawImage(img, 0, 0, THUMB_W, THUMB_H);
   }
@@ -698,7 +703,7 @@ function buildBodyGrid() {
   g.innerHTML = '';
   for(let i=1;i<=29;i++) {
     const card = makeCard(i, `Peau ${i}`, 'body', async (cv) => {
-      await renderThumb(cv, [`body/${i}.png`]);
+      await renderThumb(cv, [`body/${i}.png`, `body/full.png`]);
     });
     g.appendChild(card);
   }
@@ -710,12 +715,11 @@ function buildSimpleGrid(gridId, key, prefix, count, withNone=false) {
   if(withNone) g.appendChild(makeNoneCard(key));
   for(let i=1;i<=count;i++) {
     const card = makeCard(i, `${i}`, key, async (cv) => {
-      const ctx = cv.getContext('2d');
-      ctx.clearRect(0,0,THUMB_W,THUMB_H);
-      const bodyImg = await loadImg(`body/${S.body}.png`);
-      if(bodyImg) ctx.drawImage(bodyImg, 0,0,THUMB_W,THUMB_H);
-      const img = await loadImg(`${prefix}/${i}.png`);
-      if(img) ctx.drawImage(img, 0,0,THUMB_W,THUMB_H);
+      await renderThumb(cv, [
+        `body/${S.body}.png`,
+        `${prefix}/${i}.png`,
+        `body/full.png`,
+      ]);
     });
     g.appendChild(card);
   }
@@ -729,13 +733,17 @@ function buildHairGrid() {
       const hc = S.hairColor;
       await renderThumb(cv, [
         `body/${S.body}.png`,
-        hairFile('hair_back', i, hc),
+        hairBaseFile('hair_back', i),
+        hairColorFile('hair_back', i, hc),
         `EYELASHES/${S.eyelashes||1}.png`,
         `PUPILS/${S.pupils||1}.png`,
         `EYEBROWS/${S.eyebrows||1}.png`,
-        hairFile('hair', i, hc),
-        S.bangs ? hairFile('bangs', S.bangs, hc) : null,
-      ].filter(Boolean));
+        hairBaseFile('hair', i),
+        hairColorFile('hair', i, hc),
+        S.bangs ? hairBaseFile('bangs', S.bangs) : null,
+        S.bangs ? hairColorFile('bangs', S.bangs, hc) : null,
+        `body/full.png`,
+      ]);
     });
     g.appendChild(card);
   }
@@ -771,11 +779,15 @@ function buildBangsGrid() {
       const hc = S.hairColor;
       await renderThumb(cv, [
         `body/${S.body}.png`,
-        hairFile('hair_back', S.hair||1, hc),
+        hairBaseFile('hair_back', S.hair||1),
+        hairColorFile('hair_back', S.hair||1, hc),
         `EYELASHES/${S.eyelashes||1}.png`,
         `PUPILS/${S.pupils||1}.png`,
-        hairFile('hair', S.hair||1, hc),
-        hairFile('bangs', i, hc),
+        hairBaseFile('hair', S.hair||1),
+        hairColorFile('hair', S.hair||1, hc),
+        hairBaseFile('bangs', i),
+        hairColorFile('bangs', i, hc),
+        `body/full.png`,
       ]);
     });
     g.appendChild(card);
@@ -791,9 +803,13 @@ function buildHairBonusGrid() {
       const hc = S.hairColor;
       await renderThumb(cv, [
         `body/${S.body}.png`,
-        hairFile('hair_back', S.hair||1, hc),
-        hairFile('hair_bonus', i, hc),
-        hairFile('hair', S.hair||1, hc),
+        hairBaseFile('hair_back', S.hair||1),
+        hairColorFile('hair_back', S.hair||1, hc),
+        hairBaseFile('hair_bonus', i),
+        hairColorFile('hair_bonus', i, hc),
+        hairBaseFile('hair', S.hair||1),
+        hairColorFile('hair', S.hair||1, hc),
+        `body/full.png`,
       ]);
     });
     g.appendChild(card);
@@ -806,7 +822,12 @@ function buildTopGrid() {
   g.appendChild(makeNoneCard('top'));
   for(let i=1;i<=12;i++) {
     const card = makeCard(i, `${i}`, 'top', async (cv) => {
-      await renderThumb(cv, [`body/${S.body}.png`,`top/${i}.png`,`top/colors/${i}.png`]);
+      await renderThumb(cv, [
+        `body/${S.body}.png`,
+        `top/${i}.png`,
+        `top/colors/${i}.png`,
+        `body/full.png`,
+      ]);
     }, () => { S.dress = null; refreshDressCards(); });
     g.appendChild(card);
   }
@@ -818,7 +839,12 @@ function buildDressGrid() {
   g.appendChild(makeNoneCard('dress'));
   for(let i=1;i<=7;i++) {
     const card = makeCard(i, `${i}`, 'dress', async (cv) => {
-      await renderThumb(cv, [`body/${S.body}.png`,`dress/${i}.png`,`dress/COLORS/${i}.png`]);
+      await renderThumb(cv, [
+        `body/${S.body}.png`,
+        `dress/${i}.png`,
+        `dress/COLORS/${i}.png`,
+        `body/full.png`,
+      ]);
     }, () => { S.top = null; S.bottom = null; refreshTopCards(); refreshBottomCards(); });
     g.appendChild(card);
   }
@@ -846,7 +872,12 @@ function buildBottomGrid() {
   g.appendChild(makeNoneCard('bottom'));
   for(let i=1;i<=8;i++) {
     const card = makeCard(i, `${i}`, 'bottom', async (cv) => {
-      await renderThumb(cv, [`body/${S.body}.png`,`bottom/${i}.png`,`bottom/color/${i}.png`]);
+      await renderThumb(cv, [
+        `body/${S.body}.png`,
+        `bottom/${i}.png`,
+        `bottom/color/${i}.png`,
+        `body/full.png`,
+      ]);
     });
     g.appendChild(card);
   }
@@ -858,7 +889,12 @@ function buildShoesGrid() {
   g.appendChild(makeNoneCard('shoes'));
   for(let i=1;i<=4;i++) {
     const card = makeCard(i, `${i}`, 'shoes', async (cv) => {
-      await renderThumb(cv, [`body/${S.body}.png`,`shoes/${i}.png`,`shoes/COLOR/${i}.png`]);
+      await renderThumb(cv, [
+        `body/${S.body}.png`,
+        `shoes/${i}.png`,
+        `shoes/COLOR/${i}.png`,
+        `body/full.png`,
+      ]);
     });
     g.appendChild(card);
   }
@@ -870,7 +906,12 @@ function buildGlovesGrid() {
   g.appendChild(makeNoneCard('gloves'));
   for(let i=1;i<=6;i++) {
     const card = makeCard(i, `${i}`, 'gloves', async (cv) => {
-      await renderThumb(cv, [`body/${S.body}.png`,`gloves/${i}.png`,`gloves/COLOR/${i}.png`]);
+      await renderThumb(cv, [
+        `body/${S.body}.png`,
+        `gloves/${i}.png`,
+        `gloves/COLOR/${i}.png`,
+        `body/full.png`,
+      ]);
     });
     g.appendChild(card);
   }
@@ -1048,7 +1089,6 @@ loadSaved();
     boot.style.opacity = '0';
     setTimeout(() => boot.remove(), 400);
     buildAllGrids();
-    initMobileStrip();
     scheduleRender();
   } catch(err) {
     document.getElementById('load-error').style.display = 'block';
@@ -1058,180 +1098,6 @@ loadSaved();
     console.error('Assets load error:', err);
   }
 })();
-
-// ===== MOBILE STRIP =====
-const STRIP_W = 444, STRIP_H = 700;
-const SDISP_W = 48, SDISP_H = 75;
-
-const CATEGORIES = [
-  { id:'peau',      label:'🌸 Peau',     key:'body',      count:29, withNone:false, prefix:null },
-  { id:'eyelashes', label:'👁 Cils',      key:'eyelashes', count:5,  withNone:false, prefix:'EYELASHES' },
-  { id:'pupils',    label:'👁 Pupilles',  key:'pupils',    count:16, withNone:false, prefix:'PUPILS' },
-  { id:'eyebrows',  label:'✏️ Sourcils',  key:'eyebrows',  count:5,  withNone:false, prefix:'EYEBROWS' },
-  { id:'mouth',     label:'👄 Bouche',    key:'mouth',     count:20, withNone:false, prefix:'MOUTH' },
-  { id:'hair',      label:'💇 Cheveux',   key:'hair',      count:12, withNone:false, prefix:null },
-  { id:'haircolor', label:'🎨 Couleur',   key:'hairColor', count:0,  withNone:false, prefix:null },
-  { id:'bangs',     label:'💈 Frange',    key:'bangs',     count:13, withNone:true,  prefix:null },
-  { id:'hairbonus', label:'✨ Bonus',     key:'hairBonus', count:5,  withNone:true,  prefix:null },
-  { id:'top',       label:'👕 Haut',      key:'top',       count:12, withNone:true,  prefix:null },
-  { id:'dress',     label:'👗 Robe',      key:'dress',     count:7,  withNone:true,  prefix:null },
-  { id:'bottom',    label:'👖 Bas',       key:'bottom',    count:8,  withNone:true,  prefix:null },
-  { id:'shoes',     label:'👟 Shoes',     key:'shoes',     count:4,  withNone:true,  prefix:null },
-  { id:'gloves',    label:'🧤 Gants',     key:'gloves',    count:6,  withNone:true,  prefix:null },
-  { id:'beard',     label:'🧔 Barbe',     key:'beard',     count:5,  withNone:true,  prefix:null },
-];
-
-let activeCat = 'peau';
-
-async function renderStripThumb(canvas, layers) {
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0,0,STRIP_W,STRIP_H);
-  const imgs = await Promise.all(layers.map(src => loadImg(src)));
-  for(const img of imgs) if(img) ctx.drawImage(img, 0,0,STRIP_W,STRIP_H);
-}
-
-function makeStripCard(val, label, stateKey, layersFn, extraOnClick) {
-  const card = document.createElement('div');
-  const isActive = stateKey === 'hairColor'
-    ? S.hairColor === val
-    : (val === null ? S[stateKey] === null : S[stateKey] === val);
-  card.className = 'strip-card' + (isActive ? ' active' : '') + (val === null ? ' strip-none' : '');
-
-  if(stateKey === 'hairColor') {
-    // Pastille couleur
-    const dot = document.createElement('div');
-    dot.style.cssText = `width:32px;height:32px;border-radius:8px;background:${val};margin:4px;`;
-    card.appendChild(dot);
-  } else {
-    const cv = document.createElement('canvas');
-    cv.width = STRIP_W; cv.height = STRIP_H;
-    cv.style.width = SDISP_W+'px'; cv.style.height = SDISP_H+'px';
-    card.appendChild(cv);
-    const obs = new IntersectionObserver(entries => {
-      if(entries[0].isIntersecting) { renderStripThumb(cv, layersFn()); obs.disconnect(); }
-    }, {threshold:0.1});
-    obs.observe(card);
-  }
-
-  const lbl = document.createElement('span');
-  lbl.className = 'slabel';
-  lbl.textContent = val === null ? 'Aucun' : label;
-  card.appendChild(lbl);
-
-  card.onclick = () => {
-    if(stateKey === 'hairColor') {
-      S.hairColor = val;
-    } else if(val === null) {
-      S[stateKey] = null;
-    } else {
-      S[stateKey] = val;
-      if(extraOnClick) extraOnClick();
-    }
-    document.querySelectorAll('#strip .strip-card').forEach(c => c.classList.remove('active'));
-    card.classList.add('active');
-    scheduleRender();
-    // Scroll card into view
-    card.scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'});
-  };
-  return card;
-}
-
-function buildStrip(catId) {
-  activeCat = catId;
-  document.querySelectorAll('.cat-pill').forEach(p => p.classList.toggle('active', p.dataset.cat === catId));
-  const strip = document.getElementById('strip');
-  strip.innerHTML = '';
-  const cat = CATEGORIES.find(c => c.id === catId);
-  if(!cat) return;
-
-  const hc = S.hairColor;
-
-  if(catId === 'haircolor') {
-    const HAIR_COLORS_STRIP = [
-      {suffix:'',  hex:'#3D1800', label:'Brun'},
-      {suffix:'b', hex:'#111111', label:'Noir'},
-      {suffix:'c', hex:'#8B4010', label:'Châtain'},
-      {suffix:'d', hex:'#C8980A', label:'Blond doré'},
-      {suffix:'e', hex:'#EEE0C0', label:'Blond clair'},
-      {suffix:'f', hex:'#FF5AAA', label:'Rose'},
-      {suffix:'g', hex:'#AA44FF', label:'Violet'},
-      {suffix:'h', hex:'#00BBDD', label:'Bleu'},
-    ];
-    HAIR_COLORS_STRIP.forEach(({suffix, hex, label}) => {
-      const card = makeStripCard(suffix, label, 'hairColor', null);
-      // override dot color already set
-      strip.appendChild(card);
-    });
-    return;
-  }
-
-  if(cat.withNone) {
-    strip.appendChild(makeStripCard(null, 'Aucun', cat.key, () => [`body/${S.body}.png`]));
-  }
-
-  for(let i=1; i<=cat.count; i++) {
-    let layersFn;
-    const k = cat.key;
-    if(k === 'body') {
-      layersFn = () => [`body/full.png`, `body/${i}.png`];
-    } else if(cat.prefix) {
-      layersFn = () => [`body/full.png`, `body/${S.body}.png`, `${cat.prefix}/${i}.png`];
-    } else if(k === 'hair') {
-      layersFn = () => [`body/${S.body}.png`, hairFile('hair_back',i,hc), `EYELASHES/${S.eyelashes||1}.png`, `PUPILS/${S.pupils||1}.png`, hairFile('hair',i,hc)];
-    } else if(k === 'bangs') {
-      layersFn = () => [`body/${S.body}.png`, hairFile('hair_back',S.hair||1,hc), hairFile('hair',S.hair||1,hc), hairFile('bangs',i,hc)];
-    } else if(k === 'hairBonus') {
-      layersFn = () => [`body/${S.body}.png`, hairFile('hair_back',S.hair||1,hc), hairFile('hair_bonus',i,hc), hairFile('hair',S.hair||1,hc)];
-    } else if(k === 'top') {
-      layersFn = () => [`body/full.png`, `body/${S.body}.png`, `top/${i}.png`, `top/colors/${i}.png`];
-    } else if(k === 'dress') {
-      layersFn = () => [`body/full.png`, `body/${S.body}.png`, `dress/${i}.png`, `dress/COLORS/${i}.png`];
-    } else if(k === 'bottom') {
-      layersFn = () => [`body/full.png`, `body/${S.body}.png`, `bottom/${i}.png`, `bottom/color/${i}.png`];
-    } else if(k === 'shoes') {
-      layersFn = () => [`body/full.png`, `body/${S.body}.png`, `shoes/${i}.png`, `shoes/COLOR/${i}.png`];
-    } else if(k === 'gloves') {
-      layersFn = () => [`body/full.png`, `body/${S.body}.png`, `gloves/${i}.png`, `gloves/COLOR/${i}.png`];
-    } else if(k === 'beard') {
-      layersFn = () => [`body/full.png`, `body/${S.body}.png`, `BEARD/${i}.png`];
-    } else {
-      layersFn = () => [`body/${S.body}.png`];
-    }
-
-    let extraOnClick = null;
-    if(k === 'top')   extraOnClick = () => { S.dress = null; };
-    if(k === 'dress')  extraOnClick = () => { S.top = null; S.bottom = null; };
-
-    strip.appendChild(makeStripCard(i, `${i}`, cat.key, layersFn, extraOnClick));
-  }
-
-  // Scroll sur la carte active
-  setTimeout(() => {
-    const active = strip.querySelector('.strip-card.active');
-    if(active) active.scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'});
-  }, 100);
-}
-
-function buildCatPills() {
-  const pills = document.getElementById('cat-pills');
-  pills.innerHTML = '';
-  CATEGORIES.forEach(cat => {
-    const pill = document.createElement('button');
-    pill.className = 'cat-pill' + (cat.id === activeCat ? ' active' : '');
-    pill.dataset.cat = cat.id;
-    pill.textContent = cat.label;
-    pill.onclick = () => buildStrip(cat.id);
-    pills.appendChild(pill);
-  });
-}
-
-// Init mobile strip apres buildAllGrids
-const _origBuildAll = buildAllGrids;
-function initMobileStrip() {
-  buildCatPills();
-  buildStrip('peau');
-}
-
 </script>
 
 </body>
