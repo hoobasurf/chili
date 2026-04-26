@@ -26,20 +26,16 @@ radial-gradient(ellipse at 90% 80%,#FFD74730 0%,transparent 45%),
 .star{position:absolute;border-radius:50%;background:white;animation:twinkle var(–d,3s) ease-in-out infinite var(–del,0s);}
 @keyframes twinkle{0%,100%{opacity:.1;transform:scale(1);}50%{opacity:.8;transform:scale(1.5);}}
 
-/* ===== LAYOUT ===== */
 .app{position:relative;z-index:1;display:flex;flex-direction:column;min-height:100vh;}
 
-/* HEADER */
 .header{text-align:center;padding:24px 20px 16px;flex-shrink:0;}
 .logo-tag{display:inline-block;background:var(–yellow);color:var(–dark);font-size:.65rem;font-weight:900;letter-spacing:3px;text-transform:uppercase;padding:4px 12px;border-radius:20px;margin-bottom:10px;}
 .logo-title{font-family:‘Baloo 2’,cursive;font-size:clamp(1.8rem,6vw,3rem);font-weight:800;line-height:1;color:white;letter-spacing:-1px;}
 .logo-title .c1{color:var(–pink);}.logo-title .c2{color:var(–yellow);}.logo-title .c3{color:var(–mint);}
 .logo-title .c4{color:var(–sky);}.logo-title .c5{color:var(–lav);}.logo-title .c6{color:var(–peach);}
 
-/* MAIN SPLIT */
 .main{display:flex;flex:1;gap:0;max-width:1000px;margin:0 auto;width:100%;padding:0 12px 20px;}
 
-/* LEFT: PREVIEW */
 .panel-preview{
 width:240px;flex-shrink:0;
 display:flex;flex-direction:column;align-items:center;
@@ -73,7 +69,7 @@ flex-direction:column;gap:8px;
 .pseudo-input{
 width:100%;background:rgba(255,255,255,.07);
 border:1.5px solid rgba(255,255,255,.12);border-radius:14px;
-padding:11px 14px;font-family:‘Nunito’,sans-serif;font-size:.95rem;font-weight:700;
+padding:11px 14px;font-family:‘Nunito’,sans-serif;font-size:16px;font-weight:700;
 color:white;outline:none;transition:all .2s;
 }
 .pseudo-input::placeholder{color:rgba(255,255,255,.2);}
@@ -97,7 +93,6 @@ color:rgba(255,255,255,.6);cursor:pointer;transition:all .2s;
 }
 .btn-random:hover{background:rgba(255,255,255,.12);color:white;}
 
-/* RIGHT: EDITOR */
 .panel-editor{
 flex:1;
 background:rgba(255,255,255,.04);
@@ -107,7 +102,6 @@ display:flex;flex-direction:column;
 overflow:hidden;min-width:0;
 }
 
-/* TABS */
 .tabs{
 display:flex;gap:2px;padding:12px 12px 0;
 flex-shrink:0;overflow-x:auto;scrollbar-width:none;
@@ -124,7 +118,6 @@ flex-shrink:0;
 .tab:hover{color:rgba(255,255,255,.65);background:rgba(255,255,255,.04);}
 .tab.active{color:white;background:rgba(255,255,255,.07);border-bottom-color:var(–pink);}
 
-/* PANELS */
 .panels{flex:1;overflow-y:auto;padding:14px;scrollbar-width:thin;scrollbar-color:#3A1D6A transparent;}
 .panels::-webkit-scrollbar{width:4px;}
 .panels::-webkit-scrollbar-thumb{background:#3A1D6A;border-radius:4px;}
@@ -135,7 +128,6 @@ flex-shrink:0;
 .section{background:rgba(255,255,255,.05);border-radius:14px;padding:12px 14px;}
 .section-title{font-size:.62rem;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.28);margin-bottom:10px;}
 
-/* GRID D’ITEMS (sprites) */
 .igrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:8px;}
 .icard{
 background:rgba(255,255,255,.06);border-radius:12px;
@@ -152,7 +144,6 @@ transition:all .15s;position:relative;overflow:hidden;
 .ilabel{font-size:.58rem;font-weight:800;color:rgba(255,255,255,.45);text-align:center;}
 .icard.active .ilabel{color:rgba(255,255,255,.8);}
 
-/* TOGGLE NONE */
 .none-badge{
 position:absolute;top:4px;right:4px;
 background:rgba(255,255,255,.15);border-radius:4px;
@@ -160,10 +151,8 @@ font-size:.5rem;font-weight:900;color:rgba(255,255,255,.5);
 padding:1px 4px;
 }
 
-/* BODY GRID (teintes de peau) */
 .skin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(58px,1fr));gap:8px;}
 
-/* COULEURS DE CHEVEUX */
 .hair-colors{display:flex;gap:0;flex-wrap:wrap;}
 .hc{
 width:28px;height:28px;cursor:pointer;
@@ -173,7 +162,6 @@ transition:transform .15s,border-color .15s;flex-shrink:0;
 .hc:hover{transform:scale(1.15);}
 .hc.active{border-color:white;transform:scale(1.1);}
 
-/* TOAST */
 .toast{
 position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
 background:var(–mint);color:var(–dark);
@@ -183,7 +171,6 @@ transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:999;pointer-events:n
 }
 .toast.show{transform:translateX(-50%) translateY(0);}
 
-/* MOBILE */
 @media(max-width:680px){
 .main{flex-direction:column;align-items:center;}
 .panel-preview{width:100%;flex-direction:row;justify-content:center;flex-wrap:wrap;padding:8px 12px;}
@@ -197,7 +184,9 @@ transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:999;pointer-events:n
 
 </head>
 <body>
+
 <!-- ÉCRAN DE CHARGEMENT -->
+
 <div id="boot-screen" style="
   position:fixed;inset:0;z-index:999;
   background:#12082A;
@@ -213,7 +202,7 @@ transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:999;pointer-events:n
   <div id="load-status" style="font-size:.8rem;color:rgba(255,255,255,.45);font-weight:700;letter-spacing:.5px;">Initialisation…</div>
   <div id="load-error" style="display:none;max-width:320px;text-align:center;">
     <p style="color:#FF6EB4;font-size:.85rem;font-weight:700;margin-bottom:12px;">❌ Impossible de charger les assets.</p>
-    <p style="color:rgba(255,255,255,.5);font-size:.75rem;margin-bottom:16px;">Vérifie que l'URL du zip est correcte dans le code.</p>
+    <p style="color:rgba(255,255,255,.5);font-size:.75rem;margin-bottom:16px;">Vérifie la console pour plus de détails.</p>
     <code id="load-error-msg" style="color:#FFD747;font-size:.7rem;word-break:break-all;"></code>
   </div>
 </div>
@@ -232,7 +221,6 @@ transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:999;pointer-events:n
   </div>
 
   <div class="main">
-    <!-- PREVIEW -->
     <div class="panel-preview">
       <div class="avatar-stage">
         <canvas id="preview-canvas" width="444" height="700"></canvas>
@@ -251,7 +239,6 @@ transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:999;pointer-events:n
   <button class="btn-save" onclick="saveAvatar()">✨ Sauvegarder</button>
 </div>
 
-<!-- EDITOR -->
 <div class="panel-editor">
   <div class="tabs" id="tabs">
     <button class="tab active" data-panel="peau">🌸 Peau</button>
@@ -265,7 +252,6 @@ transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:999;pointer-events:n
   </div>
   <div class="panels" id="panels">
 
-    <!-- PEAU -->
     <div class="panel active" id="panel-peau">
       <div class="section">
         <div class="section-title">Teinte de peau (1–29)</div>
@@ -273,7 +259,6 @@ transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:999;pointer-events:n
       </div>
     </div>
 
-    <!-- YEUX -->
     <div class="panel" id="panel-yeux">
       <div class="section">
         <div class="section-title">Cils</div>
@@ -289,7 +274,6 @@ transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:999;pointer-events:n
       </div>
     </div>
 
-    <!-- BOUCHE -->
     <div class="panel" id="panel-bouche">
       <div class="section">
         <div class="section-title">Bouche (20 styles)</div>
@@ -297,7 +281,6 @@ transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:999;pointer-events:n
       </div>
     </div>
 
-    <!-- CHEVEUX -->
     <div class="panel" id="panel-cheveux">
       <div class="section">
         <div class="section-title">Style de cheveux</div>
@@ -317,7 +300,6 @@ transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:999;pointer-events:n
       </div>
     </div>
 
-    <!-- HAUT -->
     <div class="panel" id="panel-haut">
       <div class="section">
         <div class="section-title">Haut (12 styles)</div>
@@ -329,7 +311,6 @@ transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:999;pointer-events:n
       </div>
     </div>
 
-    <!-- BAS -->
     <div class="panel" id="panel-bas">
       <div class="section">
         <div class="section-title">Bas (8 styles)</div>
@@ -337,7 +318,6 @@ transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:999;pointer-events:n
       </div>
     </div>
 
-    <!-- SHOES -->
     <div class="panel" id="panel-shoes">
       <div class="section">
         <div class="section-title">Chaussures (4 styles)</div>
@@ -349,7 +329,6 @@ transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:999;pointer-events:n
       </div>
     </div>
 
-    <!-- EXTRAS -->
     <div class="panel" id="panel-extras">
       <div class="section">
         <div class="section-title">Barbe / poils</div>
@@ -366,8 +345,6 @@ transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:999;pointer-events:n
 
 <div class="toast" id="toast"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-
 <script>
 // ===== ÉTOILES =====
 const starsEl = document.getElementById('stars');
@@ -378,59 +355,99 @@ for(let i=0;i<60;i++){
   starsEl.appendChild(s);
 }
 
-// ===== ASSETS VIA JSZIP =====
-// 👇 Mets ici l'URL de ta GitHub Release après upload
-const ASSETS_ZIP_URL = 'https://github.com/TON_USER/TON_REPO/releases/download/v1.0/assets.zip';
+// ===== URL DU ZIP (corrigée) =====
+const ASSETS_ZIP_URL = 'https://github.com/user-attachments/files/27100943/assets.zip';
 const CACHE_NAME = 'macadam-assets-v1';
 
 // Blob URLs extraites du zip : { 'body_1.png': 'blob:...', ... }
 const assetBlobs = {};
-let assetsReady = false;
 
-async function loadAssetsZip() {
-  setLoadStatus('Vérification du cache…', 5);
+// ===== PARSER ZIP NATIF (sans dépendance externe) =====
+// Utilise DecompressionStream (supporté Safari 16.4+, Chrome 80+, Firefox 113+)
 
-  // 1. Chercher dans Cache API
-  let zipBuffer = null;
-  try {
-    const cache = await caches.open(CACHE_NAME);
-    const cached = await cache.match(ASSETS_ZIP_URL);
-    if(cached) {
-      setLoadStatus('Assets en cache, extraction…', 40);
-      zipBuffer = await cached.arrayBuffer();
-    }
-  } catch(e) {}
+function readU16LE(buf, offset) {
+  return buf[offset] | (buf[offset+1] << 8);
+}
+function readU32LE(buf, offset) {
+  return (buf[offset] | (buf[offset+1]<<8) | (buf[offset+2]<<16) | (buf[offset+3]<<24)) >>> 0;
+}
 
-  // 2. Sinon télécharger
-  if(!zipBuffer) {
-    setLoadStatus('Téléchargement des assets (8 Mo)…', 10);
-    const resp = await fetch(ASSETS_ZIP_URL);
-    if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    zipBuffer = await resp.arrayBuffer();
-
-    // Mettre en cache pour la prochaine fois
-    try {
-      const cache = await caches.open(CACHE_NAME);
-      await cache.put(ASSETS_ZIP_URL, new Response(zipBuffer.slice(0)));
-    } catch(e) {}
+async function inflateRaw(compressedBytes) {
+  // Wrap en DEFLATE stream avec zlib header pour DecompressionStream
+  const ds = new DecompressionStream('deflate-raw');
+  const writer = ds.writable.getWriter();
+  writer.write(compressedBytes);
+  writer.close();
+  const chunks = [];
+  const reader = ds.readable.getReader();
+  while(true) {
+    const {done, value} = await reader.read();
+    if(done) break;
+    chunks.push(value);
   }
+  let total = chunks.reduce((s,c)=>s+c.length,0);
+  const out = new Uint8Array(total);
+  let off = 0;
+  for(const c of chunks) { out.set(c, off); off += c.length; }
+  return out;
+}
 
-  // 3. Décompresser avec JSZip
-  setLoadStatus('Décompression…', 60);
-  const zip = await JSZip.loadAsync(zipBuffer);
+async function parseZip(buffer) {
+  const bytes = new Uint8Array(buffer);
+  const files = {};
 
-  // 4. Créer les Blob URLs pour chaque PNG
-  setLoadStatus('Préparation des sprites…', 80);
-  const entries = Object.entries(zip.files).filter(([name, f]) => !f.dir && name.endsWith('.png'));
-  await Promise.all(entries.map(async ([name, file]) => {
-    const blob = await file.async('blob');
-    // name = 'assets/body_1.png' → clé = 'body_1.png'
-    const key = name.replace(/^assets\//, '');
-    assetBlobs[key] = URL.createObjectURL(blob);
-  }));
+  // Trouver End of Central Directory (EOCD) depuis la fin
+  let eocdOffset = -1;
+  for(let i = bytes.length - 22; i >= 0; i--) {
+    if(bytes[i]===0x50 && bytes[i+1]===0x4B && bytes[i+2]===0x05 && bytes[i+3]===0x06) {
+      eocdOffset = i;
+      break;
+    }
+  }
+  if(eocdOffset < 0) throw new Error('ZIP: EOCD introuvable');
 
-  setLoadStatus('Prêt !', 100);
-  assetsReady = true;
+  const cdCount  = readU16LE(bytes, eocdOffset + 10);
+  const cdSize   = readU32LE(bytes, eocdOffset + 12);
+  const cdOffset = readU32LE(bytes, eocdOffset + 16);
+
+  let pos = cdOffset;
+  for(let fi = 0; fi < cdCount; fi++) {
+    if(readU32LE(bytes, pos) !== 0x02014B50) break; // Central dir signature
+    const compression  = readU16LE(bytes, pos + 10);
+    const compSize     = readU32LE(bytes, pos + 20);
+    const uncompSize   = readU32LE(bytes, pos + 24);
+    const nameLen      = readU16LE(bytes, pos + 28);
+    const extraLen     = readU16LE(bytes, pos + 30);
+    const commentLen   = readU16LE(bytes, pos + 32);
+    const localOffset  = readU32LE(bytes, pos + 42);
+    const name         = new TextDecoder().decode(bytes.slice(pos+46, pos+46+nameLen));
+    pos += 46 + nameLen + extraLen + commentLen;
+
+    if(name.endsWith('/')) continue; // dossier
+
+    // Lire l'en-tête local pour trouver les données
+    const lNameLen  = readU16LE(bytes, localOffset + 26);
+    const lExtraLen = readU16LE(bytes, localOffset + 28);
+    const dataStart = localOffset + 30 + lNameLen + lExtraLen;
+    const compData  = bytes.slice(dataStart, dataStart + compSize);
+
+    let fileData;
+    if(compression === 0) {
+      // Stored (non compressé)
+      fileData = compData;
+    } else if(compression === 8) {
+      // DEFLATE
+      fileData = await inflateRaw(compData);
+    } else {
+      console.warn(`ZIP: compression ${compression} non supportée pour ${name}`);
+      continue;
+    }
+
+    // Clé = nom sans préfixe de dossier
+    const key = name.replace(/^.*\//, '');
+    files[key] = fileData;
+  }
+  return files;
 }
 
 function setLoadStatus(msg, pct) {
@@ -440,10 +457,53 @@ function setLoadStatus(msg, pct) {
   if(bar) bar.style.width = pct + '%';
 }
 
-// Remplace BASE + loadImg : résout vers blob URL ou null
+async function loadAssetsZip() {
+  setLoadStatus('Vérification du cache…', 5);
+
+  let zipBuffer = null;
+
+  // 1. Chercher dans Cache API
+  try {
+    const cache = await caches.open(CACHE_NAME);
+    const cached = await cache.match(ASSETS_ZIP_URL);
+    if(cached) {
+      setLoadStatus('Assets en cache, extraction…', 40);
+      zipBuffer = await cached.arrayBuffer();
+    }
+  } catch(e) { console.warn('Cache API indisponible:', e); }
+
+  // 2. Sinon télécharger
+  if(!zipBuffer) {
+    setLoadStatus('Téléchargement des assets…', 10);
+    const resp = await fetch(ASSETS_ZIP_URL);
+    if(!resp.ok) throw new Error(`HTTP ${resp.status} – ${ASSETS_ZIP_URL}`);
+    zipBuffer = await resp.arrayBuffer();
+
+    // Mettre en cache
+    try {
+      const cache = await caches.open(CACHE_NAME);
+      await cache.put(ASSETS_ZIP_URL, new Response(zipBuffer.slice(0)));
+    } catch(e) {}
+  }
+
+  // 3. Parser ZIP natif
+  setLoadStatus('Décompression…', 60);
+  const files = await parseZip(zipBuffer);
+
+  // 4. Créer Blob URLs
+  setLoadStatus('Préparation des sprites…', 85);
+  for(const [key, data] of Object.entries(files)) {
+    if(!key.endsWith('.png')) continue;
+    const blob = new Blob([data], {type:'image/png'});
+    assetBlobs[key] = URL.createObjectURL(blob);
+  }
+
+  setLoadStatus('Prêt !', 100);
+}
+
+// ===== IMAGE CACHE (une seule déclaration) =====
 const imgCache = {};
 function loadImg(filename) {
-  // filename = 'body_1.png' (sans préfixe)
   const blobUrl = assetBlobs[filename];
   if(!blobUrl) return Promise.resolve(null);
   if(imgCache[filename]) return imgCache[filename];
@@ -458,28 +518,25 @@ function loadImg(filename) {
 }
 
 // ===== STATE =====
-// Chaque clé = null (aucun) ou numéro de style
-// hairColor: suffixe de couleur '' b c d e f g h
 const S = {
-  body: 1,          // 1-29
-  eyelashes: 1,     // 1-5
-  pupils: 1,        // 1-16
-  eyebrows: 1,      // 1-5
-  mouth: 1,         // 1-20
-  hair: 1,          // 1-12
-  hairColor: '',    // '' b c d e f g h
-  bangs: 1,         // 1-13 ou null
-  hairBonus: null,  // 1-5 ou null
-  top: 1,           // 1-12 ou null
-  dress: null,      // 1-7 ou null
-  bottom: 1,        // 1-8 ou null
-  shoes: 1,         // 1-4 ou null
-  gloves: null,     // 1-6 ou null
-  beard: null,      // 1-5 ou null
+  body: 1,
+  eyelashes: 1,
+  pupils: 1,
+  eyebrows: 1,
+  mouth: 1,
+  hair: 1,
+  hairColor: '',
+  bangs: 1,
+  hairBonus: null,
+  top: 1,
+  dress: null,
+  bottom: 1,
+  shoes: 1,
+  gloves: null,
+  beard: null,
 };
 
 // ===== COULEURS DE CHEVEUX =====
-// 8 variantes: '' (base) + b c d e f g h
 const HAIR_COLORS = [
   { suffix:'',  hex:'#3D1800', label:'Brun foncé' },
   { suffix:'b', hex:'#111111', label:'Noir' },
@@ -490,20 +547,6 @@ const HAIR_COLORS = [
   { suffix:'g', hex:'#AA44FF', label:'Violet' },
   { suffix:'h', hex:'#00BBDD', label:'Bleu' },
 ];
-
-// ===== CACHE D'IMAGES =====
-const imgCache = {};
-function loadImg(src) {
-  if(imgCache[src]) return imgCache[src];
-  const p = new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = () => resolve(null); // silently skip missing
-    img.src = src;
-  });
-  imgCache[src] = p;
-  return p;
-}
 
 // ===== COUCHES DE RENDU =====
 async function getLayers() {
@@ -530,24 +573,7 @@ async function getLayers() {
   return layers;
 }
 
-// ===== RENDU SUR CANVAS =====
-let renderPending = false;
-async function render(canvas) {
-  if(!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const W = 444, H = 700;
-
-  // Précharger en parallèle
-  const layers = await getLayers();
-  const imgs = await Promise.all(layers.map(src => loadImg(src)));
-
-  ctx.clearRect(0,0,W,H);
-  for(const img of imgs) {
-    if(img) ctx.drawImage(img, 0, 0, W, H);
-  }
-}
-
-// Debounce render
+// ===== RENDU =====
 let renderTimer = null;
 function scheduleRender() {
   if(renderTimer) clearTimeout(renderTimer);
@@ -555,16 +581,26 @@ function scheduleRender() {
     showLoading(true);
     await render(document.getElementById('preview-canvas'));
     showLoading(false);
-    // Re-rendre les thumbnails actifs si besoin
   }, 80);
+}
+
+async function render(canvas) {
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = 444, H = 700;
+  const layers = await getLayers();
+  const imgs = await Promise.all(layers.map(src => loadImg(src)));
+  ctx.clearRect(0,0,W,H);
+  for(const img of imgs) {
+    if(img) ctx.drawImage(img, 0, 0, W, H);
+  }
 }
 
 function showLoading(b) {
   document.getElementById('loading-ring').classList.toggle('hidden', !b);
 }
 
-// ===== THUMBNAIL CANVAS =====
-// Chaque icard a un mini canvas 70×110
+// ===== THUMBNAILS =====
 const THUMB_W = 444, THUMB_H = 700;
 const DISPLAY_W = 60, DISPLAY_H = 94;
 
@@ -577,9 +613,7 @@ async function renderThumb(canvas, layers) {
   }
 }
 
-// ===== BUILD GRIDS =====
-
-// Body (teintes peau 1-29)
+// ===== GRILLES =====
 function buildBodyGrid() {
   const g = document.getElementById('grid-body');
   g.innerHTML = '';
@@ -591,19 +625,14 @@ function buildBodyGrid() {
   }
 }
 
-// Grille simple de couche (eyelashes, pupils, eyebrows, mouth, beard)
 function buildSimpleGrid(gridId, key, prefix, count, withNone=false) {
   const g = document.getElementById(gridId);
   g.innerHTML = '';
-  if(withNone) {
-    const card = makeNoneCard(key);
-    g.appendChild(card);
-  }
+  if(withNone) g.appendChild(makeNoneCard(key));
   for(let i=1;i<=count;i++) {
     const card = makeCard(i, `${i}`, key, async (cv) => {
       const ctx = cv.getContext('2d');
       ctx.clearRect(0,0,THUMB_W,THUMB_H);
-      // Body de base pour contexte
       const bodyImg = await loadImg(`body_${S.body}.png`);
       if(bodyImg) ctx.drawImage(bodyImg, 0,0,THUMB_W,THUMB_H);
       const img = await loadImg(`${prefix}_${i}.png`);
@@ -613,7 +642,6 @@ function buildSimpleGrid(gridId, key, prefix, count, withNone=false) {
   }
 }
 
-// Hair styles
 function buildHairGrid() {
   const g = document.getElementById('grid-hair');
   g.innerHTML = '';
@@ -634,7 +662,6 @@ function buildHairGrid() {
   }
 }
 
-// Hair colors
 function buildHairColors() {
   const g = document.getElementById('hair-colors');
   g.innerHTML = '';
@@ -648,7 +675,6 @@ function buildHairColors() {
       document.querySelectorAll('#hair-colors .hc').forEach(d => d.classList.remove('active'));
       div.classList.add('active');
       scheduleRender();
-      // Refresh hair grids thumbs
       buildHairGrid();
       buildBangsGrid();
       buildHairBonusGrid();
@@ -657,12 +683,10 @@ function buildHairColors() {
   });
 }
 
-// Bangs
 function buildBangsGrid() {
   const g = document.getElementById('grid-bangs');
   g.innerHTML = '';
-  const noneCard = makeNoneCard('bangs');
-  g.appendChild(noneCard);
+  g.appendChild(makeNoneCard('bangs'));
   for(let i=1;i<=13;i++) {
     const card = makeCard(i, `${i}`, 'bangs', async (cv) => {
       const hc = S.hairColor;
@@ -679,12 +703,10 @@ function buildBangsGrid() {
   }
 }
 
-// Hair bonus
 function buildHairBonusGrid() {
   const g = document.getElementById('grid-hair-bonus');
   g.innerHTML = '';
-  const noneCard = makeNoneCard('hairBonus');
-  g.appendChild(noneCard);
+  g.appendChild(makeNoneCard('hairBonus'));
   for(let i=1;i<=5;i++) {
     const card = makeCard(i, `${i}`, 'hairBonus', async (cv) => {
       const hc = S.hairColor;
@@ -699,37 +721,25 @@ function buildHairBonusGrid() {
   }
 }
 
-// Top
 function buildTopGrid() {
   const g = document.getElementById('grid-top');
   g.innerHTML = '';
-  const noneCard = makeNoneCard('top');
-  g.appendChild(noneCard);
+  g.appendChild(makeNoneCard('top'));
   for(let i=1;i<=12;i++) {
     const card = makeCard(i, `${i}`, 'top', async (cv) => {
-      await renderThumb(cv, [
-        `body_${S.body}.png`,
-        `top_${i}.png`,
-        `top_color_${i}.png`,
-      ]);
+      await renderThumb(cv, [`body_${S.body}.png`,`top_${i}.png`,`top_color_${i}.png`]);
     }, () => { S.dress = null; refreshDressCards(); });
     g.appendChild(card);
   }
 }
 
-// Dress
 function buildDressGrid() {
   const g = document.getElementById('grid-dress');
   g.innerHTML = '';
-  const noneCard = makeNoneCard('dress');
-  g.appendChild(noneCard);
+  g.appendChild(makeNoneCard('dress'));
   for(let i=1;i<=7;i++) {
     const card = makeCard(i, `${i}`, 'dress', async (cv) => {
-      await renderThumb(cv, [
-        `body_${S.body}.png`,
-        `dress_${i}.png`,
-        `dress_color_${i}.png`,
-      ]);
+      await renderThumb(cv, [`body_${S.body}.png`,`dress_${i}.png`,`dress_color_${i}.png`]);
     }, () => { S.top = null; S.bottom = null; refreshTopCards(); refreshBottomCards(); });
     g.appendChild(card);
   }
@@ -737,72 +747,51 @@ function buildDressGrid() {
 
 function refreshDressCards() {
   document.querySelectorAll('#grid-dress .icard').forEach((c,i) => {
-    c.classList.toggle('active', i > 0 && parseInt(c.dataset.val) === S.dress);
-    if(i===0) c.classList.toggle('active', S.dress === null);
+    c.classList.toggle('active', i>0 ? parseInt(c.dataset.val)===S.dress : S.dress===null);
   });
 }
 function refreshTopCards() {
   document.querySelectorAll('#grid-top .icard').forEach((c,i) => {
-    c.classList.toggle('active', i > 0 && parseInt(c.dataset.val) === S.top);
-    if(i===0) c.classList.toggle('active', S.top === null);
+    c.classList.toggle('active', i>0 ? parseInt(c.dataset.val)===S.top : S.top===null);
   });
 }
 function refreshBottomCards() {
   document.querySelectorAll('#grid-bottom .icard').forEach((c,i) => {
-    c.classList.toggle('active', i > 0 && parseInt(c.dataset.val) === S.bottom);
-    if(i===0) c.classList.toggle('active', S.bottom === null);
+    c.classList.toggle('active', i>0 ? parseInt(c.dataset.val)===S.bottom : S.bottom===null);
   });
 }
 
-// Bottom
 function buildBottomGrid() {
   const g = document.getElementById('grid-bottom');
   g.innerHTML = '';
-  const noneCard = makeNoneCard('bottom');
-  g.appendChild(noneCard);
+  g.appendChild(makeNoneCard('bottom'));
   for(let i=1;i<=8;i++) {
     const card = makeCard(i, `${i}`, 'bottom', async (cv) => {
-      await renderThumb(cv, [
-        `body_${S.body}.png`,
-        `bottom_${i}.png`,
-        `bottom_color_${i}.png`,
-      ]);
+      await renderThumb(cv, [`body_${S.body}.png`,`bottom_${i}.png`,`bottom_color_${i}.png`]);
     });
     g.appendChild(card);
   }
 }
 
-// Shoes
 function buildShoesGrid() {
   const g = document.getElementById('grid-shoes');
   g.innerHTML = '';
-  const noneCard = makeNoneCard('shoes');
-  g.appendChild(noneCard);
+  g.appendChild(makeNoneCard('shoes'));
   for(let i=1;i<=4;i++) {
     const card = makeCard(i, `${i}`, 'shoes', async (cv) => {
-      await renderThumb(cv, [
-        `body_${S.body}.png`,
-        `shoes_${i}.png`,
-        `shoes_color_${i}.png`,
-      ]);
+      await renderThumb(cv, [`body_${S.body}.png`,`shoes_${i}.png`,`shoes_color_${i}.png`]);
     });
     g.appendChild(card);
   }
 }
 
-// Gloves
 function buildGlovesGrid() {
   const g = document.getElementById('grid-gloves');
   g.innerHTML = '';
-  const noneCard = makeNoneCard('gloves');
-  g.appendChild(noneCard);
+  g.appendChild(makeNoneCard('gloves'));
   for(let i=1;i<=6;i++) {
     const card = makeCard(i, `${i}`, 'gloves', async (cv) => {
-      await renderThumb(cv, [
-        `body_${S.body}.png`,
-        `gloves_${i}.png`,
-        `gloves_color_${i}.png`,
-      ]);
+      await renderThumb(cv, [`body_${S.body}.png`,`gloves_${i}.png`,`gloves_color_${i}.png`]);
     });
     g.appendChild(card);
   }
@@ -826,12 +815,8 @@ function makeCard(val, label, stateKey, renderFn, extraOnClick) {
   lbl.textContent = label;
   card.appendChild(lbl);
 
-  // Lazy load thumbnail
   const obs = new IntersectionObserver((entries) => {
-    if(entries[0].isIntersecting) {
-      renderFn(cv);
-      obs.disconnect();
-    }
+    if(entries[0].isIntersecting) { renderFn(cv); obs.disconnect(); }
   }, {threshold: 0.1});
   obs.observe(card);
 
@@ -856,7 +841,6 @@ function makeNoneCard(stateKey) {
   cv.width = THUMB_W; cv.height = THUMB_H;
   cv.style.width = DISPLAY_W + 'px';
   cv.style.height = DISPLAY_H + 'px';
-  // Rendre un body seul grisé
   loadImg(`body_${S.body}.png`).then(img => {
     const ctx = cv.getContext('2d');
     ctx.globalAlpha = 0.3;
@@ -894,7 +878,7 @@ document.querySelectorAll('.tab').forEach(t => {
   };
 });
 
-// ===== RANDOM =====
+// ===== ALÉATOIRE =====
 function rnd(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
 function pickOrNull(max, prob=0.7){return Math.random()<prob ? rnd(1,max) : null;}
 
@@ -909,7 +893,6 @@ function randomize(){
   S.eyebrows = rnd(1,5);
   S.mouth = rnd(1,20);
   S.beard = pickOrNull(5, 0.15);
-  // Tenue: robe OU haut+bas
   if(Math.random() < 0.3) {
     S.dress = rnd(1,7); S.top = null; S.bottom = null;
   } else {
@@ -917,8 +900,6 @@ function randomize(){
   }
   S.shoes = pickOrNull(4, 0.9);
   S.gloves = pickOrNull(6, 0.2);
-
-  // Refresh couleur active
   buildHairColors();
   scheduleRender();
   showToast('🎲 Nouvel avatar !');
@@ -927,23 +908,16 @@ function randomize(){
 // ===== SAVE =====
 function saveAvatar(){
   const pseudo = document.getElementById('pseudo').value.trim();
-  if(!pseudo){showToast('✏️ Entre ton pseudo !');return;}
-
-  // Export canvas
+  if(!pseudo){ showToast('✏️ Entre ton pseudo !'); return; }
   const canvas = document.getElementById('preview-canvas');
   const dataUrl = canvas.toDataURL('image/png');
-
-  // Stocker en localStorage
   localStorage.setItem('macadam_avatar', JSON.stringify({
     pseudo, state: S, img: dataUrl, savedAt: Date.now()
   }));
-
-  // Proposer le téléchargement
   const a = document.createElement('a');
   a.href = dataUrl;
   a.download = `avatar_${pseudo}.png`;
   a.click();
-
   showToast('✨ Avatar sauvegardé !');
 }
 
@@ -974,7 +948,6 @@ function buildAllGrids(){
   buildGlovesGrid();
 }
 
-// Charger le profil sauvegardé si existe
 function loadSaved(){
   try {
     const saved = JSON.parse(localStorage.getItem('macadam_avatar') || 'null');
@@ -991,9 +964,10 @@ loadSaved();
 (async () => {
   try {
     await loadAssetsZip();
-    // Masquer l'écran de boot
-    document.getElementById('boot-screen').style.opacity = '0';
-    setTimeout(() => document.getElementById('boot-screen').remove(), 400);
+    const boot = document.getElementById('boot-screen');
+    boot.style.transition = 'opacity .4s';
+    boot.style.opacity = '0';
+    setTimeout(() => boot.remove(), 400);
     buildAllGrids();
     scheduleRender();
   } catch(err) {
