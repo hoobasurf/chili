@@ -356,7 +356,9 @@ for(let i=0;i<60;i++){
 }
 
 // ===== URL DU ZIP (corrigée) =====
-const ASSETS_ZIP_URL = 'https://github.com/user-attachments/files/27100943/assets.zip';
+// Proxy CORS pour contourner le blocage Safari iOS sur user-attachments
+const _RAW_ZIP = 'https://github.com/user-attachments/files/27100943/assets.zip';
+const ASSETS_ZIP_URL = 'https://corsproxy.io/?' + encodeURIComponent(_RAW_ZIP);
 const CACHE_NAME = 'macadam-assets-v1';
 
 // Blob URLs extraites du zip : { 'body_1.png': 'blob:...', ... }
@@ -472,17 +474,35 @@ async function loadAssetsZip() {
     }
   } catch(e) { console.warn('Cache API indisponible:', e); }
 
-  // 2. Sinon télécharger
+  // 2. Sinon telecharger avec fallback multi-proxy
   if(!zipBuffer) {
-    setLoadStatus('Téléchargement des assets…', 10);
-    const resp = await fetch(ASSETS_ZIP_URL);
-    if(!resp.ok) throw new Error(`HTTP ${resp.status} – ${ASSETS_ZIP_URL}`);
-    zipBuffer = await resp.arrayBuffer();
+    const _RAW = 'https://github.com/user-attachments/files/27100943/assets.zip';
+    const proxies = [
+      'https://corsproxy.io/?' + encodeURIComponent(_RAW),
+      'https://api.allorigins.win/raw?url=' + encodeURIComponent(_RAW),
+      'https://proxy.cors.sh/' + _RAW,
+      _RAW,
+    ];
+    let lastErr = null;
+    for(let i = 0; i < proxies.length; i++) {
+      setLoadStatus('Telechargement... (' + (i+1) + '/' + proxies.length + ')', 10 + i*8);
+      try {
+        const resp = await fetch(proxies[i]);
+        if(!resp.ok) throw new Error('HTTP ' + resp.status);
+        zipBuffer = await resp.arrayBuffer();
+        console.log('Proxy OK:', proxies[i]);
+        break;
+      } catch(e) {
+        lastErr = e;
+        console.warn('Proxy echoue:', proxies[i], e.message);
+      }
+    }
+    if(!zipBuffer) throw new Error('Tous les proxies ont echoue: ' + (lastErr && lastErr.message));
 
     // Mettre en cache
     try {
       const cache = await caches.open(CACHE_NAME);
-      await cache.put(ASSETS_ZIP_URL, new Response(zipBuffer.slice(0)));
+      await cache.put(_RAW, new Response(zipBuffer.slice(0)));
     } catch(e) {}
   }
 
