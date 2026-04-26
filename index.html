@@ -171,6 +171,58 @@ transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:999;pointer-events:n
 }
 .toast.show{transform:translateX(-50%) translateY(0);}
 
+/* ===== STRIP HORIZONTAL ===== */
+.strip-wrap{
+width:100%;overflow-x:auto;overflow-y:hidden;
+scrollbar-width:none;-webkit-overflow-scrolling:touch;
+padding:8px 0 4px;
+}
+.strip-wrap::-webkit-scrollbar{display:none;}
+.strip{display:flex;gap:8px;padding:0 12px;width:max-content;}
+.strip-card{
+flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:3px;
+cursor:pointer;border-radius:12px;padding:5px 5px 4px;
+border:2px solid transparent;transition:all .15s;
+background:rgba(255,255,255,.06);
+}
+.strip-card:hover{background:rgba(255,255,255,.12);transform:translateY(-2px);}
+.strip-card.active{border-color:var(–pink);background:rgba(255,110,180,.18);}
+.strip-card canvas{display:block;image-rendering:pixelated;}
+.strip-card .slabel{font-size:.55rem;font-weight:800;color:rgba(255,255,255,.45);text-align:center;}
+.strip-card.active .slabel{color:rgba(255,255,255,.8);}
+.strip-none canvas{opacity:.3;}
+
+/* CATEGORY PILLS */
+.cat-pills{display:flex;gap:6px;padding:8px 12px 4px;overflow-x:auto;scrollbar-width:none;flex-shrink:0;}
+.cat-pills::-webkit-scrollbar{display:none;}
+.cat-pill{
+flex-shrink:0;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.1);
+border-radius:20px;padding:6px 12px;font-size:.72rem;font-weight:800;
+color:rgba(255,255,255,.4);cursor:pointer;transition:all .2s;white-space:nowrap;
+}
+.cat-pill:hover{color:rgba(255,255,255,.7);background:rgba(255,255,255,.12);}
+.cat-pill.active{background:rgba(255,110,180,.2);border-color:var(–pink);color:white;}
+
+/* Cacher l’ancien editor panel sur mobile */
+@media(max-width:900px){
+.panel-editor{display:none !important;}
+.main{flex-direction:column;align-items:center;padding-bottom:0;}
+.panel-preview{width:100%;flex-direction:column;align-items:center;padding:8px 0 0;}
+.avatar-stage{width:180px;height:238px;}
+.avatar-stage canvas{width:162px;height:214px;}
+.pseudo-wrap{max-width:260px;width:100%;}
+.btn-save,.btn-random{max-width:260px;width:100%;}
+}
+.mobile-editor{
+width:100%;background:rgba(255,255,255,.04);
+border-top:1px solid rgba(255,255,255,.09);
+display:flex;flex-direction:column;
+flex-shrink:0;
+}
+@media(min-width:901px){
+.mobile-editor{display:none;}
+}
+
 @media(max-width:680px){
 .main{flex-direction:column;align-items:center;}
 .panel-preview{width:100%;flex-direction:row;justify-content:center;flex-wrap:wrap;padding:8px 12px;}
@@ -340,6 +392,15 @@ transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:999;pointer-events:n
 </div>
 ```
 
+  </div>
+</div>
+
+<!-- MOBILE EDITOR : strip horizontal -->
+
+<div class="mobile-editor" id="mobile-editor">
+  <div class="cat-pills" id="cat-pills"></div>
+  <div class="strip-wrap">
+    <div class="strip" id="strip"></div>
   </div>
 </div>
 
@@ -561,8 +622,9 @@ const HAIR_COLORS = [
 // body/1.png, EYELASHES/1.png, hair/COLOR/1b.png, bangs/COLOR/1.png, etc.
 function img(path) { return path; }
 function hairFile(folder, num, color) {
-  if(!color) return `${folder}/${num}.png`;
-  return `${folder}/COLOR/${num}${color}.png`;
+  // Toujours passer par COLOR/ - '' = brun fonce (couleur de base)
+  const suffix = color || '';
+  return `${folder}/COLOR/${num}${suffix}.png`;
 }
 
 async function getLayers() {
@@ -570,7 +632,8 @@ async function getLayers() {
   const hc = S.hairColor;
   const add = (f) => layers.push(f);
 
-  add(`body/${S.body}.png`);
+  add(`body/full.png`);   // structure de base
+  add(`body/${S.body}.png`); // teinte de peau
   if(S.hair) add(hairFile('hair_back', S.hair, hc));
   if(S.bottom)  { add(`bottom/${S.bottom}.png`); add(`bottom/color/${S.bottom}.png`); }
   if(S.dress)   { add(`dress/${S.dress}.png`);   add(`dress/COLORS/${S.dress}.png`); }
@@ -985,6 +1048,7 @@ loadSaved();
     boot.style.opacity = '0';
     setTimeout(() => boot.remove(), 400);
     buildAllGrids();
+    initMobileStrip();
     scheduleRender();
   } catch(err) {
     document.getElementById('load-error').style.display = 'block';
@@ -994,6 +1058,180 @@ loadSaved();
     console.error('Assets load error:', err);
   }
 })();
+
+// ===== MOBILE STRIP =====
+const STRIP_W = 444, STRIP_H = 700;
+const SDISP_W = 48, SDISP_H = 75;
+
+const CATEGORIES = [
+  { id:'peau',      label:'🌸 Peau',     key:'body',      count:29, withNone:false, prefix:null },
+  { id:'eyelashes', label:'👁 Cils',      key:'eyelashes', count:5,  withNone:false, prefix:'EYELASHES' },
+  { id:'pupils',    label:'👁 Pupilles',  key:'pupils',    count:16, withNone:false, prefix:'PUPILS' },
+  { id:'eyebrows',  label:'✏️ Sourcils',  key:'eyebrows',  count:5,  withNone:false, prefix:'EYEBROWS' },
+  { id:'mouth',     label:'👄 Bouche',    key:'mouth',     count:20, withNone:false, prefix:'MOUTH' },
+  { id:'hair',      label:'💇 Cheveux',   key:'hair',      count:12, withNone:false, prefix:null },
+  { id:'haircolor', label:'🎨 Couleur',   key:'hairColor', count:0,  withNone:false, prefix:null },
+  { id:'bangs',     label:'💈 Frange',    key:'bangs',     count:13, withNone:true,  prefix:null },
+  { id:'hairbonus', label:'✨ Bonus',     key:'hairBonus', count:5,  withNone:true,  prefix:null },
+  { id:'top',       label:'👕 Haut',      key:'top',       count:12, withNone:true,  prefix:null },
+  { id:'dress',     label:'👗 Robe',      key:'dress',     count:7,  withNone:true,  prefix:null },
+  { id:'bottom',    label:'👖 Bas',       key:'bottom',    count:8,  withNone:true,  prefix:null },
+  { id:'shoes',     label:'👟 Shoes',     key:'shoes',     count:4,  withNone:true,  prefix:null },
+  { id:'gloves',    label:'🧤 Gants',     key:'gloves',    count:6,  withNone:true,  prefix:null },
+  { id:'beard',     label:'🧔 Barbe',     key:'beard',     count:5,  withNone:true,  prefix:null },
+];
+
+let activeCat = 'peau';
+
+async function renderStripThumb(canvas, layers) {
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,STRIP_W,STRIP_H);
+  const imgs = await Promise.all(layers.map(src => loadImg(src)));
+  for(const img of imgs) if(img) ctx.drawImage(img, 0,0,STRIP_W,STRIP_H);
+}
+
+function makeStripCard(val, label, stateKey, layersFn, extraOnClick) {
+  const card = document.createElement('div');
+  const isActive = stateKey === 'hairColor'
+    ? S.hairColor === val
+    : (val === null ? S[stateKey] === null : S[stateKey] === val);
+  card.className = 'strip-card' + (isActive ? ' active' : '') + (val === null ? ' strip-none' : '');
+
+  if(stateKey === 'hairColor') {
+    // Pastille couleur
+    const dot = document.createElement('div');
+    dot.style.cssText = `width:32px;height:32px;border-radius:8px;background:${val};margin:4px;`;
+    card.appendChild(dot);
+  } else {
+    const cv = document.createElement('canvas');
+    cv.width = STRIP_W; cv.height = STRIP_H;
+    cv.style.width = SDISP_W+'px'; cv.style.height = SDISP_H+'px';
+    card.appendChild(cv);
+    const obs = new IntersectionObserver(entries => {
+      if(entries[0].isIntersecting) { renderStripThumb(cv, layersFn()); obs.disconnect(); }
+    }, {threshold:0.1});
+    obs.observe(card);
+  }
+
+  const lbl = document.createElement('span');
+  lbl.className = 'slabel';
+  lbl.textContent = val === null ? 'Aucun' : label;
+  card.appendChild(lbl);
+
+  card.onclick = () => {
+    if(stateKey === 'hairColor') {
+      S.hairColor = val;
+    } else if(val === null) {
+      S[stateKey] = null;
+    } else {
+      S[stateKey] = val;
+      if(extraOnClick) extraOnClick();
+    }
+    document.querySelectorAll('#strip .strip-card').forEach(c => c.classList.remove('active'));
+    card.classList.add('active');
+    scheduleRender();
+    // Scroll card into view
+    card.scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'});
+  };
+  return card;
+}
+
+function buildStrip(catId) {
+  activeCat = catId;
+  document.querySelectorAll('.cat-pill').forEach(p => p.classList.toggle('active', p.dataset.cat === catId));
+  const strip = document.getElementById('strip');
+  strip.innerHTML = '';
+  const cat = CATEGORIES.find(c => c.id === catId);
+  if(!cat) return;
+
+  const hc = S.hairColor;
+
+  if(catId === 'haircolor') {
+    const HAIR_COLORS_STRIP = [
+      {suffix:'',  hex:'#3D1800', label:'Brun'},
+      {suffix:'b', hex:'#111111', label:'Noir'},
+      {suffix:'c', hex:'#8B4010', label:'Châtain'},
+      {suffix:'d', hex:'#C8980A', label:'Blond doré'},
+      {suffix:'e', hex:'#EEE0C0', label:'Blond clair'},
+      {suffix:'f', hex:'#FF5AAA', label:'Rose'},
+      {suffix:'g', hex:'#AA44FF', label:'Violet'},
+      {suffix:'h', hex:'#00BBDD', label:'Bleu'},
+    ];
+    HAIR_COLORS_STRIP.forEach(({suffix, hex, label}) => {
+      const card = makeStripCard(suffix, label, 'hairColor', null);
+      // override dot color already set
+      strip.appendChild(card);
+    });
+    return;
+  }
+
+  if(cat.withNone) {
+    strip.appendChild(makeStripCard(null, 'Aucun', cat.key, () => [`body/${S.body}.png`]));
+  }
+
+  for(let i=1; i<=cat.count; i++) {
+    let layersFn;
+    const k = cat.key;
+    if(k === 'body') {
+      layersFn = () => [`body/full.png`, `body/${i}.png`];
+    } else if(cat.prefix) {
+      layersFn = () => [`body/full.png`, `body/${S.body}.png`, `${cat.prefix}/${i}.png`];
+    } else if(k === 'hair') {
+      layersFn = () => [`body/${S.body}.png`, hairFile('hair_back',i,hc), `EYELASHES/${S.eyelashes||1}.png`, `PUPILS/${S.pupils||1}.png`, hairFile('hair',i,hc)];
+    } else if(k === 'bangs') {
+      layersFn = () => [`body/${S.body}.png`, hairFile('hair_back',S.hair||1,hc), hairFile('hair',S.hair||1,hc), hairFile('bangs',i,hc)];
+    } else if(k === 'hairBonus') {
+      layersFn = () => [`body/${S.body}.png`, hairFile('hair_back',S.hair||1,hc), hairFile('hair_bonus',i,hc), hairFile('hair',S.hair||1,hc)];
+    } else if(k === 'top') {
+      layersFn = () => [`body/full.png`, `body/${S.body}.png`, `top/${i}.png`, `top/colors/${i}.png`];
+    } else if(k === 'dress') {
+      layersFn = () => [`body/full.png`, `body/${S.body}.png`, `dress/${i}.png`, `dress/COLORS/${i}.png`];
+    } else if(k === 'bottom') {
+      layersFn = () => [`body/full.png`, `body/${S.body}.png`, `bottom/${i}.png`, `bottom/color/${i}.png`];
+    } else if(k === 'shoes') {
+      layersFn = () => [`body/full.png`, `body/${S.body}.png`, `shoes/${i}.png`, `shoes/COLOR/${i}.png`];
+    } else if(k === 'gloves') {
+      layersFn = () => [`body/full.png`, `body/${S.body}.png`, `gloves/${i}.png`, `gloves/COLOR/${i}.png`];
+    } else if(k === 'beard') {
+      layersFn = () => [`body/full.png`, `body/${S.body}.png`, `BEARD/${i}.png`];
+    } else {
+      layersFn = () => [`body/${S.body}.png`];
+    }
+
+    let extraOnClick = null;
+    if(k === 'top')   extraOnClick = () => { S.dress = null; };
+    if(k === 'dress')  extraOnClick = () => { S.top = null; S.bottom = null; };
+
+    strip.appendChild(makeStripCard(i, `${i}`, cat.key, layersFn, extraOnClick));
+  }
+
+  // Scroll sur la carte active
+  setTimeout(() => {
+    const active = strip.querySelector('.strip-card.active');
+    if(active) active.scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'});
+  }, 100);
+}
+
+function buildCatPills() {
+  const pills = document.getElementById('cat-pills');
+  pills.innerHTML = '';
+  CATEGORIES.forEach(cat => {
+    const pill = document.createElement('button');
+    pill.className = 'cat-pill' + (cat.id === activeCat ? ' active' : '');
+    pill.dataset.cat = cat.id;
+    pill.textContent = cat.label;
+    pill.onclick = () => buildStrip(cat.id);
+    pills.appendChild(pill);
+  });
+}
+
+// Init mobile strip apres buildAllGrids
+const _origBuildAll = buildAllGrids;
+function initMobileStrip() {
+  buildCatPills();
+  buildStrip('peau');
+}
+
 </script>
 
 </body>
