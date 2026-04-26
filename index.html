@@ -446,7 +446,7 @@ async function parseZip(buffer) {
     }
 
     // Clé = nom sans préfixe de dossier
-    const key = name.replace(/^.*\//, '');
+    const key = name; // garder le chemin complet: 'body/1.png', 'EYELASHES/1.png', etc.
     files[key] = fileData;
   }
   return files;
@@ -507,13 +507,6 @@ async function loadAssetsZip() {
 
   setLoadStatus('Prêt !', 100);
 
-  // DEBUG mobile: affiche les vrais noms dans le zip
-  const keys = Object.keys(assetBlobs);
-  const dbg = document.createElement('div');
-  dbg.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#111;color:#0f0;font-size:11px;padding:8px;z-index:9999;max-height:140px;overflow:auto;font-family:monospace;word-break:break-all;';
-  dbg.textContent = keys.length + ' fichiers. Exemples: ' + keys.slice(0,5).join(' | ');
-  document.body.appendChild(dbg);
-  setTimeout(() => dbg.remove(), 12000);
 }
 
 // ===== IMAGE CACHE (une seule déclaration) =====
@@ -564,26 +557,34 @@ const HAIR_COLORS = [
 ];
 
 // ===== COUCHES DE RENDU =====
+// Mapping vers les vrais chemins du zip
+// body/1.png, EYELASHES/1.png, hair/COLOR/1b.png, bangs/COLOR/1.png, etc.
+function img(path) { return path; }
+function hairFile(folder, num, color) {
+  if(!color) return `${folder}/${num}.png`;
+  return `${folder}/COLOR/${num}${color}.png`;
+}
+
 async function getLayers() {
   const layers = [];
   const hc = S.hairColor;
   const add = (f) => layers.push(f);
 
-  add(`body_${S.body}.png`);
-  if(S.hair)      add(`hair_back_${S.hair}${hc}.png`);
-  if(S.bottom)  { add(`bottom_${S.bottom}.png`);       add(`bottom_color_${S.bottom}.png`); }
-  if(S.dress)   { add(`dress_${S.dress}.png`);         add(`dress_color_${S.dress}.png`); }
-  if(S.top && !S.dress) { add(`top_${S.top}.png`);     add(`top_color_${S.top}.png`); }
-  if(S.eyelashes) add(`EYELASHES_${S.eyelashes}.png`);
-  if(S.pupils)    add(`PUPILS_${S.pupils}.png`);
-  if(S.eyebrows)  add(`EYEBROWS_${S.eyebrows}.png`);
-  if(S.mouth)     add(`MOUTH_${S.mouth}.png`);
-  if(S.hair)      add(`hair_${S.hair}${hc}.png`);
-  if(S.hairBonus) add(`hair_bonus_${S.hairBonus}${hc}.png`);
-  if(S.bangs)     add(`bangs_${S.bangs}${hc}.png`);
-  if(S.shoes)   { add(`shoes_${S.shoes}.png`);         add(`shoes_color_${S.shoes}.png`); }
-  if(S.gloves)  { add(`gloves_${S.gloves}.png`);       add(`gloves_color_${S.gloves}.png`); }
-  if(S.beard)     add(`BEARD_${S.beard}.png`);
+  add(`body/${S.body}.png`);
+  if(S.hair) add(hairFile('hair_back', S.hair, hc));
+  if(S.bottom)  { add(`bottom/${S.bottom}.png`); add(`bottom/color/${S.bottom}.png`); }
+  if(S.dress)   { add(`dress/${S.dress}.png`);   add(`dress/COLORS/${S.dress}.png`); }
+  if(S.top && !S.dress) { add(`top/${S.top}.png`); add(`top/colors/${S.top}.png`); }
+  if(S.eyelashes) add(`EYELASHES/${S.eyelashes}.png`);
+  if(S.pupils)    add(`PUPILS/${S.pupils}.png`);
+  if(S.eyebrows)  add(`EYEBROWS/${S.eyebrows}.png`);
+  if(S.mouth)     add(`MOUTH/${S.mouth}.png`);
+  if(S.hair)      add(hairFile('hair', S.hair, hc));
+  if(S.hairBonus) add(hairFile('hair_bonus', S.hairBonus, hc));
+  if(S.bangs)     add(hairFile('bangs', S.bangs, hc));
+  if(S.shoes)   { add(`shoes/${S.shoes}.png`);   add(`shoes/COLOR/${S.shoes}.png`); }
+  if(S.gloves)  { add(`gloves/${S.gloves}.png`); add(`gloves/COLOR/${S.gloves}.png`); }
+  if(S.beard)     add(`BEARD/${S.beard}.png`);
 
   return layers;
 }
@@ -634,7 +635,7 @@ function buildBodyGrid() {
   g.innerHTML = '';
   for(let i=1;i<=29;i++) {
     const card = makeCard(i, `Peau ${i}`, 'body', async (cv) => {
-      await renderThumb(cv, [`body_${i}.png`]);
+      await renderThumb(cv, [`body/${i}.png`]);
     });
     g.appendChild(card);
   }
@@ -648,9 +649,9 @@ function buildSimpleGrid(gridId, key, prefix, count, withNone=false) {
     const card = makeCard(i, `${i}`, key, async (cv) => {
       const ctx = cv.getContext('2d');
       ctx.clearRect(0,0,THUMB_W,THUMB_H);
-      const bodyImg = await loadImg(`body_${S.body}.png`);
+      const bodyImg = await loadImg(`body/${S.body}.png`);
       if(bodyImg) ctx.drawImage(bodyImg, 0,0,THUMB_W,THUMB_H);
-      const img = await loadImg(`${prefix}_${i}.png`);
+      const img = await loadImg(`${prefix}/${i}.png`);
       if(img) ctx.drawImage(img, 0,0,THUMB_W,THUMB_H);
     });
     g.appendChild(card);
@@ -664,13 +665,13 @@ function buildHairGrid() {
     const card = makeCard(i, `${i}`, 'hair', async (cv) => {
       const hc = S.hairColor;
       await renderThumb(cv, [
-        `body_${S.body}.png`,
-        `hair_back_${i}${hc}.png`,
-        `EYELASHES_${S.eyelashes||1}.png`,
-        `PUPILS_${S.pupils||1}.png`,
-        `EYEBROWS_${S.eyebrows||1}.png`,
-        `hair_${i}${hc}.png`,
-        S.bangs ? `bangs_${S.bangs}${hc}.png` : null,
+        `body/${S.body}.png`,
+        hairFile('hair_back', i, hc),
+        `EYELASHES/${S.eyelashes||1}.png`,
+        `PUPILS/${S.pupils||1}.png`,
+        `EYEBROWS/${S.eyebrows||1}.png`,
+        hairFile('hair', i, hc),
+        S.bangs ? hairFile('bangs', S.bangs, hc) : null,
       ].filter(Boolean));
     });
     g.appendChild(card);
@@ -706,12 +707,12 @@ function buildBangsGrid() {
     const card = makeCard(i, `${i}`, 'bangs', async (cv) => {
       const hc = S.hairColor;
       await renderThumb(cv, [
-        `body_${S.body}.png`,
-        `hair_back_${S.hair||1}${hc}.png`,
-        `EYELASHES_${S.eyelashes||1}.png`,
-        `PUPILS_${S.pupils||1}.png`,
-        `hair_${S.hair||1}${hc}.png`,
-        `bangs_${i}${hc}.png`,
+        `body/${S.body}.png`,
+        hairFile('hair_back', S.hair||1, hc),
+        `EYELASHES/${S.eyelashes||1}.png`,
+        `PUPILS/${S.pupils||1}.png`,
+        hairFile('hair', S.hair||1, hc),
+        hairFile('bangs', i, hc),
       ]);
     });
     g.appendChild(card);
@@ -726,10 +727,10 @@ function buildHairBonusGrid() {
     const card = makeCard(i, `${i}`, 'hairBonus', async (cv) => {
       const hc = S.hairColor;
       await renderThumb(cv, [
-        `body_${S.body}.png`,
-        `hair_back_${S.hair||1}${hc}.png`,
-        `hair_bonus_${i}${hc}.png`,
-        `hair_${S.hair||1}${hc}.png`,
+        `body/${S.body}.png`,
+        hairFile('hair_back', S.hair||1, hc),
+        hairFile('hair_bonus', i, hc),
+        hairFile('hair', S.hair||1, hc),
       ]);
     });
     g.appendChild(card);
@@ -742,7 +743,7 @@ function buildTopGrid() {
   g.appendChild(makeNoneCard('top'));
   for(let i=1;i<=12;i++) {
     const card = makeCard(i, `${i}`, 'top', async (cv) => {
-      await renderThumb(cv, [`body_${S.body}.png`,`top_${i}.png`,`top_color_${i}.png`]);
+      await renderThumb(cv, [`body/${S.body}.png`,`top/${i}.png`,`top/colors/${i}.png`]);
     }, () => { S.dress = null; refreshDressCards(); });
     g.appendChild(card);
   }
@@ -754,7 +755,7 @@ function buildDressGrid() {
   g.appendChild(makeNoneCard('dress'));
   for(let i=1;i<=7;i++) {
     const card = makeCard(i, `${i}`, 'dress', async (cv) => {
-      await renderThumb(cv, [`body_${S.body}.png`,`dress_${i}.png`,`dress_color_${i}.png`]);
+      await renderThumb(cv, [`body/${S.body}.png`,`dress/${i}.png`,`dress/COLORS/${i}.png`]);
     }, () => { S.top = null; S.bottom = null; refreshTopCards(); refreshBottomCards(); });
     g.appendChild(card);
   }
@@ -782,7 +783,7 @@ function buildBottomGrid() {
   g.appendChild(makeNoneCard('bottom'));
   for(let i=1;i<=8;i++) {
     const card = makeCard(i, `${i}`, 'bottom', async (cv) => {
-      await renderThumb(cv, [`body_${S.body}.png`,`bottom_${i}.png`,`bottom_color_${i}.png`]);
+      await renderThumb(cv, [`body/${S.body}.png`,`bottom/${i}.png`,`bottom/color/${i}.png`]);
     });
     g.appendChild(card);
   }
@@ -794,7 +795,7 @@ function buildShoesGrid() {
   g.appendChild(makeNoneCard('shoes'));
   for(let i=1;i<=4;i++) {
     const card = makeCard(i, `${i}`, 'shoes', async (cv) => {
-      await renderThumb(cv, [`body_${S.body}.png`,`shoes_${i}.png`,`shoes_color_${i}.png`]);
+      await renderThumb(cv, [`body/${S.body}.png`,`shoes/${i}.png`,`shoes/COLOR/${i}.png`]);
     });
     g.appendChild(card);
   }
@@ -806,7 +807,7 @@ function buildGlovesGrid() {
   g.appendChild(makeNoneCard('gloves'));
   for(let i=1;i<=6;i++) {
     const card = makeCard(i, `${i}`, 'gloves', async (cv) => {
-      await renderThumb(cv, [`body_${S.body}.png`,`gloves_${i}.png`,`gloves_color_${i}.png`]);
+      await renderThumb(cv, [`body/${S.body}.png`,`gloves/${i}.png`,`gloves/COLOR/${i}.png`]);
     });
     g.appendChild(card);
   }
@@ -856,7 +857,7 @@ function makeNoneCard(stateKey) {
   cv.width = THUMB_W; cv.height = THUMB_H;
   cv.style.width = DISPLAY_W + 'px';
   cv.style.height = DISPLAY_H + 'px';
-  loadImg(`body_${S.body}.png`).then(img => {
+  loadImg(`body/${S.body}.png`).then(img => {
     const ctx = cv.getContext('2d');
     ctx.globalAlpha = 0.3;
     if(img) ctx.drawImage(img, 0,0,THUMB_W,THUMB_H);
