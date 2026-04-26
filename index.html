@@ -357,7 +357,7 @@ for(let i=0;i<60;i++){
 
 // ===== URL DES ASSETS =====
 const ASSETS_ZIP_URL = 'https://magenta-pegasus-537cbf.netlify.app/assets.zip';
-const CACHE_NAME = 'macadam-assets-v2';
+const CACHE_NAME = 'macadam-assets-v3';
 
 // Blob URLs extraites du zip : { 'body/1.png': 'blob:...', ... }
 const assetBlobs = {};
@@ -675,8 +675,17 @@ async function render(canvas) {
   const layers = await getLayers();
   const imgs = await Promise.all(layers.map(src => loadImg(src)));
   ctx.clearRect(0,0,W,H);
-  for(const img of imgs) {
-    if(img) ctx.drawImage(img, 0, 0, W, H);
+  ctx.globalCompositeOperation = 'source-over';
+  for(let i = 0; i < imgs.length; i++) {
+    const img = imgs[i];
+    if(!img) continue;
+    if(layers[i] === 'body/full.png') {
+      ctx.globalCompositeOperation = 'multiply';
+      ctx.drawImage(img, 0, 0, W, H);
+      ctx.globalCompositeOperation = 'source-over';
+    } else {
+      ctx.drawImage(img, 0, 0, W, H);
+    }
   }
 }
 
@@ -691,9 +700,19 @@ const DISPLAY_W = 60, DISPLAY_H = 94;
 async function renderThumb(canvas, layers) {
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0,0,THUMB_W,THUMB_H);
-  const imgs = await Promise.all(layers.filter(Boolean).map(src => loadImg(src)));
-  for(const img of imgs) {
-    if(img) ctx.drawImage(img, 0, 0, THUMB_W, THUMB_H);
+  const filtered = layers.filter(Boolean);
+  const imgs = await Promise.all(filtered.map(src => loadImg(src)));
+  ctx.globalCompositeOperation = 'source-over';
+  for(let i = 0; i < imgs.length; i++) {
+    const img = imgs[i];
+    if(!img) continue;
+    if(filtered[i] === 'body/full.png') {
+      ctx.globalCompositeOperation = 'multiply';
+      ctx.drawImage(img, 0, 0, THUMB_W, THUMB_H);
+      ctx.globalCompositeOperation = 'source-over';
+    } else {
+      ctx.drawImage(img, 0, 0, THUMB_W, THUMB_H);
+    }
   }
 }
 
