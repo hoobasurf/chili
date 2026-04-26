@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Macadam World — Créateur d'Avatar</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --pink:#FF6EB4;--mint:#3DDBB8;--yellow:#FFD747;
+  --lav:#B388FF;--sky:#5BC8F5;--peach:#FF9E7A;
+  --dark:#12082A;--mid:#1A0A38;--card:rgba(255,248,255,0.06);
+}
+html,body{min-height:100vh;font-family:'Nunito',sans-serif;overflow-x:hidden;background:var(--dark);}
+
+.bg{position:fixed;inset:0;z-index:0;
+  background:
+    radial-gradient(ellipse at 15% 20%,#FF6EB440 0%,transparent 45%),
+    radial-gradient(ellipse at 85% 15%,#B388FF40 0%,transparent 45%),
+    radial-gradient(ellipse at 10% 80%,#3DDBB830 0%,transparent 45%),
+    radial-gradient(ellipse at 90% 80%,#FFD74730 0%,transparent 45%),
+    #12082A;}
+.stars{position:fixed;inset:0;z-index:0;pointer-events:none;}
+.star{position:absolute;border-radius:50%;background:white;animation:twinkle var(--d,3s) ease-in-out infinite var(--del,0s);}
+@keyframes twinkle{0%,100%{opacity:.1;transform:scale(1);}50%{opacity:.8;transform:scale(1.5);}}
+
+/* ===== LAYOUT ===== */
+.app{position:relative;z-index:1;display:flex;flex-direction:column;min-height:100vh;}
+
+/* HEADER */
+.header{text-align:center;padding:24px 20px 16px;flex-shrink:0;}
+.logo-tag{display:inline-block;background:var(--yellow);color:var(--dark);font-size:.65rem;font-weight:900;letter-spacing:3px;text-transform:uppercase;padding:4px 12px;border-radius:20px;margin-bottom:10px;}
+.logo-title{font-family:'Baloo 2',cursive;font-size:clamp(1.8rem,6vw,3rem);font-weight:800;line-height:1;color:white;letter-spacing:-1px;}
+.logo-title .c1{color:var(--pink);}.logo-title .c2{color:var(--yellow);}.logo-title .c3{color:var(--mint);}
+.logo-title .c4{color:var(--sky);}.logo-title .c5{color:var(--lav);}.logo-title .c6{color:var(--peach);}
+
+/* MAIN SPLIT */
+.main{display:flex;flex:1;gap:0;max-width:1000px;margin:0 auto;width:100%;padding:0 12px 20px;}
+
+/* LEFT: PREVIEW */
+.panel-preview{
+  width:240px;flex-shrink:0;
+  display:flex;flex-direction:column;align-items:center;
+  gap:16px;padding:16px 12px;
+}
+
+.avatar-stage{
+  position:relative;
+  width:200px;height:264px;
+  background:radial-gradient(ellipse at 50% 60%,rgba(255,255,255,.07) 0%,transparent 70%);
+  border-radius:24px;
+  border:1.5px solid rgba(255,255,255,.1);
+  overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 20px 60px rgba(0,0,0,.5);
+}
+.avatar-stage canvas{width:180px;height:238px;image-rendering:pixelated;}
+
+.loading-ring{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  background:rgba(18,8,42,.7);border-radius:23px;transition:opacity .3s;
+  font-size:.75rem;color:var(--mint);font-weight:700;letter-spacing:1px;
+  flex-direction:column;gap:8px;
+}
+.loading-ring.hidden{opacity:0;pointer-events:none;}
+.spinner{width:32px;height:32px;border:3px solid rgba(61,219,184,.2);border-top-color:var(--mint);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+.pseudo-wrap{width:100%;}
+.pseudo-label{font-size:.62rem;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.3);display:block;margin-bottom:6px;}
+.pseudo-input{
+  width:100%;background:rgba(255,255,255,.07);
+  border:1.5px solid rgba(255,255,255,.12);border-radius:14px;
+  padding:11px 14px;font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:700;
+  color:white;outline:none;transition:all .2s;
+}
+.pseudo-input::placeholder{color:rgba(255,255,255,.2);}
+.pseudo-input:focus{border-color:var(--pink);background:rgba(255,110,180,.08);box-shadow:0 0 0 3px rgba(255,110,180,.12);}
+
+.btn-save{
+  width:100%;background:linear-gradient(135deg,var(--pink),var(--lav));
+  border:none;border-radius:14px;padding:13px;
+  font-family:'Baloo 2',cursive;font-size:1rem;font-weight:700;
+  color:white;cursor:pointer;transition:transform .15s,box-shadow .15s;
+  box-shadow:0 6px 20px rgba(255,110,180,.35);
+}
+.btn-save:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(255,110,180,.5);}
+.btn-save:active{transform:scale(.97);}
+
+.btn-random{
+  width:100%;background:rgba(255,255,255,.07);
+  border:1.5px solid rgba(255,255,255,.12);border-radius:14px;padding:10px;
+  font-family:'Nunito',sans-serif;font-size:.85rem;font-weight:700;
+  color:rgba(255,255,255,.6);cursor:pointer;transition:all .2s;
+}
+.btn-random:hover{background:rgba(255,255,255,.12);color:white;}
+
+/* RIGHT: EDITOR */
+.panel-editor{
+  flex:1;
+  background:rgba(255,255,255,.04);
+  border:1.5px solid rgba(255,255,255,.09);
+  border-radius:24px;
+  display:flex;flex-direction:column;
+  overflow:hidden;min-width:0;
+}
+
+/* TABS */
+.tabs{
+  display:flex;gap:2px;padding:12px 12px 0;
+  flex-shrink:0;overflow-x:auto;scrollbar-width:none;
+  border-bottom:1px solid rgba(255,255,255,.07);
+}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{
+  background:transparent;border:none;border-radius:10px 10px 0 0;
+  padding:8px 12px;font-family:'Nunito',sans-serif;font-size:.75rem;font-weight:800;
+  color:rgba(255,255,255,.35);cursor:pointer;transition:all .2s;
+  white-space:nowrap;border-bottom:2.5px solid transparent;
+  flex-shrink:0;
+}
+.tab:hover{color:rgba(255,255,255,.65);background:rgba(255,255,255,.04);}
+.tab.active{color:white;background:rgba(255,255,255,.07);border-bottom-color:var(--pink);}
+
+/* PANELS */
+.panels{flex:1;overflow-y:auto;padding:14px;scrollbar-width:thin;scrollbar-color:#3A1D6A transparent;}
+.panels::-webkit-scrollbar{width:4px;}
+.panels::-webkit-scrollbar-thumb{background:#3A1D6A;border-radius:4px;}
+
+.panel{display:none;flex-direction:column;gap:12px;}
+.panel.active{display:flex;}
+
+.section{background:rgba(255,255,255,.05);border-radius:14px;padding:12px 14px;}
+.section-title{font-size:.62rem;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.28);margin-bottom:10px;}
+
+/* GRID D'ITEMS (sprites) */
+.igrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:8px;}
+.icard{
+  background:rgba(255,255,255,.06);border-radius:12px;
+  padding:6px 4px 5px;cursor:pointer;
+  border:2px solid transparent;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  transition:all .15s;position:relative;overflow:hidden;
+}
+.icard:hover{background:rgba(255,255,255,.12);transform:translateY(-2px);}
+.icard.active{border-color:var(--pink);background:rgba(255,110,180,.18);}
+.icard canvas{display:block;image-rendering:pixelated;}
+.icard-none canvas{opacity:.35;}
+.icard-none.active canvas{opacity:.6;}
+.ilabel{font-size:.58rem;font-weight:800;color:rgba(255,255,255,.45);text-align:center;}
+.icard.active .ilabel{color:rgba(255,255,255,.8);}
+
+/* TOGGLE NONE */
+.none-badge{
+  position:absolute;top:4px;right:4px;
+  background:rgba(255,255,255,.15);border-radius:4px;
+  font-size:.5rem;font-weight:900;color:rgba(255,255,255,.5);
+  padding:1px 4px;
+}
+
+/* BODY GRID (teintes de peau) */
+.skin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(58px,1fr));gap:8px;}
+
+/* COULEURS DE CHEVEUX */
+.hair-colors{display:flex;gap:0;flex-wrap:wrap;}
+.hc{
+  width:28px;height:28px;cursor:pointer;
+  border:2.5px solid transparent;border-radius:6px;
+  transition:transform .15s,border-color .15s;flex-shrink:0;
+}
+.hc:hover{transform:scale(1.15);}
+.hc.active{border-color:white;transform:scale(1.1);}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:var(--mint);color:var(--dark);
+  padding:10px 22px;border-radius:14px;font-size:.88rem;font-weight:800;
+  box-shadow:0 8px 24px rgba(61,219,184,.4);
+  transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:999;pointer-events:none;
+}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+/* MOBILE */
+@media(max-width:680px){
+  .main{flex-direction:column;align-items:center;}
+  .panel-preview{width:100%;flex-direction:row;justify-content:center;flex-wrap:wrap;padding:8px 12px;}
+  .avatar-stage{width:160px;height:212px;}
+  .avatar-stage canvas{width:144px;height:191px;}
+  .pseudo-wrap,.btn-save,.btn-random{max-width:200px;}
+  .panel-editor{width:100%;}
+  .igrid{grid-template-columns:repeat(auto-fill,minmax(60px,1fr));}
+}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="stars" id="stars"></div>
+
+<div class="app">
+  <div class="header">
+    <div class="logo-tag">✦ Créateur d'avatar ✦</div>
+    <div class="logo-title">
+      <span class="c1">M</span><span class="c2">A</span><span class="c3">C</span><span class="c4">A</span><span class="c5">D</span><span class="c6">A</span><span class="c1">M</span>
+      <span style="color:rgba(255,255,255,.25);font-size:.7em;margin:0 8px;">✦</span>
+      <span class="c2">W</span><span class="c3">O</span><span class="c4">R</span><span class="c5">L</span><span class="c6">D</span>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- PREVIEW -->
+    <div class="panel-preview">
+      <div class="avatar-stage">
+        <canvas id="preview-canvas" width="444" height="700"></canvas>
+        <div class="loading-ring" id="loading-ring">
+          <div class="spinner"></div>
+          <span>Chargement…</span>
+        </div>
+      </div>
+
+      <div class="pseudo-wrap">
+        <label class="pseudo-label" for="pseudo">Ton pseudo</label>
+        <input class="pseudo-input" id="pseudo" type="text" maxlength="16" placeholder="StarMochi…" autocomplete="off"/>
+      </div>
+      <button class="btn-random" onclick="randomize()">🎲 Aléatoire</button>
+      <button class="btn-save" onclick="saveAvatar()">✨ Sauvegarder</button>
+    </div>
+
+    <!-- EDITOR -->
+    <div class="panel-editor">
+      <div class="tabs" id="tabs">
+        <button class="tab active" data-panel="peau">🌸 Peau</button>
+        <button class="tab" data-panel="yeux">👁 Yeux</button>
+        <button class="tab" data-panel="bouche">👄 Bouche</button>
+        <button class="tab" data-panel="cheveux">💇 Cheveux</button>
+        <button class="tab" data-panel="haut">👕 Haut</button>
+        <button class="tab" data-panel="bas">👖 Bas</button>
+        <button class="tab" data-panel="shoes">👟 Shoes</button>
+        <button class="tab" data-panel="extras">✨ Extras</button>
+      </div>
+      <div class="panels" id="panels">
+
+        <!-- PEAU -->
+        <div class="panel active" id="panel-peau">
+          <div class="section">
+            <div class="section-title">Teinte de peau (1–29)</div>
+            <div class="skin-grid" id="grid-body"></div>
+          </div>
+        </div>
+
+        <!-- YEUX -->
+        <div class="panel" id="panel-yeux">
+          <div class="section">
+            <div class="section-title">Cils</div>
+            <div class="igrid" id="grid-eyelashes"></div>
+          </div>
+          <div class="section">
+            <div class="section-title">Pupilles</div>
+            <div class="igrid" id="grid-pupils"></div>
+          </div>
+          <div class="section">
+            <div class="section-title">Sourcils</div>
+            <div class="igrid" id="grid-eyebrows"></div>
+          </div>
+        </div>
+
+        <!-- BOUCHE -->
+        <div class="panel" id="panel-bouche">
+          <div class="section">
+            <div class="section-title">Bouche (20 styles)</div>
+            <div class="igrid" id="grid-mouth"></div>
+          </div>
+        </div>
+
+        <!-- CHEVEUX -->
+        <div class="panel" id="panel-cheveux">
+          <div class="section">
+            <div class="section-title">Style de cheveux</div>
+            <div class="igrid" id="grid-hair"></div>
+          </div>
+          <div class="section">
+            <div class="section-title">Couleur de cheveux</div>
+            <div class="hair-colors" id="hair-colors"></div>
+          </div>
+          <div class="section">
+            <div class="section-title">Frange</div>
+            <div class="igrid" id="grid-bangs"></div>
+          </div>
+          <div class="section">
+            <div class="section-title">Bonus coiffure</div>
+            <div class="igrid" id="grid-hair-bonus"></div>
+          </div>
+        </div>
+
+        <!-- HAUT -->
+        <div class="panel" id="panel-haut">
+          <div class="section">
+            <div class="section-title">Haut (12 styles)</div>
+            <div class="igrid" id="grid-top"></div>
+          </div>
+          <div class="section">
+            <div class="section-title">Robe (7 styles)</div>
+            <div class="igrid" id="grid-dress"></div>
+          </div>
+        </div>
+
+        <!-- BAS -->
+        <div class="panel" id="panel-bas">
+          <div class="section">
+            <div class="section-title">Bas (8 styles)</div>
+            <div class="igrid" id="grid-bottom"></div>
+          </div>
+        </div>
+
+        <!-- SHOES -->
+        <div class="panel" id="panel-shoes">
+          <div class="section">
+            <div class="section-title">Chaussures (4 styles)</div>
+            <div class="igrid" id="grid-shoes"></div>
+          </div>
+          <div class="section">
+            <div class="section-title">Gants (6 styles)</div>
+            <div class="igrid" id="grid-gloves"></div>
+          </div>
+        </div>
+
+        <!-- EXTRAS -->
+        <div class="panel" id="panel-extras">
+          <div class="section">
+            <div class="section-title">Barbe / poils</div>
+            <div class="igrid" id="grid-beard"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== ÉTOILES =====
+const starsEl = document.getElementById('stars');
+for(let i=0;i<60;i++){
+  const s=document.createElement('div');s.className='star';
+  const sz=Math.random()*2.5+.8;
+  s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${2+Math.random()*4}s;--del:-${Math.random()*5}s;`;
+  starsEl.appendChild(s);
+}
+
+// ===== ASSETS BASE PATH =====
+const BASE = 'assets/';
+
+// ===== STATE =====
+// Chaque clé = null (aucun) ou numéro de style
+// hairColor: suffixe de couleur '' b c d e f g h
+const S = {
+  body: 1,          // 1-29
+  eyelashes: 1,     // 1-5
+  pupils: 1,        // 1-16
+  eyebrows: 1,      // 1-5
+  mouth: 1,         // 1-20
+  hair: 1,          // 1-12
+  hairColor: '',    // '' b c d e f g h
+  bangs: 1,         // 1-13 ou null
+  hairBonus: null,  // 1-5 ou null
+  top: 1,           // 1-12 ou null
+  dress: null,      // 1-7 ou null
+  bottom: 1,        // 1-8 ou null
+  shoes: 1,         // 1-4 ou null
+  gloves: null,     // 1-6 ou null
+  beard: null,      // 1-5 ou null
+};
+
+// ===== COULEURS DE CHEVEUX =====
+// 8 variantes: '' (base) + b c d e f g h
+const HAIR_COLORS = [
+  { suffix:'',  hex:'#3D1800', label:'Brun foncé' },
+  { suffix:'b', hex:'#111111', label:'Noir' },
+  { suffix:'c', hex:'#8B4010', label:'Châtain' },
+  { suffix:'d', hex:'#C8980A', label:'Blond doré' },
+  { suffix:'e', hex:'#EEE0C0', label:'Blond clair' },
+  { suffix:'f', hex:'#FF5AAA', label:'Rose' },
+  { suffix:'g', hex:'#AA44FF', label:'Violet' },
+  { suffix:'h', hex:'#00BBDD', label:'Bleu' },
+];
+
+// ===== CACHE D'IMAGES =====
+const imgCache = {};
+function loadImg(src) {
+  if(imgCache[src]) return imgCache[src];
+  const p = new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null); // silently skip missing
+    img.src = src;
+  });
+  imgCache[src] = p;
+  return p;
+}
+
+// ===== COUCHES DE RENDU =====
+async function getLayers() {
+  const layers = [];
+  const hc = S.hairColor;
+  const add = (path) => layers.push(path);
+
+  // 1. Corps / teinte peau
+  add(`${BASE}body_${S.body}.png`);
+
+  // 2. Cheveux arrière
+  if(S.hair) add(`${BASE}hair_back_${S.hair}${hc}.png`);
+
+  // 3. Bas (pantalon/jupe)
+  if(S.bottom) {
+    add(`${BASE}bottom_${S.bottom}.png`);
+    add(`${BASE}bottom_color_${S.bottom}.png`);
+  }
+
+  // 4. Robe (si sélectionnée, remplace haut+bas)
+  if(S.dress) {
+    add(`${BASE}dress_${S.dress}.png`);
+    add(`${BASE}dress_color_${S.dress}.png`);
+  }
+
+  // 5. Haut
+  if(S.top && !S.dress) {
+    add(`${BASE}top_${S.top}.png`);
+    add(`${BASE}top_color_${S.top}.png`);
+  }
+
+  // 6. Yeux
+  if(S.eyelashes) add(`${BASE}EYELASHES_${S.eyelashes}.png`);
+  if(S.pupils)    add(`${BASE}PUPILS_${S.pupils}.png`);
+  if(S.eyebrows)  add(`${BASE}EYEBROWS_${S.eyebrows}.png`);
+
+  // 7. Bouche
+  if(S.mouth) add(`${BASE}MOUTH_${S.mouth}.png`);
+
+  // 8. Cheveux avant
+  if(S.hair) add(`${BASE}hair_${S.hair}${hc}.png`);
+
+  // 9. Hair bonus
+  if(S.hairBonus) add(`${BASE}hair_bonus_${S.hairBonus}${hc}.png`);
+
+  // 10. Frange
+  if(S.bangs) add(`${BASE}bangs_${S.bangs}${hc}.png`);
+
+  // 11. Chaussures
+  if(S.shoes) {
+    add(`${BASE}shoes_${S.shoes}.png`);
+    add(`${BASE}shoes_color_${S.shoes}.png`);
+  }
+
+  // 12. Gants
+  if(S.gloves) {
+    add(`${BASE}gloves_${S.gloves}.png`);
+    add(`${BASE}gloves_color_${S.gloves}.png`);
+  }
+
+  // 13. Barbe
+  if(S.beard) add(`${BASE}BEARD_${S.beard}.png`);
+
+  return layers;
+}
+
+// ===== RENDU SUR CANVAS =====
+let renderPending = false;
+async function render(canvas) {
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = 444, H = 700;
+
+  // Précharger en parallèle
+  const layers = await getLayers();
+  const imgs = await Promise.all(layers.map(src => loadImg(src)));
+
+  ctx.clearRect(0,0,W,H);
+  for(const img of imgs) {
+    if(img) ctx.drawImage(img, 0, 0, W, H);
+  }
+}
+
+// Debounce render
+let renderTimer = null;
+function scheduleRender() {
+  if(renderTimer) clearTimeout(renderTimer);
+  renderTimer = setTimeout(async () => {
+    showLoading(true);
+    await render(document.getElementById('preview-canvas'));
+    showLoading(false);
+    // Re-rendre les thumbnails actifs si besoin
+  }, 80);
+}
+
+function showLoading(b) {
+  document.getElementById('loading-ring').classList.toggle('hidden', !b);
+}
+
+// ===== THUMBNAIL CANVAS =====
+// Chaque icard a un mini canvas 70×110
+const THUMB_W = 444, THUMB_H = 700;
+const DISPLAY_W = 60, DISPLAY_H = 94;
+
+async function renderThumb(canvas, layers) {
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,THUMB_W,THUMB_H);
+  const imgs = await Promise.all(layers.map(src => loadImg(src)));
+  for(const img of imgs) {
+    if(img) ctx.drawImage(img, 0, 0, THUMB_W, THUMB_H);
+  }
+}
+
+// ===== BUILD GRIDS =====
+
+// Body (teintes peau 1-29)
+function buildBodyGrid() {
+  const g = document.getElementById('grid-body');
+  g.innerHTML = '';
+  for(let i=1;i<=29;i++) {
+    const card = makeCard(i, `Peau ${i}`, 'body', async (cv) => {
+      await renderThumb(cv, [`${BASE}body_${i}.png`]);
+    });
+    g.appendChild(card);
+  }
+}
+
+// Grille simple de couche (eyelashes, pupils, eyebrows, mouth, beard)
+function buildSimpleGrid(gridId, key, prefix, count, withNone=false) {
+  const g = document.getElementById(gridId);
+  g.innerHTML = '';
+  if(withNone) {
+    const card = makeNoneCard(key);
+    g.appendChild(card);
+  }
+  for(let i=1;i<=count;i++) {
+    const card = makeCard(i, `${i}`, key, async (cv) => {
+      const ctx = cv.getContext('2d');
+      ctx.clearRect(0,0,THUMB_W,THUMB_H);
+      // Body de base pour contexte
+      const bodyImg = await loadImg(`${BASE}body_${S.body}.png`);
+      if(bodyImg) ctx.drawImage(bodyImg, 0,0,THUMB_W,THUMB_H);
+      const img = await loadImg(`${BASE}${prefix}_${i}.png`);
+      if(img) ctx.drawImage(img, 0,0,THUMB_W,THUMB_H);
+    });
+    g.appendChild(card);
+  }
+}
+
+// Hair styles
+function buildHairGrid() {
+  const g = document.getElementById('grid-hair');
+  g.innerHTML = '';
+  for(let i=1;i<=12;i++) {
+    const card = makeCard(i, `${i}`, 'hair', async (cv) => {
+      const hc = S.hairColor;
+      await renderThumb(cv, [
+        `${BASE}body_${S.body}.png`,
+        `${BASE}hair_back_${i}${hc}.png`,
+        `${BASE}EYELASHES_${S.eyelashes||1}.png`,
+        `${BASE}PUPILS_${S.pupils||1}.png`,
+        `${BASE}EYEBROWS_${S.eyebrows||1}.png`,
+        `${BASE}hair_${i}${hc}.png`,
+        S.bangs ? `${BASE}bangs_${S.bangs}${hc}.png` : null,
+      ].filter(Boolean));
+    });
+    g.appendChild(card);
+  }
+}
+
+// Hair colors
+function buildHairColors() {
+  const g = document.getElementById('hair-colors');
+  g.innerHTML = '';
+  HAIR_COLORS.forEach(({suffix, hex, label}) => {
+    const div = document.createElement('div');
+    div.className = 'hc' + (S.hairColor === suffix ? ' active' : '');
+    div.style.background = hex;
+    div.title = label;
+    div.onclick = async () => {
+      S.hairColor = suffix;
+      document.querySelectorAll('#hair-colors .hc').forEach(d => d.classList.remove('active'));
+      div.classList.add('active');
+      scheduleRender();
+      // Refresh hair grids thumbs
+      buildHairGrid();
+      buildBangsGrid();
+      buildHairBonusGrid();
+    };
+    g.appendChild(div);
+  });
+}
+
+// Bangs
+function buildBangsGrid() {
+  const g = document.getElementById('grid-bangs');
+  g.innerHTML = '';
+  const noneCard = makeNoneCard('bangs');
+  g.appendChild(noneCard);
+  for(let i=1;i<=13;i++) {
+    const card = makeCard(i, `${i}`, 'bangs', async (cv) => {
+      const hc = S.hairColor;
+      await renderThumb(cv, [
+        `${BASE}body_${S.body}.png`,
+        `${BASE}hair_back_${S.hair||1}${hc}.png`,
+        `${BASE}EYELASHES_${S.eyelashes||1}.png`,
+        `${BASE}PUPILS_${S.pupils||1}.png`,
+        `${BASE}hair_${S.hair||1}${hc}.png`,
+        `${BASE}bangs_${i}${hc}.png`,
+      ]);
+    });
+    g.appendChild(card);
+  }
+}
+
+// Hair bonus
+function buildHairBonusGrid() {
+  const g = document.getElementById('grid-hair-bonus');
+  g.innerHTML = '';
+  const noneCard = makeNoneCard('hairBonus');
+  g.appendChild(noneCard);
+  for(let i=1;i<=5;i++) {
+    const card = makeCard(i, `${i}`, 'hairBonus', async (cv) => {
+      const hc = S.hairColor;
+      await renderThumb(cv, [
+        `${BASE}body_${S.body}.png`,
+        `${BASE}hair_back_${S.hair||1}${hc}.png`,
+        `${BASE}hair_bonus_${i}${hc}.png`,
+        `${BASE}hair_${S.hair||1}${hc}.png`,
+      ]);
+    });
+    g.appendChild(card);
+  }
+}
+
+// Top
+function buildTopGrid() {
+  const g = document.getElementById('grid-top');
+  g.innerHTML = '';
+  const noneCard = makeNoneCard('top');
+  g.appendChild(noneCard);
+  for(let i=1;i<=12;i++) {
+    const card = makeCard(i, `${i}`, 'top', async (cv) => {
+      await renderThumb(cv, [
+        `${BASE}body_${S.body}.png`,
+        `${BASE}top_${i}.png`,
+        `${BASE}top_color_${i}.png`,
+      ]);
+    }, () => { S.dress = null; refreshDressCards(); });
+    g.appendChild(card);
+  }
+}
+
+// Dress
+function buildDressGrid() {
+  const g = document.getElementById('grid-dress');
+  g.innerHTML = '';
+  const noneCard = makeNoneCard('dress');
+  g.appendChild(noneCard);
+  for(let i=1;i<=7;i++) {
+    const card = makeCard(i, `${i}`, 'dress', async (cv) => {
+      await renderThumb(cv, [
+        `${BASE}body_${S.body}.png`,
+        `${BASE}dress_${i}.png`,
+        `${BASE}dress_color_${i}.png`,
+      ]);
+    }, () => { S.top = null; S.bottom = null; refreshTopCards(); refreshBottomCards(); });
+    g.appendChild(card);
+  }
+}
+
+function refreshDressCards() {
+  document.querySelectorAll('#grid-dress .icard').forEach((c,i) => {
+    c.classList.toggle('active', i > 0 && parseInt(c.dataset.val) === S.dress);
+    if(i===0) c.classList.toggle('active', S.dress === null);
+  });
+}
+function refreshTopCards() {
+  document.querySelectorAll('#grid-top .icard').forEach((c,i) => {
+    c.classList.toggle('active', i > 0 && parseInt(c.dataset.val) === S.top);
+    if(i===0) c.classList.toggle('active', S.top === null);
+  });
+}
+function refreshBottomCards() {
+  document.querySelectorAll('#grid-bottom .icard').forEach((c,i) => {
+    c.classList.toggle('active', i > 0 && parseInt(c.dataset.val) === S.bottom);
+    if(i===0) c.classList.toggle('active', S.bottom === null);
+  });
+}
+
+// Bottom
+function buildBottomGrid() {
+  const g = document.getElementById('grid-bottom');
+  g.innerHTML = '';
+  const noneCard = makeNoneCard('bottom');
+  g.appendChild(noneCard);
+  for(let i=1;i<=8;i++) {
+    const card = makeCard(i, `${i}`, 'bottom', async (cv) => {
+      await renderThumb(cv, [
+        `${BASE}body_${S.body}.png`,
+        `${BASE}bottom_${i}.png`,
+        `${BASE}bottom_color_${i}.png`,
+      ]);
+    });
+    g.appendChild(card);
+  }
+}
+
+// Shoes
+function buildShoesGrid() {
+  const g = document.getElementById('grid-shoes');
+  g.innerHTML = '';
+  const noneCard = makeNoneCard('shoes');
+  g.appendChild(noneCard);
+  for(let i=1;i<=4;i++) {
+    const card = makeCard(i, `${i}`, 'shoes', async (cv) => {
+      await renderThumb(cv, [
+        `${BASE}body_${S.body}.png`,
+        `${BASE}shoes_${i}.png`,
+        `${BASE}shoes_color_${i}.png`,
+      ]);
+    });
+    g.appendChild(card);
+  }
+}
+
+// Gloves
+function buildGlovesGrid() {
+  const g = document.getElementById('grid-gloves');
+  g.innerHTML = '';
+  const noneCard = makeNoneCard('gloves');
+  g.appendChild(noneCard);
+  for(let i=1;i<=6;i++) {
+    const card = makeCard(i, `${i}`, 'gloves', async (cv) => {
+      await renderThumb(cv, [
+        `${BASE}body_${S.body}.png`,
+        `${BASE}gloves_${i}.png`,
+        `${BASE}gloves_color_${i}.png`,
+      ]);
+    });
+    g.appendChild(card);
+  }
+}
+
+// ===== HELPERS =====
+function makeCard(val, label, stateKey, renderFn, extraOnClick) {
+  const card = document.createElement('div');
+  card.className = 'icard' + (S[stateKey] === val ? ' active' : '');
+  card.dataset.val = val;
+  card.dataset.key = stateKey;
+
+  const cv = document.createElement('canvas');
+  cv.width = THUMB_W; cv.height = THUMB_H;
+  cv.style.width = DISPLAY_W + 'px';
+  cv.style.height = DISPLAY_H + 'px';
+  card.appendChild(cv);
+
+  const lbl = document.createElement('span');
+  lbl.className = 'ilabel';
+  lbl.textContent = label;
+  card.appendChild(lbl);
+
+  // Lazy load thumbnail
+  const obs = new IntersectionObserver((entries) => {
+    if(entries[0].isIntersecting) {
+      renderFn(cv);
+      obs.disconnect();
+    }
+  }, {threshold: 0.1});
+  obs.observe(card);
+
+  card.onclick = () => {
+    S[stateKey] = val;
+    const grid = card.closest('.igrid, .skin-grid');
+    if(grid) grid.querySelectorAll('.icard').forEach(c => c.classList.remove('active'));
+    card.classList.add('active');
+    if(extraOnClick) extraOnClick();
+    scheduleRender();
+  };
+  return card;
+}
+
+function makeNoneCard(stateKey) {
+  const card = document.createElement('div');
+  card.className = 'icard icard-none' + (S[stateKey] === null ? ' active' : '');
+  card.dataset.val = 'null';
+  card.dataset.key = stateKey;
+
+  const cv = document.createElement('canvas');
+  cv.width = THUMB_W; cv.height = THUMB_H;
+  cv.style.width = DISPLAY_W + 'px';
+  cv.style.height = DISPLAY_H + 'px';
+  // Rendre un body seul grisé
+  loadImg(`${BASE}body_${S.body}.png`).then(img => {
+    const ctx = cv.getContext('2d');
+    ctx.globalAlpha = 0.3;
+    if(img) ctx.drawImage(img, 0,0,THUMB_W,THUMB_H);
+  });
+  card.appendChild(cv);
+
+  const span = document.createElement('span');
+  span.className = 'none-badge';
+  span.textContent = '✕';
+  card.appendChild(span);
+
+  const lbl = document.createElement('span');
+  lbl.className = 'ilabel';
+  lbl.textContent = 'Aucun';
+  card.appendChild(lbl);
+
+  card.onclick = () => {
+    S[stateKey] = null;
+    const grid = card.closest('.igrid, .skin-grid');
+    if(grid) grid.querySelectorAll('.icard').forEach(c => c.classList.remove('active'));
+    card.classList.add('active');
+    scheduleRender();
+  };
+  return card;
+}
+
+// ===== TABS =====
+document.querySelectorAll('.tab').forEach(t => {
+  t.onclick = () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('panel-' + t.dataset.panel).classList.add('active');
+  };
+});
+
+// ===== RANDOM =====
+function rnd(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
+function pickOrNull(max, prob=0.7){return Math.random()<prob ? rnd(1,max) : null;}
+
+function randomize(){
+  S.body = rnd(1,29);
+  S.hair = rnd(1,12);
+  S.hairColor = HAIR_COLORS[rnd(0,HAIR_COLORS.length-1)].suffix;
+  S.bangs = pickOrNull(13, 0.8);
+  S.hairBonus = pickOrNull(5, 0.3);
+  S.eyelashes = rnd(1,5);
+  S.pupils = rnd(1,16);
+  S.eyebrows = rnd(1,5);
+  S.mouth = rnd(1,20);
+  S.beard = pickOrNull(5, 0.15);
+  // Tenue: robe OU haut+bas
+  if(Math.random() < 0.3) {
+    S.dress = rnd(1,7); S.top = null; S.bottom = null;
+  } else {
+    S.dress = null; S.top = rnd(1,12); S.bottom = rnd(1,8);
+  }
+  S.shoes = pickOrNull(4, 0.9);
+  S.gloves = pickOrNull(6, 0.2);
+
+  // Refresh couleur active
+  buildHairColors();
+  scheduleRender();
+  showToast('🎲 Nouvel avatar !');
+}
+
+// ===== SAVE =====
+function saveAvatar(){
+  const pseudo = document.getElementById('pseudo').value.trim();
+  if(!pseudo){showToast('✏️ Entre ton pseudo !');return;}
+
+  // Export canvas
+  const canvas = document.getElementById('preview-canvas');
+  const dataUrl = canvas.toDataURL('image/png');
+
+  // Stocker en localStorage
+  localStorage.setItem('macadam_avatar', JSON.stringify({
+    pseudo, state: S, img: dataUrl, savedAt: Date.now()
+  }));
+
+  // Proposer le téléchargement
+  const a = document.createElement('a');
+  a.href = dataUrl;
+  a.download = `avatar_${pseudo}.png`;
+  a.click();
+
+  showToast('✨ Avatar sauvegardé !');
+}
+
+// ===== TOAST =====
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ===== INIT =====
+function buildAllGrids(){
+  buildBodyGrid();
+  buildHairGrid();
+  buildHairColors();
+  buildBangsGrid();
+  buildHairBonusGrid();
+  buildSimpleGrid('grid-eyelashes','eyelashes','EYELASHES',5);
+  buildSimpleGrid('grid-pupils','pupils','PUPILS',16);
+  buildSimpleGrid('grid-eyebrows','eyebrows','EYEBROWS',5);
+  buildSimpleGrid('grid-mouth','mouth','MOUTH',20, false);
+  buildSimpleGrid('grid-beard','beard','BEARD',5, true);
+  buildTopGrid();
+  buildDressGrid();
+  buildBottomGrid();
+  buildShoesGrid();
+  buildGlovesGrid();
+}
+
+// Charger le profil sauvegardé si existe
+function loadSaved(){
+  try {
+    const saved = JSON.parse(localStorage.getItem('macadam_avatar') || 'null');
+    if(saved) {
+      Object.assign(S, saved.state);
+      document.getElementById('pseudo').value = saved.pseudo || '';
+    }
+  } catch(e){}
+}
+
+loadSaved();
+buildAllGrids();
+scheduleRender();
+</script>
+</body>
+</html>
