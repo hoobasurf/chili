@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -15,14 +16,14 @@
 html,body{min-height:100vh;font-family:'Nunito',sans-serif;overflow-x:hidden;background:var(--dark);}
 
 .bg{position:fixed;inset:0;z-index:0;
-  background:
-    radial-gradient(ellipse at 15% 20%,#FF6EB440 0%,transparent 45%),
-    radial-gradient(ellipse at 85% 15%,#B388FF40 0%,transparent 45%),
-    radial-gradient(ellipse at 10% 80%,#3DDBB830 0%,transparent 45%),
-    radial-gradient(ellipse at 90% 80%,#FFD74730 0%,transparent 45%),
-    #12082A;}
+background:
+radial-gradient(ellipse at 15% 20%,#FF6EB440 0%,transparent 45%),
+radial-gradient(ellipse at 85% 15%,#B388FF40 0%,transparent 45%),
+radial-gradient(ellipse at 10% 80%,#3DDBB830 0%,transparent 45%),
+radial-gradient(ellipse at 90% 80%,#FFD74730 0%,transparent 45%),
+#12082A;}
 .stars{position:fixed;inset:0;z-index:0;pointer-events:none;}
-.star{position:absolute;border-radius:50%;background:white;animation:twinkle var(--d,3s) ease-in-out infinite var(--del,0s);}
+.star{position:absolute;border-radius:50%;background:white;animation:twinkle var(–d,3s) ease-in-out infinite var(–del,0s);}
 @keyframes twinkle{0%,100%{opacity:.1;transform:scale(1);}50%{opacity:.8;transform:scale(1.5);}}
 
 /* ===== LAYOUT ===== */
@@ -30,98 +31,98 @@ html,body{min-height:100vh;font-family:'Nunito',sans-serif;overflow-x:hidden;bac
 
 /* HEADER */
 .header{text-align:center;padding:24px 20px 16px;flex-shrink:0;}
-.logo-tag{display:inline-block;background:var(--yellow);color:var(--dark);font-size:.65rem;font-weight:900;letter-spacing:3px;text-transform:uppercase;padding:4px 12px;border-radius:20px;margin-bottom:10px;}
-.logo-title{font-family:'Baloo 2',cursive;font-size:clamp(1.8rem,6vw,3rem);font-weight:800;line-height:1;color:white;letter-spacing:-1px;}
-.logo-title .c1{color:var(--pink);}.logo-title .c2{color:var(--yellow);}.logo-title .c3{color:var(--mint);}
-.logo-title .c4{color:var(--sky);}.logo-title .c5{color:var(--lav);}.logo-title .c6{color:var(--peach);}
+.logo-tag{display:inline-block;background:var(–yellow);color:var(–dark);font-size:.65rem;font-weight:900;letter-spacing:3px;text-transform:uppercase;padding:4px 12px;border-radius:20px;margin-bottom:10px;}
+.logo-title{font-family:‘Baloo 2’,cursive;font-size:clamp(1.8rem,6vw,3rem);font-weight:800;line-height:1;color:white;letter-spacing:-1px;}
+.logo-title .c1{color:var(–pink);}.logo-title .c2{color:var(–yellow);}.logo-title .c3{color:var(–mint);}
+.logo-title .c4{color:var(–sky);}.logo-title .c5{color:var(–lav);}.logo-title .c6{color:var(–peach);}
 
 /* MAIN SPLIT */
 .main{display:flex;flex:1;gap:0;max-width:1000px;margin:0 auto;width:100%;padding:0 12px 20px;}
 
 /* LEFT: PREVIEW */
 .panel-preview{
-  width:240px;flex-shrink:0;
-  display:flex;flex-direction:column;align-items:center;
-  gap:16px;padding:16px 12px;
+width:240px;flex-shrink:0;
+display:flex;flex-direction:column;align-items:center;
+gap:16px;padding:16px 12px;
 }
 
 .avatar-stage{
-  position:relative;
-  width:200px;height:264px;
-  background:radial-gradient(ellipse at 50% 60%,rgba(255,255,255,.07) 0%,transparent 70%);
-  border-radius:24px;
-  border:1.5px solid rgba(255,255,255,.1);
-  overflow:hidden;
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 20px 60px rgba(0,0,0,.5);
+position:relative;
+width:200px;height:264px;
+background:radial-gradient(ellipse at 50% 60%,rgba(255,255,255,.07) 0%,transparent 70%);
+border-radius:24px;
+border:1.5px solid rgba(255,255,255,.1);
+overflow:hidden;
+display:flex;align-items:center;justify-content:center;
+box-shadow:0 20px 60px rgba(0,0,0,.5);
 }
 .avatar-stage canvas{width:180px;height:238px;image-rendering:pixelated;}
 
 .loading-ring{
-  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  background:rgba(18,8,42,.7);border-radius:23px;transition:opacity .3s;
-  font-size:.75rem;color:var(--mint);font-weight:700;letter-spacing:1px;
-  flex-direction:column;gap:8px;
+position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+background:rgba(18,8,42,.7);border-radius:23px;transition:opacity .3s;
+font-size:.75rem;color:var(–mint);font-weight:700;letter-spacing:1px;
+flex-direction:column;gap:8px;
 }
 .loading-ring.hidden{opacity:0;pointer-events:none;}
-.spinner{width:32px;height:32px;border:3px solid rgba(61,219,184,.2);border-top-color:var(--mint);border-radius:50%;animation:spin .8s linear infinite;}
+.spinner{width:32px;height:32px;border:3px solid rgba(61,219,184,.2);border-top-color:var(–mint);border-radius:50%;animation:spin .8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
 .pseudo-wrap{width:100%;}
 .pseudo-label{font-size:.62rem;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.3);display:block;margin-bottom:6px;}
 .pseudo-input{
-  width:100%;background:rgba(255,255,255,.07);
-  border:1.5px solid rgba(255,255,255,.12);border-radius:14px;
-  padding:11px 14px;font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:700;
-  color:white;outline:none;transition:all .2s;
+width:100%;background:rgba(255,255,255,.07);
+border:1.5px solid rgba(255,255,255,.12);border-radius:14px;
+padding:11px 14px;font-family:‘Nunito’,sans-serif;font-size:.95rem;font-weight:700;
+color:white;outline:none;transition:all .2s;
 }
 .pseudo-input::placeholder{color:rgba(255,255,255,.2);}
-.pseudo-input:focus{border-color:var(--pink);background:rgba(255,110,180,.08);box-shadow:0 0 0 3px rgba(255,110,180,.12);}
+.pseudo-input:focus{border-color:var(–pink);background:rgba(255,110,180,.08);box-shadow:0 0 0 3px rgba(255,110,180,.12);}
 
 .btn-save{
-  width:100%;background:linear-gradient(135deg,var(--pink),var(--lav));
-  border:none;border-radius:14px;padding:13px;
-  font-family:'Baloo 2',cursive;font-size:1rem;font-weight:700;
-  color:white;cursor:pointer;transition:transform .15s,box-shadow .15s;
-  box-shadow:0 6px 20px rgba(255,110,180,.35);
+width:100%;background:linear-gradient(135deg,var(–pink),var(–lav));
+border:none;border-radius:14px;padding:13px;
+font-family:‘Baloo 2’,cursive;font-size:1rem;font-weight:700;
+color:white;cursor:pointer;transition:transform .15s,box-shadow .15s;
+box-shadow:0 6px 20px rgba(255,110,180,.35);
 }
 .btn-save:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(255,110,180,.5);}
 .btn-save:active{transform:scale(.97);}
 
 .btn-random{
-  width:100%;background:rgba(255,255,255,.07);
-  border:1.5px solid rgba(255,255,255,.12);border-radius:14px;padding:10px;
-  font-family:'Nunito',sans-serif;font-size:.85rem;font-weight:700;
-  color:rgba(255,255,255,.6);cursor:pointer;transition:all .2s;
+width:100%;background:rgba(255,255,255,.07);
+border:1.5px solid rgba(255,255,255,.12);border-radius:14px;padding:10px;
+font-family:‘Nunito’,sans-serif;font-size:.85rem;font-weight:700;
+color:rgba(255,255,255,.6);cursor:pointer;transition:all .2s;
 }
 .btn-random:hover{background:rgba(255,255,255,.12);color:white;}
 
 /* RIGHT: EDITOR */
 .panel-editor{
-  flex:1;
-  background:rgba(255,255,255,.04);
-  border:1.5px solid rgba(255,255,255,.09);
-  border-radius:24px;
-  display:flex;flex-direction:column;
-  overflow:hidden;min-width:0;
+flex:1;
+background:rgba(255,255,255,.04);
+border:1.5px solid rgba(255,255,255,.09);
+border-radius:24px;
+display:flex;flex-direction:column;
+overflow:hidden;min-width:0;
 }
 
 /* TABS */
 .tabs{
-  display:flex;gap:2px;padding:12px 12px 0;
-  flex-shrink:0;overflow-x:auto;scrollbar-width:none;
-  border-bottom:1px solid rgba(255,255,255,.07);
+display:flex;gap:2px;padding:12px 12px 0;
+flex-shrink:0;overflow-x:auto;scrollbar-width:none;
+border-bottom:1px solid rgba(255,255,255,.07);
 }
 .tabs::-webkit-scrollbar{display:none;}
 .tab{
-  background:transparent;border:none;border-radius:10px 10px 0 0;
-  padding:8px 12px;font-family:'Nunito',sans-serif;font-size:.75rem;font-weight:800;
-  color:rgba(255,255,255,.35);cursor:pointer;transition:all .2s;
-  white-space:nowrap;border-bottom:2.5px solid transparent;
-  flex-shrink:0;
+background:transparent;border:none;border-radius:10px 10px 0 0;
+padding:8px 12px;font-family:‘Nunito’,sans-serif;font-size:.75rem;font-weight:800;
+color:rgba(255,255,255,.35);cursor:pointer;transition:all .2s;
+white-space:nowrap;border-bottom:2.5px solid transparent;
+flex-shrink:0;
 }
 .tab:hover{color:rgba(255,255,255,.65);background:rgba(255,255,255,.04);}
-.tab.active{color:white;background:rgba(255,255,255,.07);border-bottom-color:var(--pink);}
+.tab.active{color:white;background:rgba(255,255,255,.07);border-bottom-color:var(–pink);}
 
 /* PANELS */
 .panels{flex:1;overflow-y:auto;padding:14px;scrollbar-width:thin;scrollbar-color:#3A1D6A transparent;}
@@ -134,17 +135,17 @@ html,body{min-height:100vh;font-family:'Nunito',sans-serif;overflow-x:hidden;bac
 .section{background:rgba(255,255,255,.05);border-radius:14px;padding:12px 14px;}
 .section-title{font-size:.62rem;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.28);margin-bottom:10px;}
 
-/* GRID D'ITEMS (sprites) */
+/* GRID D’ITEMS (sprites) */
 .igrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:8px;}
 .icard{
-  background:rgba(255,255,255,.06);border-radius:12px;
-  padding:6px 4px 5px;cursor:pointer;
-  border:2px solid transparent;
-  display:flex;flex-direction:column;align-items:center;gap:4px;
-  transition:all .15s;position:relative;overflow:hidden;
+background:rgba(255,255,255,.06);border-radius:12px;
+padding:6px 4px 5px;cursor:pointer;
+border:2px solid transparent;
+display:flex;flex-direction:column;align-items:center;gap:4px;
+transition:all .15s;position:relative;overflow:hidden;
 }
 .icard:hover{background:rgba(255,255,255,.12);transform:translateY(-2px);}
-.icard.active{border-color:var(--pink);background:rgba(255,110,180,.18);}
+.icard.active{border-color:var(–pink);background:rgba(255,110,180,.18);}
 .icard canvas{display:block;image-rendering:pixelated;}
 .icard-none canvas{opacity:.35;}
 .icard-none.active canvas{opacity:.6;}
@@ -153,10 +154,10 @@ html,body{min-height:100vh;font-family:'Nunito',sans-serif;overflow-x:hidden;bac
 
 /* TOGGLE NONE */
 .none-badge{
-  position:absolute;top:4px;right:4px;
-  background:rgba(255,255,255,.15);border-radius:4px;
-  font-size:.5rem;font-weight:900;color:rgba(255,255,255,.5);
-  padding:1px 4px;
+position:absolute;top:4px;right:4px;
+background:rgba(255,255,255,.15);border-radius:4px;
+font-size:.5rem;font-weight:900;color:rgba(255,255,255,.5);
+padding:1px 4px;
 }
 
 /* BODY GRID (teintes de peau) */
@@ -165,36 +166,58 @@ html,body{min-height:100vh;font-family:'Nunito',sans-serif;overflow-x:hidden;bac
 /* COULEURS DE CHEVEUX */
 .hair-colors{display:flex;gap:0;flex-wrap:wrap;}
 .hc{
-  width:28px;height:28px;cursor:pointer;
-  border:2.5px solid transparent;border-radius:6px;
-  transition:transform .15s,border-color .15s;flex-shrink:0;
+width:28px;height:28px;cursor:pointer;
+border:2.5px solid transparent;border-radius:6px;
+transition:transform .15s,border-color .15s;flex-shrink:0;
 }
 .hc:hover{transform:scale(1.15);}
 .hc.active{border-color:white;transform:scale(1.1);}
 
 /* TOAST */
 .toast{
-  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
-  background:var(--mint);color:var(--dark);
-  padding:10px 22px;border-radius:14px;font-size:.88rem;font-weight:800;
-  box-shadow:0 8px 24px rgba(61,219,184,.4);
-  transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:999;pointer-events:none;
+position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
+background:var(–mint);color:var(–dark);
+padding:10px 22px;border-radius:14px;font-size:.88rem;font-weight:800;
+box-shadow:0 8px 24px rgba(61,219,184,.4);
+transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:999;pointer-events:none;
 }
 .toast.show{transform:translateX(-50%) translateY(0);}
 
 /* MOBILE */
 @media(max-width:680px){
-  .main{flex-direction:column;align-items:center;}
-  .panel-preview{width:100%;flex-direction:row;justify-content:center;flex-wrap:wrap;padding:8px 12px;}
-  .avatar-stage{width:160px;height:212px;}
-  .avatar-stage canvas{width:144px;height:191px;}
-  .pseudo-wrap,.btn-save,.btn-random{max-width:200px;}
-  .panel-editor{width:100%;}
-  .igrid{grid-template-columns:repeat(auto-fill,minmax(60px,1fr));}
+.main{flex-direction:column;align-items:center;}
+.panel-preview{width:100%;flex-direction:row;justify-content:center;flex-wrap:wrap;padding:8px 12px;}
+.avatar-stage{width:160px;height:212px;}
+.avatar-stage canvas{width:144px;height:191px;}
+.pseudo-wrap,.btn-save,.btn-random{max-width:200px;}
+.panel-editor{width:100%;}
+.igrid{grid-template-columns:repeat(auto-fill,minmax(60px,1fr));}
 }
 </style>
+
 </head>
 <body>
+<!-- ÉCRAN DE CHARGEMENT -->
+<div id="boot-screen" style="
+  position:fixed;inset:0;z-index:999;
+  background:#12082A;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
+  font-family:'Nunito',sans-serif;
+">
+  <div style="font-family:'Baloo 2',cursive;font-size:2rem;font-weight:800;color:white;letter-spacing:-1px;">
+    <span style="color:#FF6EB4">M</span><span style="color:#FFD747">A</span><span style="color:#3DDBB8">C</span><span style="color:#5BC8F5">A</span><span style="color:#B388FF">D</span><span style="color:#FF9E7A">A</span><span style="color:#FF6EB4">M</span>
+  </div>
+  <div style="width:260px;background:rgba(255,255,255,.1);border-radius:20px;overflow:hidden;height:8px;">
+    <div id="load-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#FF6EB4,#B388FF);border-radius:20px;transition:width .3s;"></div>
+  </div>
+  <div id="load-status" style="font-size:.8rem;color:rgba(255,255,255,.45);font-weight:700;letter-spacing:.5px;">Initialisation…</div>
+  <div id="load-error" style="display:none;max-width:320px;text-align:center;">
+    <p style="color:#FF6EB4;font-size:.85rem;font-weight:700;margin-bottom:12px;">❌ Impossible de charger les assets.</p>
+    <p style="color:rgba(255,255,255,.5);font-size:.75rem;margin-bottom:16px;">Vérifie que l'URL du zip est correcte dans le code.</p>
+    <code id="load-error-msg" style="color:#FFD747;font-size:.7rem;word-break:break-all;"></code>
+  </div>
+</div>
+
 <div class="bg"></div>
 <div class="stars" id="stars"></div>
 
@@ -219,126 +242,131 @@ html,body{min-height:100vh;font-family:'Nunito',sans-serif;overflow-x:hidden;bac
         </div>
       </div>
 
-      <div class="pseudo-wrap">
-        <label class="pseudo-label" for="pseudo">Ton pseudo</label>
-        <input class="pseudo-input" id="pseudo" type="text" maxlength="16" placeholder="StarMochi…" autocomplete="off"/>
-      </div>
-      <button class="btn-random" onclick="randomize()">🎲 Aléatoire</button>
-      <button class="btn-save" onclick="saveAvatar()">✨ Sauvegarder</button>
-    </div>
+```
+  <div class="pseudo-wrap">
+    <label class="pseudo-label" for="pseudo">Ton pseudo</label>
+    <input class="pseudo-input" id="pseudo" type="text" maxlength="16" placeholder="StarMochi…" autocomplete="off"/>
+  </div>
+  <button class="btn-random" onclick="randomize()">🎲 Aléatoire</button>
+  <button class="btn-save" onclick="saveAvatar()">✨ Sauvegarder</button>
+</div>
 
-    <!-- EDITOR -->
-    <div class="panel-editor">
-      <div class="tabs" id="tabs">
-        <button class="tab active" data-panel="peau">🌸 Peau</button>
-        <button class="tab" data-panel="yeux">👁 Yeux</button>
-        <button class="tab" data-panel="bouche">👄 Bouche</button>
-        <button class="tab" data-panel="cheveux">💇 Cheveux</button>
-        <button class="tab" data-panel="haut">👕 Haut</button>
-        <button class="tab" data-panel="bas">👖 Bas</button>
-        <button class="tab" data-panel="shoes">👟 Shoes</button>
-        <button class="tab" data-panel="extras">✨ Extras</button>
-      </div>
-      <div class="panels" id="panels">
+<!-- EDITOR -->
+<div class="panel-editor">
+  <div class="tabs" id="tabs">
+    <button class="tab active" data-panel="peau">🌸 Peau</button>
+    <button class="tab" data-panel="yeux">👁 Yeux</button>
+    <button class="tab" data-panel="bouche">👄 Bouche</button>
+    <button class="tab" data-panel="cheveux">💇 Cheveux</button>
+    <button class="tab" data-panel="haut">👕 Haut</button>
+    <button class="tab" data-panel="bas">👖 Bas</button>
+    <button class="tab" data-panel="shoes">👟 Shoes</button>
+    <button class="tab" data-panel="extras">✨ Extras</button>
+  </div>
+  <div class="panels" id="panels">
 
-        <!-- PEAU -->
-        <div class="panel active" id="panel-peau">
-          <div class="section">
-            <div class="section-title">Teinte de peau (1–29)</div>
-            <div class="skin-grid" id="grid-body"></div>
-          </div>
-        </div>
-
-        <!-- YEUX -->
-        <div class="panel" id="panel-yeux">
-          <div class="section">
-            <div class="section-title">Cils</div>
-            <div class="igrid" id="grid-eyelashes"></div>
-          </div>
-          <div class="section">
-            <div class="section-title">Pupilles</div>
-            <div class="igrid" id="grid-pupils"></div>
-          </div>
-          <div class="section">
-            <div class="section-title">Sourcils</div>
-            <div class="igrid" id="grid-eyebrows"></div>
-          </div>
-        </div>
-
-        <!-- BOUCHE -->
-        <div class="panel" id="panel-bouche">
-          <div class="section">
-            <div class="section-title">Bouche (20 styles)</div>
-            <div class="igrid" id="grid-mouth"></div>
-          </div>
-        </div>
-
-        <!-- CHEVEUX -->
-        <div class="panel" id="panel-cheveux">
-          <div class="section">
-            <div class="section-title">Style de cheveux</div>
-            <div class="igrid" id="grid-hair"></div>
-          </div>
-          <div class="section">
-            <div class="section-title">Couleur de cheveux</div>
-            <div class="hair-colors" id="hair-colors"></div>
-          </div>
-          <div class="section">
-            <div class="section-title">Frange</div>
-            <div class="igrid" id="grid-bangs"></div>
-          </div>
-          <div class="section">
-            <div class="section-title">Bonus coiffure</div>
-            <div class="igrid" id="grid-hair-bonus"></div>
-          </div>
-        </div>
-
-        <!-- HAUT -->
-        <div class="panel" id="panel-haut">
-          <div class="section">
-            <div class="section-title">Haut (12 styles)</div>
-            <div class="igrid" id="grid-top"></div>
-          </div>
-          <div class="section">
-            <div class="section-title">Robe (7 styles)</div>
-            <div class="igrid" id="grid-dress"></div>
-          </div>
-        </div>
-
-        <!-- BAS -->
-        <div class="panel" id="panel-bas">
-          <div class="section">
-            <div class="section-title">Bas (8 styles)</div>
-            <div class="igrid" id="grid-bottom"></div>
-          </div>
-        </div>
-
-        <!-- SHOES -->
-        <div class="panel" id="panel-shoes">
-          <div class="section">
-            <div class="section-title">Chaussures (4 styles)</div>
-            <div class="igrid" id="grid-shoes"></div>
-          </div>
-          <div class="section">
-            <div class="section-title">Gants (6 styles)</div>
-            <div class="igrid" id="grid-gloves"></div>
-          </div>
-        </div>
-
-        <!-- EXTRAS -->
-        <div class="panel" id="panel-extras">
-          <div class="section">
-            <div class="section-title">Barbe / poils</div>
-            <div class="igrid" id="grid-beard"></div>
-          </div>
-        </div>
-
+    <!-- PEAU -->
+    <div class="panel active" id="panel-peau">
+      <div class="section">
+        <div class="section-title">Teinte de peau (1–29)</div>
+        <div class="skin-grid" id="grid-body"></div>
       </div>
     </div>
+
+    <!-- YEUX -->
+    <div class="panel" id="panel-yeux">
+      <div class="section">
+        <div class="section-title">Cils</div>
+        <div class="igrid" id="grid-eyelashes"></div>
+      </div>
+      <div class="section">
+        <div class="section-title">Pupilles</div>
+        <div class="igrid" id="grid-pupils"></div>
+      </div>
+      <div class="section">
+        <div class="section-title">Sourcils</div>
+        <div class="igrid" id="grid-eyebrows"></div>
+      </div>
+    </div>
+
+    <!-- BOUCHE -->
+    <div class="panel" id="panel-bouche">
+      <div class="section">
+        <div class="section-title">Bouche (20 styles)</div>
+        <div class="igrid" id="grid-mouth"></div>
+      </div>
+    </div>
+
+    <!-- CHEVEUX -->
+    <div class="panel" id="panel-cheveux">
+      <div class="section">
+        <div class="section-title">Style de cheveux</div>
+        <div class="igrid" id="grid-hair"></div>
+      </div>
+      <div class="section">
+        <div class="section-title">Couleur de cheveux</div>
+        <div class="hair-colors" id="hair-colors"></div>
+      </div>
+      <div class="section">
+        <div class="section-title">Frange</div>
+        <div class="igrid" id="grid-bangs"></div>
+      </div>
+      <div class="section">
+        <div class="section-title">Bonus coiffure</div>
+        <div class="igrid" id="grid-hair-bonus"></div>
+      </div>
+    </div>
+
+    <!-- HAUT -->
+    <div class="panel" id="panel-haut">
+      <div class="section">
+        <div class="section-title">Haut (12 styles)</div>
+        <div class="igrid" id="grid-top"></div>
+      </div>
+      <div class="section">
+        <div class="section-title">Robe (7 styles)</div>
+        <div class="igrid" id="grid-dress"></div>
+      </div>
+    </div>
+
+    <!-- BAS -->
+    <div class="panel" id="panel-bas">
+      <div class="section">
+        <div class="section-title">Bas (8 styles)</div>
+        <div class="igrid" id="grid-bottom"></div>
+      </div>
+    </div>
+
+    <!-- SHOES -->
+    <div class="panel" id="panel-shoes">
+      <div class="section">
+        <div class="section-title">Chaussures (4 styles)</div>
+        <div class="igrid" id="grid-shoes"></div>
+      </div>
+      <div class="section">
+        <div class="section-title">Gants (6 styles)</div>
+        <div class="igrid" id="grid-gloves"></div>
+      </div>
+    </div>
+
+    <!-- EXTRAS -->
+    <div class="panel" id="panel-extras">
+      <div class="section">
+        <div class="section-title">Barbe / poils</div>
+        <div class="igrid" id="grid-beard"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+```
+
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
 <script>
 // ===== ÉTOILES =====
@@ -350,8 +378,84 @@ for(let i=0;i<60;i++){
   starsEl.appendChild(s);
 }
 
-// ===== ASSETS BASE PATH =====
-const BASE = 'assets/';
+// ===== ASSETS VIA JSZIP =====
+// 👇 Mets ici l'URL de ta GitHub Release après upload
+const ASSETS_ZIP_URL = 'https://github.com/TON_USER/TON_REPO/releases/download/v1.0/assets.zip';
+const CACHE_NAME = 'macadam-assets-v1';
+
+// Blob URLs extraites du zip : { 'body_1.png': 'blob:...', ... }
+const assetBlobs = {};
+let assetsReady = false;
+
+async function loadAssetsZip() {
+  setLoadStatus('Vérification du cache…', 5);
+
+  // 1. Chercher dans Cache API
+  let zipBuffer = null;
+  try {
+    const cache = await caches.open(CACHE_NAME);
+    const cached = await cache.match(ASSETS_ZIP_URL);
+    if(cached) {
+      setLoadStatus('Assets en cache, extraction…', 40);
+      zipBuffer = await cached.arrayBuffer();
+    }
+  } catch(e) {}
+
+  // 2. Sinon télécharger
+  if(!zipBuffer) {
+    setLoadStatus('Téléchargement des assets (8 Mo)…', 10);
+    const resp = await fetch(ASSETS_ZIP_URL);
+    if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    zipBuffer = await resp.arrayBuffer();
+
+    // Mettre en cache pour la prochaine fois
+    try {
+      const cache = await caches.open(CACHE_NAME);
+      await cache.put(ASSETS_ZIP_URL, new Response(zipBuffer.slice(0)));
+    } catch(e) {}
+  }
+
+  // 3. Décompresser avec JSZip
+  setLoadStatus('Décompression…', 60);
+  const zip = await JSZip.loadAsync(zipBuffer);
+
+  // 4. Créer les Blob URLs pour chaque PNG
+  setLoadStatus('Préparation des sprites…', 80);
+  const entries = Object.entries(zip.files).filter(([name, f]) => !f.dir && name.endsWith('.png'));
+  await Promise.all(entries.map(async ([name, file]) => {
+    const blob = await file.async('blob');
+    // name = 'assets/body_1.png' → clé = 'body_1.png'
+    const key = name.replace(/^assets\//, '');
+    assetBlobs[key] = URL.createObjectURL(blob);
+  }));
+
+  setLoadStatus('Prêt !', 100);
+  assetsReady = true;
+}
+
+function setLoadStatus(msg, pct) {
+  const el = document.getElementById('load-status');
+  const bar = document.getElementById('load-bar');
+  if(el) el.textContent = msg;
+  if(bar) bar.style.width = pct + '%';
+}
+
+// Remplace BASE + loadImg : résout vers blob URL ou null
+const imgCache = {};
+function loadImg(filename) {
+  // filename = 'body_1.png' (sans préfixe)
+  const blobUrl = assetBlobs[filename];
+  if(!blobUrl) return Promise.resolve(null);
+  if(imgCache[filename]) return imgCache[filename];
+  const p = new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = blobUrl;
+  });
+  imgCache[filename] = p;
+  return p;
+}
 
 // ===== STATE =====
 // Chaque clé = null (aucun) ou numéro de style
@@ -405,63 +509,23 @@ function loadImg(src) {
 async function getLayers() {
   const layers = [];
   const hc = S.hairColor;
-  const add = (path) => layers.push(path);
+  const add = (f) => layers.push(f);
 
-  // 1. Corps / teinte peau
-  add(`${BASE}body_${S.body}.png`);
-
-  // 2. Cheveux arrière
-  if(S.hair) add(`${BASE}hair_back_${S.hair}${hc}.png`);
-
-  // 3. Bas (pantalon/jupe)
-  if(S.bottom) {
-    add(`${BASE}bottom_${S.bottom}.png`);
-    add(`${BASE}bottom_color_${S.bottom}.png`);
-  }
-
-  // 4. Robe (si sélectionnée, remplace haut+bas)
-  if(S.dress) {
-    add(`${BASE}dress_${S.dress}.png`);
-    add(`${BASE}dress_color_${S.dress}.png`);
-  }
-
-  // 5. Haut
-  if(S.top && !S.dress) {
-    add(`${BASE}top_${S.top}.png`);
-    add(`${BASE}top_color_${S.top}.png`);
-  }
-
-  // 6. Yeux
-  if(S.eyelashes) add(`${BASE}EYELASHES_${S.eyelashes}.png`);
-  if(S.pupils)    add(`${BASE}PUPILS_${S.pupils}.png`);
-  if(S.eyebrows)  add(`${BASE}EYEBROWS_${S.eyebrows}.png`);
-
-  // 7. Bouche
-  if(S.mouth) add(`${BASE}MOUTH_${S.mouth}.png`);
-
-  // 8. Cheveux avant
-  if(S.hair) add(`${BASE}hair_${S.hair}${hc}.png`);
-
-  // 9. Hair bonus
-  if(S.hairBonus) add(`${BASE}hair_bonus_${S.hairBonus}${hc}.png`);
-
-  // 10. Frange
-  if(S.bangs) add(`${BASE}bangs_${S.bangs}${hc}.png`);
-
-  // 11. Chaussures
-  if(S.shoes) {
-    add(`${BASE}shoes_${S.shoes}.png`);
-    add(`${BASE}shoes_color_${S.shoes}.png`);
-  }
-
-  // 12. Gants
-  if(S.gloves) {
-    add(`${BASE}gloves_${S.gloves}.png`);
-    add(`${BASE}gloves_color_${S.gloves}.png`);
-  }
-
-  // 13. Barbe
-  if(S.beard) add(`${BASE}BEARD_${S.beard}.png`);
+  add(`body_${S.body}.png`);
+  if(S.hair)      add(`hair_back_${S.hair}${hc}.png`);
+  if(S.bottom)  { add(`bottom_${S.bottom}.png`);       add(`bottom_color_${S.bottom}.png`); }
+  if(S.dress)   { add(`dress_${S.dress}.png`);         add(`dress_color_${S.dress}.png`); }
+  if(S.top && !S.dress) { add(`top_${S.top}.png`);     add(`top_color_${S.top}.png`); }
+  if(S.eyelashes) add(`EYELASHES_${S.eyelashes}.png`);
+  if(S.pupils)    add(`PUPILS_${S.pupils}.png`);
+  if(S.eyebrows)  add(`EYEBROWS_${S.eyebrows}.png`);
+  if(S.mouth)     add(`MOUTH_${S.mouth}.png`);
+  if(S.hair)      add(`hair_${S.hair}${hc}.png`);
+  if(S.hairBonus) add(`hair_bonus_${S.hairBonus}${hc}.png`);
+  if(S.bangs)     add(`bangs_${S.bangs}${hc}.png`);
+  if(S.shoes)   { add(`shoes_${S.shoes}.png`);         add(`shoes_color_${S.shoes}.png`); }
+  if(S.gloves)  { add(`gloves_${S.gloves}.png`);       add(`gloves_color_${S.gloves}.png`); }
+  if(S.beard)     add(`BEARD_${S.beard}.png`);
 
   return layers;
 }
@@ -521,7 +585,7 @@ function buildBodyGrid() {
   g.innerHTML = '';
   for(let i=1;i<=29;i++) {
     const card = makeCard(i, `Peau ${i}`, 'body', async (cv) => {
-      await renderThumb(cv, [`${BASE}body_${i}.png`]);
+      await renderThumb(cv, [`body_${i}.png`]);
     });
     g.appendChild(card);
   }
@@ -540,9 +604,9 @@ function buildSimpleGrid(gridId, key, prefix, count, withNone=false) {
       const ctx = cv.getContext('2d');
       ctx.clearRect(0,0,THUMB_W,THUMB_H);
       // Body de base pour contexte
-      const bodyImg = await loadImg(`${BASE}body_${S.body}.png`);
+      const bodyImg = await loadImg(`body_${S.body}.png`);
       if(bodyImg) ctx.drawImage(bodyImg, 0,0,THUMB_W,THUMB_H);
-      const img = await loadImg(`${BASE}${prefix}_${i}.png`);
+      const img = await loadImg(`${prefix}_${i}.png`);
       if(img) ctx.drawImage(img, 0,0,THUMB_W,THUMB_H);
     });
     g.appendChild(card);
@@ -557,13 +621,13 @@ function buildHairGrid() {
     const card = makeCard(i, `${i}`, 'hair', async (cv) => {
       const hc = S.hairColor;
       await renderThumb(cv, [
-        `${BASE}body_${S.body}.png`,
-        `${BASE}hair_back_${i}${hc}.png`,
-        `${BASE}EYELASHES_${S.eyelashes||1}.png`,
-        `${BASE}PUPILS_${S.pupils||1}.png`,
-        `${BASE}EYEBROWS_${S.eyebrows||1}.png`,
-        `${BASE}hair_${i}${hc}.png`,
-        S.bangs ? `${BASE}bangs_${S.bangs}${hc}.png` : null,
+        `body_${S.body}.png`,
+        `hair_back_${i}${hc}.png`,
+        `EYELASHES_${S.eyelashes||1}.png`,
+        `PUPILS_${S.pupils||1}.png`,
+        `EYEBROWS_${S.eyebrows||1}.png`,
+        `hair_${i}${hc}.png`,
+        S.bangs ? `bangs_${S.bangs}${hc}.png` : null,
       ].filter(Boolean));
     });
     g.appendChild(card);
@@ -603,12 +667,12 @@ function buildBangsGrid() {
     const card = makeCard(i, `${i}`, 'bangs', async (cv) => {
       const hc = S.hairColor;
       await renderThumb(cv, [
-        `${BASE}body_${S.body}.png`,
-        `${BASE}hair_back_${S.hair||1}${hc}.png`,
-        `${BASE}EYELASHES_${S.eyelashes||1}.png`,
-        `${BASE}PUPILS_${S.pupils||1}.png`,
-        `${BASE}hair_${S.hair||1}${hc}.png`,
-        `${BASE}bangs_${i}${hc}.png`,
+        `body_${S.body}.png`,
+        `hair_back_${S.hair||1}${hc}.png`,
+        `EYELASHES_${S.eyelashes||1}.png`,
+        `PUPILS_${S.pupils||1}.png`,
+        `hair_${S.hair||1}${hc}.png`,
+        `bangs_${i}${hc}.png`,
       ]);
     });
     g.appendChild(card);
@@ -625,10 +689,10 @@ function buildHairBonusGrid() {
     const card = makeCard(i, `${i}`, 'hairBonus', async (cv) => {
       const hc = S.hairColor;
       await renderThumb(cv, [
-        `${BASE}body_${S.body}.png`,
-        `${BASE}hair_back_${S.hair||1}${hc}.png`,
-        `${BASE}hair_bonus_${i}${hc}.png`,
-        `${BASE}hair_${S.hair||1}${hc}.png`,
+        `body_${S.body}.png`,
+        `hair_back_${S.hair||1}${hc}.png`,
+        `hair_bonus_${i}${hc}.png`,
+        `hair_${S.hair||1}${hc}.png`,
       ]);
     });
     g.appendChild(card);
@@ -644,9 +708,9 @@ function buildTopGrid() {
   for(let i=1;i<=12;i++) {
     const card = makeCard(i, `${i}`, 'top', async (cv) => {
       await renderThumb(cv, [
-        `${BASE}body_${S.body}.png`,
-        `${BASE}top_${i}.png`,
-        `${BASE}top_color_${i}.png`,
+        `body_${S.body}.png`,
+        `top_${i}.png`,
+        `top_color_${i}.png`,
       ]);
     }, () => { S.dress = null; refreshDressCards(); });
     g.appendChild(card);
@@ -662,9 +726,9 @@ function buildDressGrid() {
   for(let i=1;i<=7;i++) {
     const card = makeCard(i, `${i}`, 'dress', async (cv) => {
       await renderThumb(cv, [
-        `${BASE}body_${S.body}.png`,
-        `${BASE}dress_${i}.png`,
-        `${BASE}dress_color_${i}.png`,
+        `body_${S.body}.png`,
+        `dress_${i}.png`,
+        `dress_color_${i}.png`,
       ]);
     }, () => { S.top = null; S.bottom = null; refreshTopCards(); refreshBottomCards(); });
     g.appendChild(card);
@@ -699,9 +763,9 @@ function buildBottomGrid() {
   for(let i=1;i<=8;i++) {
     const card = makeCard(i, `${i}`, 'bottom', async (cv) => {
       await renderThumb(cv, [
-        `${BASE}body_${S.body}.png`,
-        `${BASE}bottom_${i}.png`,
-        `${BASE}bottom_color_${i}.png`,
+        `body_${S.body}.png`,
+        `bottom_${i}.png`,
+        `bottom_color_${i}.png`,
       ]);
     });
     g.appendChild(card);
@@ -717,9 +781,9 @@ function buildShoesGrid() {
   for(let i=1;i<=4;i++) {
     const card = makeCard(i, `${i}`, 'shoes', async (cv) => {
       await renderThumb(cv, [
-        `${BASE}body_${S.body}.png`,
-        `${BASE}shoes_${i}.png`,
-        `${BASE}shoes_color_${i}.png`,
+        `body_${S.body}.png`,
+        `shoes_${i}.png`,
+        `shoes_color_${i}.png`,
       ]);
     });
     g.appendChild(card);
@@ -735,9 +799,9 @@ function buildGlovesGrid() {
   for(let i=1;i<=6;i++) {
     const card = makeCard(i, `${i}`, 'gloves', async (cv) => {
       await renderThumb(cv, [
-        `${BASE}body_${S.body}.png`,
-        `${BASE}gloves_${i}.png`,
-        `${BASE}gloves_color_${i}.png`,
+        `body_${S.body}.png`,
+        `gloves_${i}.png`,
+        `gloves_color_${i}.png`,
       ]);
     });
     g.appendChild(card);
@@ -793,7 +857,7 @@ function makeNoneCard(stateKey) {
   cv.style.width = DISPLAY_W + 'px';
   cv.style.height = DISPLAY_H + 'px';
   // Rendre un body seul grisé
-  loadImg(`${BASE}body_${S.body}.png`).then(img => {
+  loadImg(`body_${S.body}.png`).then(img => {
     const ctx = cv.getContext('2d');
     ctx.globalAlpha = 0.3;
     if(img) ctx.drawImage(img, 0,0,THUMB_W,THUMB_H);
@@ -922,8 +986,25 @@ function loadSaved(){
 }
 
 loadSaved();
-buildAllGrids();
-scheduleRender();
+
+// ===== BOOT =====
+(async () => {
+  try {
+    await loadAssetsZip();
+    // Masquer l'écran de boot
+    document.getElementById('boot-screen').style.opacity = '0';
+    setTimeout(() => document.getElementById('boot-screen').remove(), 400);
+    buildAllGrids();
+    scheduleRender();
+  } catch(err) {
+    document.getElementById('load-error').style.display = 'block';
+    document.getElementById('load-error-msg').textContent = err.message;
+    document.getElementById('load-status').style.display = 'none';
+    document.getElementById('load-bar').parentElement.style.display = 'none';
+    console.error('Assets load error:', err);
+  }
+})();
 </script>
+
 </body>
 </html>
