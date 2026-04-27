@@ -15,7 +15,6 @@
 }
 html,body{min-height:100vh;font-family:'Nunito',sans-serif;background:var(--dark);overflow-x:hidden;}
 
-/* BG */
 .bg{position:fixed;inset:0;z-index:0;
 background:
 radial-gradient(ellipse at 15% 20%,#FF6EB440 0%,transparent 45%),
@@ -27,15 +26,12 @@ radial-gradient(ellipse at 90% 80%,#FFD74730 0%,transparent 45%),
 .star{position:absolute;border-radius:50%;background:white;animation:twinkle var(–d,3s) ease-in-out infinite var(–del,0s);}
 @keyframes twinkle{0%,100%{opacity:.1;transform:scale(1);}50%{opacity:.8;transform:scale(1.5);}}
 
-/* APP */
 .app{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:24px 16px 40px;}
 
-/* HEADER */
 .logo-tag{display:inline-block;background:var(–yellow);color:var(–dark);font-size:.65rem;font-weight:900;letter-spacing:3px;text-transform:uppercase;padding:4px 12px;border-radius:20px;margin-bottom:10px;}
 .logo-title{font-family:‘Baloo 2’,cursive;font-size:clamp(1.6rem,6vw,2.8rem);font-weight:800;line-height:1;color:white;letter-spacing:-1px;text-align:center;margin-bottom:6px;}
 .logo-sub{font-size:.8rem;color:rgba(255,255,255,.35);font-weight:700;letter-spacing:1px;margin-bottom:28px;}
 
-/* CARD AVATAR */
 .avatar-card{
 width:100%;max-width:360px;
 background:rgba(255,255,255,.05);
@@ -46,7 +42,6 @@ display:flex;flex-direction:column;align-items:center;gap:16px;
 box-shadow:0 24px 60px rgba(0,0,0,.4);
 }
 
-/* VIEWER 3D */
 .viewer-wrap{
 width:100%;aspect-ratio:3/4;max-height:340px;
 background:rgba(255,255,255,.04);
@@ -55,15 +50,12 @@ border:1.5px solid rgba(255,255,255,.08);
 overflow:hidden;position:relative;
 display:flex;align-items:center;justify-content:center;
 }
-.viewer-wrap iframe{width:100%;height:100%;border:none;}
 .viewer-placeholder{
 display:flex;flex-direction:column;align-items:center;gap:10px;
 color:rgba(255,255,255,.25);font-size:.85rem;font-weight:700;
 }
 .viewer-placeholder .icon{font-size:3rem;opacity:.4;}
-.viewer-wrap model-viewer{width:100%;height:100%;}
 
-/* PSEUDO */
 .pseudo-wrap{width:100%;}
 .pseudo-label{font-size:.62rem;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.3);display:block;margin-bottom:6px;}
 .pseudo-input{
@@ -75,7 +67,6 @@ color:white;outline:none;transition:all .2s;
 .pseudo-input::placeholder{color:rgba(255,255,255,.2);}
 .pseudo-input:focus{border-color:var(–pink);background:rgba(255,110,180,.08);}
 
-/* BOUTONS */
 .btn-create{
 width:100%;background:linear-gradient(135deg,var(–pink),var(–lav));
 border:none;border-radius:14px;padding:14px;
@@ -97,15 +88,16 @@ display:none;
 .btn-save:hover{background:rgba(61,219,184,.25);}
 .btn-save.visible{display:block;}
 
-.avatar-url{
-width:100%;font-size:.7rem;color:rgba(255,255,255,.3);
-word-break:break-all;text-align:center;
-background:rgba(255,255,255,.04);border-radius:10px;padding:8px;
-display:none;
+.avatar-badge{
+display:none;align-items:center;gap:8px;
+background:rgba(61,219,184,.12);border:1px solid rgba(61,219,184,.3);
+border-radius:12px;padding:8px 14px;width:100%;
 }
-.avatar-url.visible{display:block;}
+.avatar-badge.visible{display:flex;}
+.avatar-badge .dot{width:8px;height:8px;border-radius:50%;background:var(–mint);flex-shrink:0;animation:pulse 1.5s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.3);}}
+.avatar-badge span{font-size:.78rem;font-weight:800;color:var(–mint);}
 
-/* MODAL RPM */
 .modal-overlay{
 position:fixed;inset:0;z-index:100;
 background:rgba(0,0,0,.85);
@@ -143,7 +135,6 @@ transition:background .2s;
 .btn-close:hover{background:rgba(255,255,255,.2);}
 .modal-iframe{flex:1;border:none;width:100%;height:100%;}
 
-/* LOADING */
 .modal-loading{
 position:absolute;inset:0;
 display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -153,7 +144,6 @@ font-size:.8rem;color:rgba(255,255,255,.4);font-weight:700;
 .spinner{width:36px;height:36px;border:3px solid rgba(255,110,180,.2);border-top-color:var(–pink);border-radius:50%;animation:spin .8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
-/* TOAST */
 .toast{
 position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
 background:var(–mint);color:var(–dark);
@@ -162,17 +152,6 @@ box-shadow:0 8px 24px rgba(61,219,184,.4);
 transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:999;pointer-events:none;
 }
 .toast.show{transform:translateX(-50%) translateY(0);}
-
-/* BADGE avatar prêt */
-.avatar-badge{
-display:none;align-items:center;gap:8px;
-background:rgba(61,219,184,.12);border:1px solid rgba(61,219,184,.3);
-border-radius:12px;padding:8px 14px;width:100%;
-}
-.avatar-badge.visible{display:flex;}
-.avatar-badge .dot{width:8px;height:8px;border-radius:50%;background:var(–mint);flex-shrink:0;animation:pulse 1.5s ease-in-out infinite;}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.3);}}
-.avatar-badge span{font-size:.78rem;font-weight:800;color:var(–mint);}
 </style>
 
 </head>
@@ -193,7 +172,6 @@ border-radius:12px;padding:8px 14px;width:100%;
   <div class="avatar-card">
 
 ```
-<!-- VIEWER 3D -->
 <div class="viewer-wrap" id="viewer-wrap">
   <div class="viewer-placeholder" id="viewer-placeholder">
     <div class="icon">🧍</div>
@@ -201,26 +179,20 @@ border-radius:12px;padding:8px 14px;width:100%;
   </div>
 </div>
 
-<!-- BADGE -->
 <div class="avatar-badge" id="avatar-badge">
   <div class="dot"></div>
   <span>Avatar 3D prêt ✨</span>
 </div>
 
-<!-- PSEUDO -->
 <div class="pseudo-wrap">
   <label class="pseudo-label" for="pseudo">Ton pseudo</label>
   <input class="pseudo-input" id="pseudo" type="text" maxlength="16" placeholder="StarMochi…" autocomplete="off"/>
 </div>
 
-<!-- URL (debug) -->
-<div class="avatar-url" id="avatar-url"></div>
-
-<!-- BOUTONS -->
 <button class="btn-create" id="btn-create" onclick="openRPM()">
   🧬 Créer / Modifier mon avatar 3D
 </button>
-<button class="btn-save visible" id="btn-save" onclick="saveAvatar()">
+<button class="btn-save" id="btn-save" onclick="saveAvatar()">
   ✨ Sauvegarder
 </button>
 ```
@@ -252,8 +224,6 @@ border-radius:12px;padding:8px 14px;width:100%;
 
 <div class="toast" id="toast"></div>
 
-<!-- Model Viewer pour afficher le GLB -->
-
 <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
 
 <script>
@@ -266,33 +236,41 @@ for(let i=0;i<60;i++){
   starsEl.appendChild(s);
 }
 
-// ===== READY PLAYER ME =====
-// Utilise l'iframe officiel RPM avec ton App ID
-// Pour avoir un App ID gratuit : https://studio.readyplayer.me
-// Sans App ID, on utilise le mode demo public
-const RPM_SUBDOMAIN = 'macadam'; // change avec ton subdomain RPM si tu en crées un
-const RPM_URL = `https://macadam.readyplayer.me/avatar?frameApi`;
+// ===== CLÉ LOCALE UNIQUE PAR APPAREIL =====
+// Chaque visiteur a un user_id généré une fois et gardé en localStorage
+function getUserId() {
+  let uid = localStorage.getItem('macadam_user_id');
+  if (!uid) {
+    uid = crypto.randomUUID();
+    localStorage.setItem('macadam_user_id', uid);
+  }
+  return uid;
+}
 
+// Clé de stockage propre à cet utilisateur
+function storageKey() {
+  return 'macadam_avatar_' + getUserId();
+}
+
+// ===== RPM =====
+const RPM_URL = 'https://demo.readyplayer.me/avatar?frameApi';
 let avatarGlbUrl = null;
 
 function openRPM() {
   const overlay = document.getElementById('modal-overlay');
-  const iframe = document.getElementById('rpm-iframe');
+  const iframe  = document.getElementById('rpm-iframe');
   const loading = document.getElementById('modal-loading');
 
   overlay.classList.add('open');
   loading.style.display = 'flex';
-  iframe.style.display = 'none';
-
-  // Charger l'iframe RPM
+  iframe.style.display  = 'none';
   iframe.src = RPM_URL;
 
   iframe.onload = () => {
     loading.style.display = 'none';
-    iframe.style.display = 'block';
-    // Envoyer le message pour activer l'API frame
+    iframe.style.display  = 'block';
     iframe.contentWindow.postMessage(
-      JSON.stringify({ target: 'readyplayerme', type: 'subscribe', eventName: 'v1.**' }),
+      JSON.stringify({ target:'readyplayerme', type:'subscribe', eventName:'v1.**' }),
       '*'
     );
   };
@@ -300,54 +278,49 @@ function openRPM() {
 
 function closeRPM() {
   const overlay = document.getElementById('modal-overlay');
-  const iframe = document.getElementById('rpm-iframe');
+  const iframe  = document.getElementById('rpm-iframe');
   overlay.classList.remove('open');
-  // Vider l'iframe pour stopper la caméra
   setTimeout(() => { iframe.src = ''; }, 300);
 }
 
-// Écouter le message de RPM avec l'URL du GLB
+// Message RPM → avatar exporté
 window.addEventListener('message', (event) => {
-  if(typeof event.data !== 'string') return;
+  if (typeof event.data !== 'string') return;
   let data;
   try { data = JSON.parse(event.data); } catch(e) { return; }
 
-  // RPM envoie l'URL du GLB quand l'avatar est finalisé
-  if(data.source === 'readyplayerme') {
-    if(data.eventName === 'v1.avatar.exported') {
+  if (data.source === 'readyplayerme') {
+    if (data.eventName === 'v1.frame.ready') {
+      const iframe = document.getElementById('rpm-iframe');
+      iframe.contentWindow.postMessage(
+        JSON.stringify({ target:'readyplayerme', type:'subscribe', eventName:'v1.**' }),
+        '*'
+      );
+    }
+    if (data.eventName === 'v1.avatar.exported') {
       const glbUrl = data.data?.url;
-      if(glbUrl) {
+      if (glbUrl) {
         avatarGlbUrl = glbUrl;
         closeRPM();
         showAvatar(glbUrl);
-        showToast('🎉 Avatar créé !');
+        // Sauvegarde auto dès la création
+        persistAvatar(glbUrl, document.getElementById('pseudo').value.trim());
+        showToast('🎉 Avatar créé et sauvegardé !');
+        document.getElementById('btn-save').classList.add('visible');
       }
-    }
-    if(data.eventName === 'v1.frame.ready') {
-      // Frame prête, on peut l'utiliser
-      const iframe = document.getElementById('rpm-iframe');
-      iframe.contentWindow.postMessage(
-        JSON.stringify({ target: 'readyplayerme', type: 'subscribe', eventName: 'v1.**' }),
-        '*'
-      );
     }
   }
 });
 
 function showAvatar(glbUrl) {
-  const wrap = document.getElementById('viewer-wrap');
+  const wrap        = document.getElementById('viewer-wrap');
   const placeholder = document.getElementById('viewer-placeholder');
-  const badge = document.getElementById('avatar-badge');
-  const urlEl = document.getElementById('avatar-url');
+  const badge       = document.getElementById('avatar-badge');
 
-  // Supprimer le placeholder
-  if(placeholder) placeholder.remove();
-
-  // Supprimer l'ancien model-viewer si existe
+  if (placeholder) placeholder.remove();
   const old = wrap.querySelector('model-viewer');
-  if(old) old.remove();
+  if (old) old.remove();
 
-  // Créer model-viewer
   const mv = document.createElement('model-viewer');
   mv.setAttribute('src', glbUrl);
   mv.setAttribute('camera-controls', '');
@@ -360,30 +333,27 @@ function showAvatar(glbUrl) {
   mv.setAttribute('shadow-intensity', '1');
   mv.setAttribute('environment-image', 'neutral');
   mv.setAttribute('exposure', '1');
-  mv.setAttribute('ar', '');
   mv.style.cssText = 'width:100%;height:100%;background:transparent;--progress-bar-color:var(--pink);';
   wrap.appendChild(mv);
 
-  // Badge + URL
   badge.classList.add('visible');
-  urlEl.textContent = glbUrl;
-  urlEl.classList.add('visible');
+}
 
-  // Sauvegarder en localStorage
-  const pseudo = document.getElementById('pseudo').value.trim();
-  localStorage.setItem('macadam_rpm_avatar', JSON.stringify({
-    glbUrl, pseudo, savedAt: Date.now()
+function persistAvatar(glbUrl, pseudo) {
+  localStorage.setItem(storageKey(), JSON.stringify({
+    glbUrl,
+    pseudo,
+    savedAt: Date.now()
   }));
+  // Met aussi à jour le pseudo affiché
+  if (pseudo) document.getElementById('pseudo').value = pseudo;
 }
 
 function saveAvatar() {
   const pseudo = document.getElementById('pseudo').value.trim();
-  if(!pseudo) { showToast('✏️ Entre ton pseudo !'); return; }
-  if(!avatarGlbUrl) { showToast('👆 Crée d\'abord ton avatar !'); return; }
-
-  localStorage.setItem('macadam_rpm_avatar', JSON.stringify({
-    glbUrl: avatarGlbUrl, pseudo, savedAt: Date.now()
-  }));
+  if (!pseudo)        { showToast('✏️ Entre ton pseudo !');          return; }
+  if (!avatarGlbUrl)  { showToast('👆 Crée d\'abord ton avatar !');  return; }
+  persistAvatar(avatarGlbUrl, pseudo);
   showToast('✨ Avatar sauvegardé !');
 }
 
@@ -395,14 +365,15 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-// ===== CHARGER L'AVATAR SAUVEGARDÉ =====
+// ===== CHARGER L'AVATAR AU RETOUR =====
 function loadSaved() {
   try {
-    const saved = JSON.parse(localStorage.getItem('macadam_rpm_avatar') || 'null');
-    if(saved && saved.glbUrl) {
+    const saved = JSON.parse(localStorage.getItem(storageKey()) || 'null');
+    if (saved && saved.glbUrl) {
       avatarGlbUrl = saved.glbUrl;
-      if(saved.pseudo) document.getElementById('pseudo').value = saved.pseudo;
+      if (saved.pseudo) document.getElementById('pseudo').value = saved.pseudo;
       showAvatar(saved.glbUrl);
+      document.getElementById('btn-save').classList.add('visible');
     }
   } catch(e) {}
 }
@@ -411,7 +382,7 @@ loadSaved();
 
 // Fermer modal en cliquant l'overlay
 document.getElementById('modal-overlay').addEventListener('click', (e) => {
-  if(e.target === e.currentTarget) closeRPM();
+  if (e.target === e.currentTarget) closeRPM();
 });
 </script>
 
