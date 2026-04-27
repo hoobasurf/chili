@@ -357,7 +357,7 @@ for(let i=0;i<60;i++){
 
 // ===== URL DES ASSETS =====
 const ASSETS_ZIP_URL = 'https://magenta-pegasus-537cbf.netlify.app/assets.zip';
-const CACHE_NAME = 'macadam-assets-v3';
+const CACHE_NAME = 'macadam-assets-v4';
 
 // Blob URLs extraites du zip : { 'body/1.png': 'blob:...', ... }
 const assetBlobs = {};
@@ -583,8 +583,10 @@ async function getLayers() {
   const hc = S.hairColor;
   const add = (f) => { if(f) layers.push(f); };
 
-  // Corps (peau)
-  add(`body/${S.body}.png`);
+  // Corps: base avec contours
+  add(`body/body_layered.png`);
+  // Teinte de peau (multiply)
+  add(`__MULTIPLY__body/${S.body}.png`);
 
   // Arrière cheveux
   if(S.hair) {
@@ -651,9 +653,6 @@ async function getLayers() {
   // Barbe
   if(S.beard) add(`BEARD/${S.beard}.png`);
 
-  // Highlights / contours blancs — EN DERNIER
-  add(`body/full.png`);
-
   return layers;
 }
 
@@ -673,13 +672,13 @@ async function render(canvas) {
   const ctx = canvas.getContext('2d');
   const W = 444, H = 700;
   const layers = await getLayers();
-  const imgs = await Promise.all(layers.map(src => loadImg(src)));
+  const imgs = await Promise.all(layers.map(src => loadImg(src.replace('__MULTIPLY__', ''))));
   ctx.clearRect(0,0,W,H);
   ctx.globalCompositeOperation = 'source-over';
   for(let i = 0; i < imgs.length; i++) {
     const img = imgs[i];
     if(!img) continue;
-    if(layers[i] === 'body/full.png') {
+    if(layers[i].startsWith('__MULTIPLY__')) {
       ctx.globalCompositeOperation = 'multiply';
       ctx.drawImage(img, 0, 0, W, H);
       ctx.globalCompositeOperation = 'source-over';
@@ -701,12 +700,12 @@ async function renderThumb(canvas, layers) {
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0,0,THUMB_W,THUMB_H);
   const filtered = layers.filter(Boolean);
-  const imgs = await Promise.all(filtered.map(src => loadImg(src)));
+  const imgs = await Promise.all(filtered.map(src => loadImg(src.replace('__MULTIPLY__', ''))));
   ctx.globalCompositeOperation = 'source-over';
   for(let i = 0; i < imgs.length; i++) {
     const img = imgs[i];
     if(!img) continue;
-    if(filtered[i] === 'body/full.png') {
+    if(filtered[i].startsWith('__MULTIPLY__')) {
       ctx.globalCompositeOperation = 'multiply';
       ctx.drawImage(img, 0, 0, THUMB_W, THUMB_H);
       ctx.globalCompositeOperation = 'source-over';
@@ -722,7 +721,7 @@ function buildBodyGrid() {
   g.innerHTML = '';
   for(let i=1;i<=29;i++) {
     const card = makeCard(i, `Peau ${i}`, 'body', async (cv) => {
-      await renderThumb(cv, [`body/${i}.png`, `body/full.png`]);
+      await renderThumb(cv, [`body/body_layered.png`, `__MULTIPLY__body/${i}.png`]);
     });
     g.appendChild(card);
   }
@@ -735,9 +734,9 @@ function buildSimpleGrid(gridId, key, prefix, count, withNone=false) {
   for(let i=1;i<=count;i++) {
     const card = makeCard(i, `${i}`, key, async (cv) => {
       await renderThumb(cv, [
-        `body/${S.body}.png`,
+        `body/body_layered.png`,
+        `__MULTIPLY__body/${S.body}.png`,
         `${prefix}/${i}.png`,
-        `body/full.png`,
       ]);
     });
     g.appendChild(card);
@@ -751,7 +750,8 @@ function buildHairGrid() {
     const card = makeCard(i, `${i}`, 'hair', async (cv) => {
       const hc = S.hairColor;
       await renderThumb(cv, [
-        `body/${S.body}.png`,
+        `body/body_layered.png`,
+        `__MULTIPLY__body/${S.body}.png`,
         hairBaseFile('hair_back', i),
         hairColorFile('hair_back', i, hc),
         `EYELASHES/${S.eyelashes||1}.png`,
@@ -761,7 +761,6 @@ function buildHairGrid() {
         hairColorFile('hair', i, hc),
         S.bangs ? hairBaseFile('bangs', S.bangs) : null,
         S.bangs ? hairColorFile('bangs', S.bangs, hc) : null,
-        `body/full.png`,
       ]);
     });
     g.appendChild(card);
@@ -797,7 +796,8 @@ function buildBangsGrid() {
     const card = makeCard(i, `${i}`, 'bangs', async (cv) => {
       const hc = S.hairColor;
       await renderThumb(cv, [
-        `body/${S.body}.png`,
+        `body/body_layered.png`,
+        `__MULTIPLY__body/${S.body}.png`,
         hairBaseFile('hair_back', S.hair||1),
         hairColorFile('hair_back', S.hair||1, hc),
         `EYELASHES/${S.eyelashes||1}.png`,
@@ -806,7 +806,6 @@ function buildBangsGrid() {
         hairColorFile('hair', S.hair||1, hc),
         hairBaseFile('bangs', i),
         hairColorFile('bangs', i, hc),
-        `body/full.png`,
       ]);
     });
     g.appendChild(card);
@@ -821,14 +820,14 @@ function buildHairBonusGrid() {
     const card = makeCard(i, `${i}`, 'hairBonus', async (cv) => {
       const hc = S.hairColor;
       await renderThumb(cv, [
-        `body/${S.body}.png`,
+        `body/body_layered.png`,
+        `__MULTIPLY__body/${S.body}.png`,
         hairBaseFile('hair_back', S.hair||1),
         hairColorFile('hair_back', S.hair||1, hc),
         hairBaseFile('hair_bonus', i),
         hairColorFile('hair_bonus', i, hc),
         hairBaseFile('hair', S.hair||1),
         hairColorFile('hair', S.hair||1, hc),
-        `body/full.png`,
       ]);
     });
     g.appendChild(card);
@@ -842,10 +841,10 @@ function buildTopGrid() {
   for(let i=1;i<=12;i++) {
     const card = makeCard(i, `${i}`, 'top', async (cv) => {
       await renderThumb(cv, [
-        `body/${S.body}.png`,
+        `body/body_layered.png`,
+        `__MULTIPLY__body/${S.body}.png`,
         `top/${i}.png`,
         `top/colors/${i}.png`,
-        `body/full.png`,
       ]);
     }, () => { S.dress = null; refreshDressCards(); });
     g.appendChild(card);
@@ -859,10 +858,10 @@ function buildDressGrid() {
   for(let i=1;i<=7;i++) {
     const card = makeCard(i, `${i}`, 'dress', async (cv) => {
       await renderThumb(cv, [
-        `body/${S.body}.png`,
+        `body/body_layered.png`,
+        `__MULTIPLY__body/${S.body}.png`,
         `dress/${i}.png`,
         `dress/COLORS/${i}.png`,
-        `body/full.png`,
       ]);
     }, () => { S.top = null; S.bottom = null; refreshTopCards(); refreshBottomCards(); });
     g.appendChild(card);
@@ -892,10 +891,10 @@ function buildBottomGrid() {
   for(let i=1;i<=8;i++) {
     const card = makeCard(i, `${i}`, 'bottom', async (cv) => {
       await renderThumb(cv, [
-        `body/${S.body}.png`,
+        `body/body_layered.png`,
+        `__MULTIPLY__body/${S.body}.png`,
         `bottom/${i}.png`,
         `bottom/color/${i}.png`,
-        `body/full.png`,
       ]);
     });
     g.appendChild(card);
@@ -909,10 +908,10 @@ function buildShoesGrid() {
   for(let i=1;i<=4;i++) {
     const card = makeCard(i, `${i}`, 'shoes', async (cv) => {
       await renderThumb(cv, [
-        `body/${S.body}.png`,
+        `body/body_layered.png`,
+        `__MULTIPLY__body/${S.body}.png`,
         `shoes/${i}.png`,
         `shoes/COLOR/${i}.png`,
-        `body/full.png`,
       ]);
     });
     g.appendChild(card);
@@ -926,10 +925,10 @@ function buildGlovesGrid() {
   for(let i=1;i<=6;i++) {
     const card = makeCard(i, `${i}`, 'gloves', async (cv) => {
       await renderThumb(cv, [
-        `body/${S.body}.png`,
+        `body/body_layered.png`,
+        `__MULTIPLY__body/${S.body}.png`,
         `gloves/${i}.png`,
         `gloves/COLOR/${i}.png`,
-        `body/full.png`,
       ]);
     });
     g.appendChild(card);
