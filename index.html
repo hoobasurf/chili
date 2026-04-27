@@ -4,17 +4,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Macadam World — Créateur d'Avatar</title>
+<title>Macadam World — Avatar 3D</title>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
   --pink:#FF6EB4;--mint:#3DDBB8;--yellow:#FFD747;
   --lav:#B388FF;--sky:#5BC8F5;--peach:#FF9E7A;
-  --dark:#12082A;--mid:#1A0A38;--card:rgba(255,248,255,0.06);
+  --dark:#12082A;
 }
-html,body{min-height:100vh;font-family:'Nunito',sans-serif;overflow-x:hidden;background:var(--dark);}
+html,body{min-height:100vh;font-family:'Nunito',sans-serif;background:var(--dark);overflow-x:hidden;}
 
+/* BG */
 .bg{position:fixed;inset:0;z-index:0;
 background:
 radial-gradient(ellipse at 15% 20%,#FF6EB440 0%,transparent 45%),
@@ -26,44 +27,43 @@ radial-gradient(ellipse at 90% 80%,#FFD74730 0%,transparent 45%),
 .star{position:absolute;border-radius:50%;background:white;animation:twinkle var(–d,3s) ease-in-out infinite var(–del,0s);}
 @keyframes twinkle{0%,100%{opacity:.1;transform:scale(1);}50%{opacity:.8;transform:scale(1.5);}}
 
-.app{position:relative;z-index:1;display:flex;flex-direction:column;min-height:100vh;}
+/* APP */
+.app{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:24px 16px 40px;}
 
-.header{text-align:center;padding:24px 20px 16px;flex-shrink:0;}
+/* HEADER */
 .logo-tag{display:inline-block;background:var(–yellow);color:var(–dark);font-size:.65rem;font-weight:900;letter-spacing:3px;text-transform:uppercase;padding:4px 12px;border-radius:20px;margin-bottom:10px;}
-.logo-title{font-family:‘Baloo 2’,cursive;font-size:clamp(1.8rem,6vw,3rem);font-weight:800;line-height:1;color:white;letter-spacing:-1px;}
-.logo-title .c1{color:var(–pink);}.logo-title .c2{color:var(–yellow);}.logo-title .c3{color:var(–mint);}
-.logo-title .c4{color:var(–sky);}.logo-title .c5{color:var(–lav);}.logo-title .c6{color:var(–peach);}
+.logo-title{font-family:‘Baloo 2’,cursive;font-size:clamp(1.6rem,6vw,2.8rem);font-weight:800;line-height:1;color:white;letter-spacing:-1px;text-align:center;margin-bottom:6px;}
+.logo-sub{font-size:.8rem;color:rgba(255,255,255,.35);font-weight:700;letter-spacing:1px;margin-bottom:28px;}
 
-.main{display:flex;flex:1;gap:0;max-width:1000px;margin:0 auto;width:100%;padding:0 12px 20px;}
-
-.panel-preview{
-width:240px;flex-shrink:0;
-display:flex;flex-direction:column;align-items:center;
-gap:16px;padding:16px 12px;
-}
-
-.avatar-stage{
-position:relative;
-width:200px;height:264px;
-background:radial-gradient(ellipse at 50% 60%,rgba(255,255,255,.07) 0%,transparent 70%);
-border-radius:24px;
+/* CARD AVATAR */
+.avatar-card{
+width:100%;max-width:360px;
+background:rgba(255,255,255,.05);
 border:1.5px solid rgba(255,255,255,.1);
-overflow:hidden;
+border-radius:28px;
+padding:24px 20px;
+display:flex;flex-direction:column;align-items:center;gap:16px;
+box-shadow:0 24px 60px rgba(0,0,0,.4);
+}
+
+/* VIEWER 3D */
+.viewer-wrap{
+width:100%;aspect-ratio:3/4;max-height:340px;
+background:rgba(255,255,255,.04);
+border-radius:20px;
+border:1.5px solid rgba(255,255,255,.08);
+overflow:hidden;position:relative;
 display:flex;align-items:center;justify-content:center;
-box-shadow:0 20px 60px rgba(0,0,0,.5);
 }
-.avatar-stage canvas{width:180px;height:238px;image-rendering:pixelated;}
-
-.loading-ring{
-position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-background:rgba(18,8,42,.7);border-radius:23px;transition:opacity .3s;
-font-size:.75rem;color:var(–mint);font-weight:700;letter-spacing:1px;
-flex-direction:column;gap:8px;
+.viewer-wrap iframe{width:100%;height:100%;border:none;}
+.viewer-placeholder{
+display:flex;flex-direction:column;align-items:center;gap:10px;
+color:rgba(255,255,255,.25);font-size:.85rem;font-weight:700;
 }
-.loading-ring.hidden{opacity:0;pointer-events:none;}
-.spinner{width:32px;height:32px;border:3px solid rgba(61,219,184,.2);border-top-color:var(–mint);border-radius:50%;animation:spin .8s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
+.viewer-placeholder .icon{font-size:3rem;opacity:.4;}
+.viewer-wrap model-viewer{width:100%;height:100%;}
 
+/* PSEUDO */
 .pseudo-wrap{width:100%;}
 .pseudo-label{font-size:.62rem;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.3);display:block;margin-bottom:6px;}
 .pseudo-input{
@@ -73,95 +73,87 @@ padding:11px 14px;font-family:‘Nunito’,sans-serif;font-size:16px;font-weight
 color:white;outline:none;transition:all .2s;
 }
 .pseudo-input::placeholder{color:rgba(255,255,255,.2);}
-.pseudo-input:focus{border-color:var(–pink);background:rgba(255,110,180,.08);box-shadow:0 0 0 3px rgba(255,110,180,.12);}
+.pseudo-input:focus{border-color:var(–pink);background:rgba(255,110,180,.08);}
+
+/* BOUTONS */
+.btn-create{
+width:100%;background:linear-gradient(135deg,var(–pink),var(–lav));
+border:none;border-radius:14px;padding:14px;
+font-family:‘Baloo 2’,cursive;font-size:1.05rem;font-weight:700;
+color:white;cursor:pointer;
+box-shadow:0 6px 20px rgba(255,110,180,.4);
+transition:transform .15s,box-shadow .15s;
+}
+.btn-create:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(255,110,180,.55);}
+.btn-create:active{transform:scale(.97);}
 
 .btn-save{
-width:100%;background:linear-gradient(135deg,var(–pink),var(–lav));
-border:none;border-radius:14px;padding:13px;
-font-family:‘Baloo 2’,cursive;font-size:1rem;font-weight:700;
-color:white;cursor:pointer;transition:transform .15s,box-shadow .15s;
-box-shadow:0 6px 20px rgba(255,110,180,.35);
+width:100%;background:rgba(61,219,184,.15);
+border:1.5px solid var(–mint);border-radius:14px;padding:12px;
+font-family:‘Nunito’,sans-serif;font-size:.95rem;font-weight:800;
+color:var(–mint);cursor:pointer;transition:all .2s;
+display:none;
 }
-.btn-save:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(255,110,180,.5);}
-.btn-save:active{transform:scale(.97);}
+.btn-save:hover{background:rgba(61,219,184,.25);}
+.btn-save.visible{display:block;}
 
-.btn-random{
-width:100%;background:rgba(255,255,255,.07);
-border:1.5px solid rgba(255,255,255,.12);border-radius:14px;padding:10px;
-font-family:‘Nunito’,sans-serif;font-size:.85rem;font-weight:700;
-color:rgba(255,255,255,.6);cursor:pointer;transition:all .2s;
+.avatar-url{
+width:100%;font-size:.7rem;color:rgba(255,255,255,.3);
+word-break:break-all;text-align:center;
+background:rgba(255,255,255,.04);border-radius:10px;padding:8px;
+display:none;
 }
-.btn-random:hover{background:rgba(255,255,255,.12);color:white;}
+.avatar-url.visible{display:block;}
 
-.panel-editor{
-flex:1;
-background:rgba(255,255,255,.04);
-border:1.5px solid rgba(255,255,255,.09);
-border-radius:24px;
+/* MODAL RPM */
+.modal-overlay{
+position:fixed;inset:0;z-index:100;
+background:rgba(0,0,0,.85);
+display:flex;align-items:center;justify-content:center;
+padding:0;
+opacity:0;pointer-events:none;
+transition:opacity .3s;
+}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal-box{
+width:100%;height:100%;
+max-width:480px;max-height:100vh;
+background:#1a1a2e;
+border-radius:0;
 display:flex;flex-direction:column;
-overflow:hidden;min-width:0;
+overflow:hidden;position:relative;
 }
-
-.tabs{
-display:flex;gap:2px;padding:12px 12px 0;
-flex-shrink:0;overflow-x:auto;scrollbar-width:none;
-border-bottom:1px solid rgba(255,255,255,.07);
+@media(min-width:520px){
+.modal-box{height:92vh;border-radius:24px;max-height:700px;}
 }
-.tabs::-webkit-scrollbar{display:none;}
-.tab{
-background:transparent;border:none;border-radius:10px 10px 0 0;
-padding:8px 12px;font-family:‘Nunito’,sans-serif;font-size:.75rem;font-weight:800;
-color:rgba(255,255,255,.35);cursor:pointer;transition:all .2s;
-white-space:nowrap;border-bottom:2.5px solid transparent;
+.modal-header{
+display:flex;align-items:center;justify-content:space-between;
+padding:12px 16px;
+background:rgba(255,255,255,.04);
+border-bottom:1px solid rgba(255,255,255,.08);
 flex-shrink:0;
 }
-.tab:hover{color:rgba(255,255,255,.65);background:rgba(255,255,255,.04);}
-.tab.active{color:white;background:rgba(255,255,255,.07);border-bottom-color:var(–pink);}
-
-.panels{flex:1;overflow-y:auto;padding:14px;scrollbar-width:thin;scrollbar-color:#3A1D6A transparent;}
-.panels::-webkit-scrollbar{width:4px;}
-.panels::-webkit-scrollbar-thumb{background:#3A1D6A;border-radius:4px;}
-
-.panel{display:none;flex-direction:column;gap:12px;}
-.panel.active{display:flex;}
-
-.section{background:rgba(255,255,255,.05);border-radius:14px;padding:12px 14px;}
-.section-title{font-size:.62rem;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.28);margin-bottom:10px;}
-
-.igrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:8px;}
-.icard{
-background:rgba(255,255,255,.06);border-radius:12px;
-padding:6px 4px 5px;cursor:pointer;
-border:2px solid transparent;
-display:flex;flex-direction:column;align-items:center;gap:4px;
-transition:all .15s;position:relative;overflow:hidden;
+.modal-title{font-size:.85rem;font-weight:800;color:rgba(255,255,255,.6);letter-spacing:1px;}
+.btn-close{
+background:rgba(255,255,255,.1);border:none;border-radius:10px;
+width:32px;height:32px;cursor:pointer;font-size:1rem;color:white;
+display:flex;align-items:center;justify-content:center;
+transition:background .2s;
 }
-.icard:hover{background:rgba(255,255,255,.12);transform:translateY(-2px);}
-.icard.active{border-color:var(–pink);background:rgba(255,110,180,.18);}
-.icard canvas{display:block;image-rendering:pixelated;}
-.icard-none canvas{opacity:.35;}
-.icard-none.active canvas{opacity:.6;}
-.ilabel{font-size:.58rem;font-weight:800;color:rgba(255,255,255,.45);text-align:center;}
-.icard.active .ilabel{color:rgba(255,255,255,.8);}
+.btn-close:hover{background:rgba(255,255,255,.2);}
+.modal-iframe{flex:1;border:none;width:100%;height:100%;}
 
-.none-badge{
-position:absolute;top:4px;right:4px;
-background:rgba(255,255,255,.15);border-radius:4px;
-font-size:.5rem;font-weight:900;color:rgba(255,255,255,.5);
-padding:1px 4px;
+/* LOADING */
+.modal-loading{
+position:absolute;inset:0;
+display:flex;flex-direction:column;align-items:center;justify-content:center;
+gap:12px;background:#1a1a2e;z-index:2;
+font-size:.8rem;color:rgba(255,255,255,.4);font-weight:700;
 }
+.spinner{width:36px;height:36px;border:3px solid rgba(255,110,180,.2);border-top-color:var(–pink);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
 
-.skin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(58px,1fr));gap:8px;}
-
-.hair-colors{display:flex;gap:0;flex-wrap:wrap;}
-.hc{
-width:28px;height:28px;cursor:pointer;
-border:2.5px solid transparent;border-radius:6px;
-transition:transform .15s,border-color .15s;flex-shrink:0;
-}
-.hc:hover{transform:scale(1.15);}
-.hc.active{border-color:white;transform:scale(1.1);}
-
+/* TOAST */
 .toast{
 position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
 background:var(–mint);color:var(–dark);
@@ -171,179 +163,98 @@ transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:999;pointer-events:n
 }
 .toast.show{transform:translateX(-50%) translateY(0);}
 
-@media(max-width:680px){
-.main{flex-direction:column;align-items:center;}
-.panel-preview{width:100%;flex-direction:row;justify-content:center;flex-wrap:wrap;padding:8px 12px;}
-.avatar-stage{width:160px;height:212px;}
-.avatar-stage canvas{width:144px;height:191px;}
-.pseudo-wrap,.btn-save,.btn-random{max-width:200px;}
-.panel-editor{width:100%;}
-.igrid{grid-template-columns:repeat(auto-fill,minmax(60px,1fr));}
+/* BADGE avatar prêt */
+.avatar-badge{
+display:none;align-items:center;gap:8px;
+background:rgba(61,219,184,.12);border:1px solid rgba(61,219,184,.3);
+border-radius:12px;padding:8px 14px;width:100%;
 }
+.avatar-badge.visible{display:flex;}
+.avatar-badge .dot{width:8px;height:8px;border-radius:50%;background:var(–mint);flex-shrink:0;animation:pulse 1.5s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.3);}}
+.avatar-badge span{font-size:.78rem;font-weight:800;color:var(–mint);}
 </style>
 
 </head>
 <body>
 
-<!-- ÉCRAN DE CHARGEMENT -->
-
-<div id="boot-screen" style="
-  position:fixed;inset:0;z-index:999;
-  background:#12082A;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
-  font-family:'Nunito',sans-serif;
-">
-  <div style="font-family:'Baloo 2',cursive;font-size:2rem;font-weight:800;color:white;letter-spacing:-1px;">
-    <span style="color:#FF6EB4">M</span><span style="color:#FFD747">A</span><span style="color:#3DDBB8">C</span><span style="color:#5BC8F5">A</span><span style="color:#B388FF">D</span><span style="color:#FF9E7A">A</span><span style="color:#FF6EB4">M</span>
-  </div>
-  <div style="width:260px;background:rgba(255,255,255,.1);border-radius:20px;overflow:hidden;height:8px;">
-    <div id="load-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#FF6EB4,#B388FF);border-radius:20px;transition:width .3s;"></div>
-  </div>
-  <div id="load-status" style="font-size:.8rem;color:rgba(255,255,255,.45);font-weight:700;letter-spacing:.5px;">Initialisation…</div>
-  <div id="load-error" style="display:none;max-width:320px;text-align:center;">
-    <p style="color:#FF6EB4;font-size:.85rem;font-weight:700;margin-bottom:12px;">❌ Impossible de charger les assets.</p>
-    <p style="color:rgba(255,255,255,.5);font-size:.75rem;margin-bottom:16px;">Vérifie la console pour plus de détails.</p>
-    <code id="load-error-msg" style="color:#FFD747;font-size:.7rem;word-break:break-all;"></code>
-  </div>
-</div>
-
 <div class="bg"></div>
 <div class="stars" id="stars"></div>
 
 <div class="app">
-  <div class="header">
-    <div class="logo-tag">✦ Créateur d'avatar ✦</div>
-    <div class="logo-title">
-      <span class="c1">M</span><span class="c2">A</span><span class="c3">C</span><span class="c4">A</span><span class="c5">D</span><span class="c6">A</span><span class="c1">M</span>
-      <span style="color:rgba(255,255,255,.25);font-size:.7em;margin:0 8px;">✦</span>
-      <span class="c2">W</span><span class="c3">O</span><span class="c4">R</span><span class="c5">L</span><span class="c6">D</span>
-    </div>
+  <div class="logo-tag">✦ Créateur d'avatar ✦</div>
+  <div class="logo-title">
+    <span style="color:var(--pink)">M</span><span style="color:var(--yellow)">A</span><span style="color:var(--mint)">C</span><span style="color:var(--sky)">A</span><span style="color:var(--lav)">D</span><span style="color:var(--peach)">A</span><span style="color:var(--pink)">M</span>
+    <span style="color:rgba(255,255,255,.2);font-size:.7em;margin:0 8px;">✦</span>
+    <span style="color:var(--yellow)">W</span><span style="color:var(--mint)">O</span><span style="color:var(--sky)">R</span><span style="color:var(--lav)">L</span><span style="color:var(--peach)">D</span>
   </div>
+  <div class="logo-sub">Avatar 3D — Powered by Ready Player Me</div>
 
-  <div class="main">
-    <div class="panel-preview">
-      <div class="avatar-stage">
-        <canvas id="preview-canvas" width="444" height="700"></canvas>
-        <div class="loading-ring" id="loading-ring">
-          <div class="spinner"></div>
-          <span>Chargement…</span>
-        </div>
-      </div>
+  <div class="avatar-card">
 
 ```
-  <div class="pseudo-wrap">
-    <label class="pseudo-label" for="pseudo">Ton pseudo</label>
-    <input class="pseudo-input" id="pseudo" type="text" maxlength="16" placeholder="StarMochi…" autocomplete="off"/>
+<!-- VIEWER 3D -->
+<div class="viewer-wrap" id="viewer-wrap">
+  <div class="viewer-placeholder" id="viewer-placeholder">
+    <div class="icon">🧍</div>
+    <span>Ton avatar apparaîtra ici</span>
   </div>
-  <button class="btn-random" onclick="randomize()">🎲 Aléatoire</button>
-  <button class="btn-save" onclick="saveAvatar()">✨ Sauvegarder</button>
 </div>
 
-<div class="panel-editor">
-  <div class="tabs" id="tabs">
-    <button class="tab active" data-panel="peau">🌸 Peau</button>
-    <button class="tab" data-panel="yeux">👁 Yeux</button>
-    <button class="tab" data-panel="bouche">👄 Bouche</button>
-    <button class="tab" data-panel="cheveux">💇 Cheveux</button>
-    <button class="tab" data-panel="haut">👕 Haut</button>
-    <button class="tab" data-panel="bas">👖 Bas</button>
-    <button class="tab" data-panel="shoes">👟 Shoes</button>
-    <button class="tab" data-panel="extras">✨ Extras</button>
-  </div>
-  <div class="panels" id="panels">
+<!-- BADGE -->
+<div class="avatar-badge" id="avatar-badge">
+  <div class="dot"></div>
+  <span>Avatar 3D prêt ✨</span>
+</div>
 
-    <div class="panel active" id="panel-peau">
-      <div class="section">
-        <div class="section-title">Teinte de peau (1–29)</div>
-        <div class="skin-grid" id="grid-body"></div>
-      </div>
-    </div>
+<!-- PSEUDO -->
+<div class="pseudo-wrap">
+  <label class="pseudo-label" for="pseudo">Ton pseudo</label>
+  <input class="pseudo-input" id="pseudo" type="text" maxlength="16" placeholder="StarMochi…" autocomplete="off"/>
+</div>
 
-    <div class="panel" id="panel-yeux">
-      <div class="section">
-        <div class="section-title">Cils</div>
-        <div class="igrid" id="grid-eyelashes"></div>
-      </div>
-      <div class="section">
-        <div class="section-title">Pupilles</div>
-        <div class="igrid" id="grid-pupils"></div>
-      </div>
-      <div class="section">
-        <div class="section-title">Sourcils</div>
-        <div class="igrid" id="grid-eyebrows"></div>
-      </div>
-    </div>
+<!-- URL (debug) -->
+<div class="avatar-url" id="avatar-url"></div>
 
-    <div class="panel" id="panel-bouche">
-      <div class="section">
-        <div class="section-title">Bouche (20 styles)</div>
-        <div class="igrid" id="grid-mouth"></div>
-      </div>
-    </div>
-
-    <div class="panel" id="panel-cheveux">
-      <div class="section">
-        <div class="section-title">Style de cheveux</div>
-        <div class="igrid" id="grid-hair"></div>
-      </div>
-      <div class="section">
-        <div class="section-title">Couleur de cheveux</div>
-        <div class="hair-colors" id="hair-colors"></div>
-      </div>
-      <div class="section">
-        <div class="section-title">Frange</div>
-        <div class="igrid" id="grid-bangs"></div>
-      </div>
-      <div class="section">
-        <div class="section-title">Bonus coiffure</div>
-        <div class="igrid" id="grid-hair-bonus"></div>
-      </div>
-    </div>
-
-    <div class="panel" id="panel-haut">
-      <div class="section">
-        <div class="section-title">Haut (12 styles)</div>
-        <div class="igrid" id="grid-top"></div>
-      </div>
-      <div class="section">
-        <div class="section-title">Robe (7 styles)</div>
-        <div class="igrid" id="grid-dress"></div>
-      </div>
-    </div>
-
-    <div class="panel" id="panel-bas">
-      <div class="section">
-        <div class="section-title">Bas (8 styles)</div>
-        <div class="igrid" id="grid-bottom"></div>
-      </div>
-    </div>
-
-    <div class="panel" id="panel-shoes">
-      <div class="section">
-        <div class="section-title">Chaussures (4 styles)</div>
-        <div class="igrid" id="grid-shoes"></div>
-      </div>
-      <div class="section">
-        <div class="section-title">Gants (6 styles)</div>
-        <div class="igrid" id="grid-gloves"></div>
-      </div>
-    </div>
-
-    <div class="panel" id="panel-extras">
-      <div class="section">
-        <div class="section-title">Barbe / poils</div>
-        <div class="igrid" id="grid-beard"></div>
-      </div>
-    </div>
+<!-- BOUTONS -->
+<button class="btn-create" id="btn-create" onclick="openRPM()">
+  🧬 Créer / Modifier mon avatar 3D
+</button>
+<button class="btn-save visible" id="btn-save" onclick="saveAvatar()">
+  ✨ Sauvegarder
+</button>
+```
 
   </div>
 </div>
-```
 
+<!-- MODAL READY PLAYER ME -->
+
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title">READY PLAYER ME</span>
+      <button class="btn-close" onclick="closeRPM()">✕</button>
+    </div>
+    <div class="modal-loading" id="modal-loading">
+      <div class="spinner"></div>
+      <span>Chargement du créateur…</span>
+    </div>
+    <iframe
+      id="rpm-iframe"
+      class="modal-iframe"
+      src=""
+      allow="camera *; microphone *"
+      style="display:none;"
+    ></iframe>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- Model Viewer pour afficher le GLB -->
+
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
 
 <script>
 // ===== ÉTOILES =====
@@ -355,767 +266,153 @@ for(let i=0;i<60;i++){
   starsEl.appendChild(s);
 }
 
-// ===== URL DES ASSETS =====
-const ASSETS_ZIP_URL = 'https://magenta-pegasus-537cbf.netlify.app/assets.zip';
-const CACHE_NAME = 'macadam-assets-v4';
-
-// Blob URLs extraites du zip : { 'body/1.png': 'blob:...', ... }
-const assetBlobs = {};
-
-// ===== PARSER ZIP NATIF =====
-function readU16LE(buf, offset) {
-  return buf[offset] | (buf[offset+1] << 8);
-}
-function readU32LE(buf, offset) {
-  return (buf[offset] | (buf[offset+1]<<8) | (buf[offset+2]<<16) | (buf[offset+3]<<24)) >>> 0;
-}
-
-async function inflateRaw(compressedBytes) {
-  const ds = new DecompressionStream('deflate-raw');
-  const writer = ds.writable.getWriter();
-  writer.write(compressedBytes);
-  writer.close();
-  const chunks = [];
-  const reader = ds.readable.getReader();
-  while(true) {
-    const {done, value} = await reader.read();
-    if(done) break;
-    chunks.push(value);
-  }
-  let total = chunks.reduce((s,c)=>s+c.length,0);
-  const out = new Uint8Array(total);
-  let off = 0;
-  for(const c of chunks) { out.set(c, off); off += c.length; }
-  return out;
-}
-
-async function parseZip(buffer) {
-  const bytes = new Uint8Array(buffer);
-  const files = {};
-
-  let eocdOffset = -1;
-  for(let i = bytes.length - 22; i >= 0; i--) {
-    if(bytes[i]===0x50 && bytes[i+1]===0x4B && bytes[i+2]===0x05 && bytes[i+3]===0x06) {
-      eocdOffset = i;
-      break;
-    }
-  }
-  if(eocdOffset < 0) throw new Error('ZIP: EOCD introuvable');
-
-  const cdCount  = readU16LE(bytes, eocdOffset + 10);
-  const cdOffset = readU32LE(bytes, eocdOffset + 16);
-
-  let pos = cdOffset;
-  for(let fi = 0; fi < cdCount; fi++) {
-    if(readU32LE(bytes, pos) !== 0x02014B50) break;
-    const compression  = readU16LE(bytes, pos + 10);
-    const compSize     = readU32LE(bytes, pos + 20);
-    const nameLen      = readU16LE(bytes, pos + 28);
-    const extraLen     = readU16LE(bytes, pos + 30);
-    const commentLen   = readU16LE(bytes, pos + 32);
-    const localOffset  = readU32LE(bytes, pos + 42);
-    const name         = new TextDecoder().decode(bytes.slice(pos+46, pos+46+nameLen));
-    pos += 46 + nameLen + extraLen + commentLen;
-
-    if(name.endsWith('/')) continue;
-
-    const lNameLen  = readU16LE(bytes, localOffset + 26);
-    const lExtraLen = readU16LE(bytes, localOffset + 28);
-    const dataStart = localOffset + 30 + lNameLen + lExtraLen;
-    const compData  = bytes.slice(dataStart, dataStart + compSize);
-
-    let fileData;
-    if(compression === 0) {
-      fileData = compData;
-    } else if(compression === 8) {
-      fileData = await inflateRaw(compData);
-    } else {
-      console.warn(`ZIP: compression ${compression} non supportée pour ${name}`);
-      continue;
-    }
-
-    files[name] = fileData;
-  }
-  return files;
-}
-
-function setLoadStatus(msg, pct) {
-  const el = document.getElementById('load-status');
-  const bar = document.getElementById('load-bar');
-  if(el) el.textContent = msg;
-  if(bar) bar.style.width = pct + '%';
-}
-
-async function loadAssetsZip() {
-  setLoadStatus('Vérification du cache…', 5);
-
-  let zipBuffer = null;
-
-  try {
-    const cache = await caches.open(CACHE_NAME);
-    const cached = await cache.match(ASSETS_ZIP_URL);
-    if(cached) {
-      setLoadStatus('Assets en cache, extraction…', 40);
-      zipBuffer = await cached.arrayBuffer();
-    }
-  } catch(e) { console.warn('Cache API indisponible:', e); }
-
-  if(!zipBuffer) {
-    setLoadStatus('Téléchargement des assets…', 15);
-    try {
-      const resp = await fetch(ASSETS_ZIP_URL);
-      if(!resp.ok) throw new Error('HTTP ' + resp.status);
-      zipBuffer = await resp.arrayBuffer();
-    } catch(e) {
-      throw new Error('Téléchargement échoué: ' + e.message);
-    }
-
-    try {
-      const cache = await caches.open(CACHE_NAME);
-      await cache.put(ASSETS_ZIP_URL, new Response(zipBuffer.slice(0)));
-    } catch(e) {}
-  }
-
-  setLoadStatus('Décompression…', 60);
-  const files = await parseZip(zipBuffer);
-
-  setLoadStatus('Préparation des sprites…', 85);
-  for(const [key, data] of Object.entries(files)) {
-    if(!key.endsWith('.png')) continue;
-    const blob = new Blob([data], {type:'image/png'});
-    assetBlobs[key] = URL.createObjectURL(blob);
-  }
-
-  setLoadStatus('Prêt !', 100);
-}
-
-// ===== IMAGE CACHE =====
-const imgCache = {};
-function loadImg(filename) {
-  if(!filename) return Promise.resolve(null);
-  const blobUrl = assetBlobs[filename];
-  if(!blobUrl) return Promise.resolve(null);
-  if(imgCache[filename]) return imgCache[filename];
-  const p = new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = () => resolve(null);
-    img.src = blobUrl;
-  });
-  imgCache[filename] = p;
-  return p;
-}
-
-// ===== STATE =====
-const S = {
-  body: 1,
-  eyelashes: 1,
-  pupils: 1,
-  eyebrows: 1,
-  mouth: 1,
-  hair: 1,
-  hairColor: '',
-  bangs: 1,
-  hairBonus: null,
-  top: 1,
-  dress: null,
-  bottom: 1,
-  shoes: 1,
-  gloves: null,
-  beard: null,
-};
-
-// ===== COULEURS DE CHEVEUX =====
-const HAIR_COLORS = [
-  { suffix:'',  hex:'#3D1800', label:'Brun foncé' },
-  { suffix:'b', hex:'#111111', label:'Noir' },
-  { suffix:'c', hex:'#8B4010', label:'Châtain' },
-  { suffix:'d', hex:'#C8980A', label:'Blond doré' },
-  { suffix:'e', hex:'#EEE0C0', label:'Blond clair' },
-  { suffix:'f', hex:'#FF5AAA', label:'Rose' },
-  { suffix:'g', hex:'#AA44FF', label:'Violet' },
-  { suffix:'h', hex:'#00BBDD', label:'Bleu' },
-];
-
-// ===== HELPER CHEMINS CHEVEUX =====
-// Structure ZIP :
-//   hair/N.png            → silhouette (forme) des cheveux
-//   hair/COLOR/N.png      → couleur brun foncé (suffix '')
-//   hair/COLOR/Nb.png     → noir, etc.
-//   hair_back/N.png       → arrière silhouette
-//   hair_back/COLOR/N.png → arrière coloré
-//   bangs/N.png           → frange silhouette
-//   bangs/COLOR/N.png     → frange colorée
-//   hair_bonus/N.png      → bonus silhouette
-//   hair_bonus/COLOR/N.png→ bonus coloré
-
-function hairColorFile(folder, num, colorSuffix) {
-  // Fichier colorisé dans COLOR/
-  return `${folder}/COLOR/${num}${colorSuffix}.png`;
-}
-
-function hairBaseFile(folder, num) {
-  // Silhouette de base (structure, noir/contours) dans le dossier racine
-  return `${folder}/${num}.png`;
-}
-
-// ===== COUCHES DE RENDU =====
-// ORDRE CORRECT :
-// 1. Corps (peau) — body/N.png
-// 2. Arrière des cheveux (base) — hair_back/N.png
-// 3. Arrière des cheveux (couleur) — hair_back/COLOR/Nsuffix.png
-// 4. Vêtements du bas
-// 5. Robe
-// 6. Haut
-// 7. Yeux (cils, pupilles, sourcils)
-// 8. Bouche
-// 9. Cheveux avant (base) — hair/N.png
-// 10. Cheveux avant (couleur) — hair/COLOR/Nsuffix.png
-// 11. Hair bonus (base + couleur)
-// 12. Frange (base + couleur)
-// 13. Chaussures
-// 14. Gants
-// 15. Barbe
-// 16. Highlights — body/full.png (EN DERNIER par-dessus tout)
-
-async function getLayers() {
-  const layers = [];
-  const hc = S.hairColor;
-  const add = (f) => { if(f) layers.push(f); };
-
-  // Corps: base avec contours
-  add(`body/body_layered.png`);
-  // Teinte de peau (multiply)
-  add(`__MULTIPLY__body/${S.body}.png`);
-
-  // Arrière cheveux
-  if(S.hair) {
-    add(hairBaseFile('hair_back', S.hair));
-    add(hairColorFile('hair_back', S.hair, hc));
-  }
-
-  // Vêtements bas
-  if(S.bottom && !S.dress) {
-    add(`bottom/${S.bottom}.png`);
-    add(`bottom/color/${S.bottom}.png`);
-  }
-
-  // Robe
-  if(S.dress) {
-    add(`dress/${S.dress}.png`);
-    add(`dress/COLORS/${S.dress}.png`);
-  }
-
-  // Haut (seulement si pas de robe)
-  if(S.top && !S.dress) {
-    add(`top/${S.top}.png`);
-    add(`top/colors/${S.top}.png`);
-  }
-
-  // Yeux
-  if(S.eyelashes) add(`EYELASHES/${S.eyelashes}.png`);
-  if(S.pupils)    add(`PUPILS/${S.pupils}.png`);
-  if(S.eyebrows)  add(`EYEBROWS/${S.eyebrows}.png`);
-
-  // Bouche
-  if(S.mouth) add(`MOUTH/${S.mouth}.png`);
-
-  // Cheveux avant
-  if(S.hair) {
-    add(hairBaseFile('hair', S.hair));
-    add(hairColorFile('hair', S.hair, hc));
-  }
-
-  // Hair bonus
-  if(S.hairBonus) {
-    add(hairBaseFile('hair_bonus', S.hairBonus));
-    add(hairColorFile('hair_bonus', S.hairBonus, hc));
-  }
-
-  // Frange
-  if(S.bangs) {
-    add(hairBaseFile('bangs', S.bangs));
-    add(hairColorFile('bangs', S.bangs, hc));
-  }
-
-  // Chaussures
-  if(S.shoes) {
-    add(`shoes/${S.shoes}.png`);
-    add(`shoes/COLOR/${S.shoes}.png`);
-  }
-
-  // Gants
-  if(S.gloves) {
-    add(`gloves/${S.gloves}.png`);
-    add(`gloves/COLOR/${S.gloves}.png`);
-  }
-
-  // Barbe
-  if(S.beard) add(`BEARD/${S.beard}.png`);
-
-  return layers;
-}
-
-// ===== RENDU =====
-let renderTimer = null;
-function scheduleRender() {
-  if(renderTimer) clearTimeout(renderTimer);
-  renderTimer = setTimeout(async () => {
-    showLoading(true);
-    await render(document.getElementById('preview-canvas'));
-    showLoading(false);
-  }, 80);
-}
-
-async function render(canvas) {
-  if(!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const W = 444, H = 700;
-  const layers = await getLayers();
-  const imgs = await Promise.all(layers.map(src => loadImg(src.replace('__MULTIPLY__', ''))));
-  ctx.clearRect(0,0,W,H);
-  ctx.globalCompositeOperation = 'source-over';
-  for(let i = 0; i < imgs.length; i++) {
-    const img = imgs[i];
-    if(!img) continue;
-    if(layers[i].startsWith('__MULTIPLY__')) {
-      ctx.globalCompositeOperation = 'multiply';
-      ctx.drawImage(img, 0, 0, W, H);
-      ctx.globalCompositeOperation = 'source-over';
-    } else {
-      ctx.drawImage(img, 0, 0, W, H);
-    }
-  }
-}
-
-function showLoading(b) {
-  document.getElementById('loading-ring').classList.toggle('hidden', !b);
-}
-
-// ===== THUMBNAILS =====
-const THUMB_W = 444, THUMB_H = 700;
-const DISPLAY_W = 60, DISPLAY_H = 94;
-
-async function renderThumb(canvas, layers) {
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0,0,THUMB_W,THUMB_H);
-  const filtered = layers.filter(Boolean);
-  const imgs = await Promise.all(filtered.map(src => loadImg(src.replace('__MULTIPLY__', ''))));
-  ctx.globalCompositeOperation = 'source-over';
-  for(let i = 0; i < imgs.length; i++) {
-    const img = imgs[i];
-    if(!img) continue;
-    if(filtered[i].startsWith('__MULTIPLY__')) {
-      ctx.globalCompositeOperation = 'multiply';
-      ctx.drawImage(img, 0, 0, THUMB_W, THUMB_H);
-      ctx.globalCompositeOperation = 'source-over';
-    } else {
-      ctx.drawImage(img, 0, 0, THUMB_W, THUMB_H);
-    }
-  }
-}
-
-// ===== GRILLES =====
-function buildBodyGrid() {
-  const g = document.getElementById('grid-body');
-  g.innerHTML = '';
-  for(let i=1;i<=29;i++) {
-    const card = makeCard(i, `Peau ${i}`, 'body', async (cv) => {
-      await renderThumb(cv, [`body/body_layered.png`, `__MULTIPLY__body/${i}.png`]);
-    });
-    g.appendChild(card);
-  }
-}
-
-function buildSimpleGrid(gridId, key, prefix, count, withNone=false) {
-  const g = document.getElementById(gridId);
-  g.innerHTML = '';
-  if(withNone) g.appendChild(makeNoneCard(key));
-  for(let i=1;i<=count;i++) {
-    const card = makeCard(i, `${i}`, key, async (cv) => {
-      await renderThumb(cv, [
-        `body/body_layered.png`,
-        `__MULTIPLY__body/${S.body}.png`,
-        `${prefix}/${i}.png`,
-      ]);
-    });
-    g.appendChild(card);
-  }
-}
-
-function buildHairGrid() {
-  const g = document.getElementById('grid-hair');
-  g.innerHTML = '';
-  for(let i=1;i<=12;i++) {
-    const card = makeCard(i, `${i}`, 'hair', async (cv) => {
-      const hc = S.hairColor;
-      await renderThumb(cv, [
-        `body/body_layered.png`,
-        `__MULTIPLY__body/${S.body}.png`,
-        hairBaseFile('hair_back', i),
-        hairColorFile('hair_back', i, hc),
-        `EYELASHES/${S.eyelashes||1}.png`,
-        `PUPILS/${S.pupils||1}.png`,
-        `EYEBROWS/${S.eyebrows||1}.png`,
-        hairBaseFile('hair', i),
-        hairColorFile('hair', i, hc),
-        S.bangs ? hairBaseFile('bangs', S.bangs) : null,
-        S.bangs ? hairColorFile('bangs', S.bangs, hc) : null,
-      ]);
-    });
-    g.appendChild(card);
-  }
-}
-
-function buildHairColors() {
-  const g = document.getElementById('hair-colors');
-  g.innerHTML = '';
-  HAIR_COLORS.forEach(({suffix, hex, label}) => {
-    const div = document.createElement('div');
-    div.className = 'hc' + (S.hairColor === suffix ? ' active' : '');
-    div.style.background = hex;
-    div.title = label;
-    div.onclick = async () => {
-      S.hairColor = suffix;
-      document.querySelectorAll('#hair-colors .hc').forEach(d => d.classList.remove('active'));
-      div.classList.add('active');
-      scheduleRender();
-      buildHairGrid();
-      buildBangsGrid();
-      buildHairBonusGrid();
-    };
-    g.appendChild(div);
-  });
-}
-
-function buildBangsGrid() {
-  const g = document.getElementById('grid-bangs');
-  g.innerHTML = '';
-  g.appendChild(makeNoneCard('bangs'));
-  for(let i=1;i<=13;i++) {
-    const card = makeCard(i, `${i}`, 'bangs', async (cv) => {
-      const hc = S.hairColor;
-      await renderThumb(cv, [
-        `body/body_layered.png`,
-        `__MULTIPLY__body/${S.body}.png`,
-        hairBaseFile('hair_back', S.hair||1),
-        hairColorFile('hair_back', S.hair||1, hc),
-        `EYELASHES/${S.eyelashes||1}.png`,
-        `PUPILS/${S.pupils||1}.png`,
-        hairBaseFile('hair', S.hair||1),
-        hairColorFile('hair', S.hair||1, hc),
-        hairBaseFile('bangs', i),
-        hairColorFile('bangs', i, hc),
-      ]);
-    });
-    g.appendChild(card);
-  }
-}
-
-function buildHairBonusGrid() {
-  const g = document.getElementById('grid-hair-bonus');
-  g.innerHTML = '';
-  g.appendChild(makeNoneCard('hairBonus'));
-  for(let i=1;i<=5;i++) {
-    const card = makeCard(i, `${i}`, 'hairBonus', async (cv) => {
-      const hc = S.hairColor;
-      await renderThumb(cv, [
-        `body/body_layered.png`,
-        `__MULTIPLY__body/${S.body}.png`,
-        hairBaseFile('hair_back', S.hair||1),
-        hairColorFile('hair_back', S.hair||1, hc),
-        hairBaseFile('hair_bonus', i),
-        hairColorFile('hair_bonus', i, hc),
-        hairBaseFile('hair', S.hair||1),
-        hairColorFile('hair', S.hair||1, hc),
-      ]);
-    });
-    g.appendChild(card);
-  }
-}
-
-function buildTopGrid() {
-  const g = document.getElementById('grid-top');
-  g.innerHTML = '';
-  g.appendChild(makeNoneCard('top'));
-  for(let i=1;i<=12;i++) {
-    const card = makeCard(i, `${i}`, 'top', async (cv) => {
-      await renderThumb(cv, [
-        `body/body_layered.png`,
-        `__MULTIPLY__body/${S.body}.png`,
-        `top/${i}.png`,
-        `top/colors/${i}.png`,
-      ]);
-    }, () => { S.dress = null; refreshDressCards(); });
-    g.appendChild(card);
-  }
-}
-
-function buildDressGrid() {
-  const g = document.getElementById('grid-dress');
-  g.innerHTML = '';
-  g.appendChild(makeNoneCard('dress'));
-  for(let i=1;i<=7;i++) {
-    const card = makeCard(i, `${i}`, 'dress', async (cv) => {
-      await renderThumb(cv, [
-        `body/body_layered.png`,
-        `__MULTIPLY__body/${S.body}.png`,
-        `dress/${i}.png`,
-        `dress/COLORS/${i}.png`,
-      ]);
-    }, () => { S.top = null; S.bottom = null; refreshTopCards(); refreshBottomCards(); });
-    g.appendChild(card);
-  }
-}
-
-function refreshDressCards() {
-  document.querySelectorAll('#grid-dress .icard').forEach((c,i) => {
-    c.classList.toggle('active', i>0 ? parseInt(c.dataset.val)===S.dress : S.dress===null);
-  });
-}
-function refreshTopCards() {
-  document.querySelectorAll('#grid-top .icard').forEach((c,i) => {
-    c.classList.toggle('active', i>0 ? parseInt(c.dataset.val)===S.top : S.top===null);
-  });
-}
-function refreshBottomCards() {
-  document.querySelectorAll('#grid-bottom .icard').forEach((c,i) => {
-    c.classList.toggle('active', i>0 ? parseInt(c.dataset.val)===S.bottom : S.bottom===null);
-  });
-}
-
-function buildBottomGrid() {
-  const g = document.getElementById('grid-bottom');
-  g.innerHTML = '';
-  g.appendChild(makeNoneCard('bottom'));
-  for(let i=1;i<=8;i++) {
-    const card = makeCard(i, `${i}`, 'bottom', async (cv) => {
-      await renderThumb(cv, [
-        `body/body_layered.png`,
-        `__MULTIPLY__body/${S.body}.png`,
-        `bottom/${i}.png`,
-        `bottom/color/${i}.png`,
-      ]);
-    });
-    g.appendChild(card);
-  }
-}
-
-function buildShoesGrid() {
-  const g = document.getElementById('grid-shoes');
-  g.innerHTML = '';
-  g.appendChild(makeNoneCard('shoes'));
-  for(let i=1;i<=4;i++) {
-    const card = makeCard(i, `${i}`, 'shoes', async (cv) => {
-      await renderThumb(cv, [
-        `body/body_layered.png`,
-        `__MULTIPLY__body/${S.body}.png`,
-        `shoes/${i}.png`,
-        `shoes/COLOR/${i}.png`,
-      ]);
-    });
-    g.appendChild(card);
-  }
-}
-
-function buildGlovesGrid() {
-  const g = document.getElementById('grid-gloves');
-  g.innerHTML = '';
-  g.appendChild(makeNoneCard('gloves'));
-  for(let i=1;i<=6;i++) {
-    const card = makeCard(i, `${i}`, 'gloves', async (cv) => {
-      await renderThumb(cv, [
-        `body/body_layered.png`,
-        `__MULTIPLY__body/${S.body}.png`,
-        `gloves/${i}.png`,
-        `gloves/COLOR/${i}.png`,
-      ]);
-    });
-    g.appendChild(card);
-  }
-}
-
-// ===== HELPERS =====
-function makeCard(val, label, stateKey, renderFn, extraOnClick) {
-  const card = document.createElement('div');
-  card.className = 'icard' + (S[stateKey] === val ? ' active' : '');
-  card.dataset.val = val;
-  card.dataset.key = stateKey;
-
-  const cv = document.createElement('canvas');
-  cv.width = THUMB_W; cv.height = THUMB_H;
-  cv.style.width = DISPLAY_W + 'px';
-  cv.style.height = DISPLAY_H + 'px';
-  card.appendChild(cv);
-
-  const lbl = document.createElement('span');
-  lbl.className = 'ilabel';
-  lbl.textContent = label;
-  card.appendChild(lbl);
-
-  const obs = new IntersectionObserver((entries) => {
-    if(entries[0].isIntersecting) { renderFn(cv); obs.disconnect(); }
-  }, {threshold: 0.1});
-  obs.observe(card);
-
-  card.onclick = () => {
-    S[stateKey] = val;
-    const grid = card.closest('.igrid, .skin-grid');
-    if(grid) grid.querySelectorAll('.icard').forEach(c => c.classList.remove('active'));
-    card.classList.add('active');
-    if(extraOnClick) extraOnClick();
-    scheduleRender();
+// ===== READY PLAYER ME =====
+// Utilise l'iframe officiel RPM avec ton App ID
+// Pour avoir un App ID gratuit : https://studio.readyplayer.me
+// Sans App ID, on utilise le mode demo public
+const RPM_SUBDOMAIN = 'macadam'; // change avec ton subdomain RPM si tu en crées un
+const RPM_URL = `https://macadam.readyplayer.me/avatar?frameApi`;
+
+let avatarGlbUrl = null;
+
+function openRPM() {
+  const overlay = document.getElementById('modal-overlay');
+  const iframe = document.getElementById('rpm-iframe');
+  const loading = document.getElementById('modal-loading');
+
+  overlay.classList.add('open');
+  loading.style.display = 'flex';
+  iframe.style.display = 'none';
+
+  // Charger l'iframe RPM
+  iframe.src = RPM_URL;
+
+  iframe.onload = () => {
+    loading.style.display = 'none';
+    iframe.style.display = 'block';
+    // Envoyer le message pour activer l'API frame
+    iframe.contentWindow.postMessage(
+      JSON.stringify({ target: 'readyplayerme', type: 'subscribe', eventName: 'v1.**' }),
+      '*'
+    );
   };
-  return card;
 }
 
-function makeNoneCard(stateKey) {
-  const card = document.createElement('div');
-  card.className = 'icard icard-none' + (S[stateKey] === null ? ' active' : '');
-  card.dataset.val = 'null';
-  card.dataset.key = stateKey;
-
-  const cv = document.createElement('canvas');
-  cv.width = THUMB_W; cv.height = THUMB_H;
-  cv.style.width = DISPLAY_W + 'px';
-  cv.style.height = DISPLAY_H + 'px';
-  loadImg(`body/${S.body}.png`).then(img => {
-    const ctx = cv.getContext('2d');
-    ctx.globalAlpha = 0.3;
-    if(img) ctx.drawImage(img, 0,0,THUMB_W,THUMB_H);
-  });
-  card.appendChild(cv);
-
-  const span = document.createElement('span');
-  span.className = 'none-badge';
-  span.textContent = '✕';
-  card.appendChild(span);
-
-  const lbl = document.createElement('span');
-  lbl.className = 'ilabel';
-  lbl.textContent = 'Aucun';
-  card.appendChild(lbl);
-
-  card.onclick = () => {
-    S[stateKey] = null;
-    const grid = card.closest('.igrid, .skin-grid');
-    if(grid) grid.querySelectorAll('.icard').forEach(c => c.classList.remove('active'));
-    card.classList.add('active');
-    scheduleRender();
-  };
-  return card;
+function closeRPM() {
+  const overlay = document.getElementById('modal-overlay');
+  const iframe = document.getElementById('rpm-iframe');
+  overlay.classList.remove('open');
+  // Vider l'iframe pour stopper la caméra
+  setTimeout(() => { iframe.src = ''; }, 300);
 }
 
-// ===== TABS =====
-document.querySelectorAll('.tab').forEach(t => {
-  t.onclick = () => {
-    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
-    document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
-    t.classList.add('active');
-    document.getElementById('panel-' + t.dataset.panel).classList.add('active');
-  };
+// Écouter le message de RPM avec l'URL du GLB
+window.addEventListener('message', (event) => {
+  if(typeof event.data !== 'string') return;
+  let data;
+  try { data = JSON.parse(event.data); } catch(e) { return; }
+
+  // RPM envoie l'URL du GLB quand l'avatar est finalisé
+  if(data.source === 'readyplayerme') {
+    if(data.eventName === 'v1.avatar.exported') {
+      const glbUrl = data.data?.url;
+      if(glbUrl) {
+        avatarGlbUrl = glbUrl;
+        closeRPM();
+        showAvatar(glbUrl);
+        showToast('🎉 Avatar créé !');
+      }
+    }
+    if(data.eventName === 'v1.frame.ready') {
+      // Frame prête, on peut l'utiliser
+      const iframe = document.getElementById('rpm-iframe');
+      iframe.contentWindow.postMessage(
+        JSON.stringify({ target: 'readyplayerme', type: 'subscribe', eventName: 'v1.**' }),
+        '*'
+      );
+    }
+  }
 });
 
-// ===== ALÉATOIRE =====
-function rnd(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
-function pickOrNull(max, prob=0.7){return Math.random()<prob ? rnd(1,max) : null;}
+function showAvatar(glbUrl) {
+  const wrap = document.getElementById('viewer-wrap');
+  const placeholder = document.getElementById('viewer-placeholder');
+  const badge = document.getElementById('avatar-badge');
+  const urlEl = document.getElementById('avatar-url');
 
-function randomize(){
-  S.body = rnd(1,29);
-  S.hair = rnd(1,12);
-  S.hairColor = HAIR_COLORS[rnd(0,HAIR_COLORS.length-1)].suffix;
-  S.bangs = pickOrNull(13, 0.8);
-  S.hairBonus = pickOrNull(5, 0.3);
-  S.eyelashes = rnd(1,5);
-  S.pupils = rnd(1,16);
-  S.eyebrows = rnd(1,5);
-  S.mouth = rnd(1,20);
-  S.beard = pickOrNull(5, 0.15);
-  if(Math.random() < 0.3) {
-    S.dress = rnd(1,7); S.top = null; S.bottom = null;
-  } else {
-    S.dress = null; S.top = rnd(1,12); S.bottom = rnd(1,8);
-  }
-  S.shoes = pickOrNull(4, 0.9);
-  S.gloves = pickOrNull(6, 0.2);
-  buildHairColors();
-  scheduleRender();
-  showToast('🎲 Nouvel avatar !');
+  // Supprimer le placeholder
+  if(placeholder) placeholder.remove();
+
+  // Supprimer l'ancien model-viewer si existe
+  const old = wrap.querySelector('model-viewer');
+  if(old) old.remove();
+
+  // Créer model-viewer
+  const mv = document.createElement('model-viewer');
+  mv.setAttribute('src', glbUrl);
+  mv.setAttribute('camera-controls', '');
+  mv.setAttribute('auto-rotate', '');
+  mv.setAttribute('auto-rotate-delay', '1000');
+  mv.setAttribute('rotation-per-second', '30deg');
+  mv.setAttribute('camera-orbit', '0deg 80deg 2.5m');
+  mv.setAttribute('min-camera-orbit', 'auto 0deg auto');
+  mv.setAttribute('max-camera-orbit', 'auto 180deg auto');
+  mv.setAttribute('shadow-intensity', '1');
+  mv.setAttribute('environment-image', 'neutral');
+  mv.setAttribute('exposure', '1');
+  mv.setAttribute('ar', '');
+  mv.style.cssText = 'width:100%;height:100%;background:transparent;--progress-bar-color:var(--pink);';
+  wrap.appendChild(mv);
+
+  // Badge + URL
+  badge.classList.add('visible');
+  urlEl.textContent = glbUrl;
+  urlEl.classList.add('visible');
+
+  // Sauvegarder en localStorage
+  const pseudo = document.getElementById('pseudo').value.trim();
+  localStorage.setItem('macadam_rpm_avatar', JSON.stringify({
+    glbUrl, pseudo, savedAt: Date.now()
+  }));
 }
 
-// ===== SAVE =====
-function saveAvatar(){
+function saveAvatar() {
   const pseudo = document.getElementById('pseudo').value.trim();
-  if(!pseudo){ showToast('✏️ Entre ton pseudo !'); return; }
-  const canvas = document.getElementById('preview-canvas');
-  const dataUrl = canvas.toDataURL('image/png');
-  localStorage.setItem('macadam_avatar', JSON.stringify({
-    pseudo, state: S, img: dataUrl, savedAt: Date.now()
+  if(!pseudo) { showToast('✏️ Entre ton pseudo !'); return; }
+  if(!avatarGlbUrl) { showToast('👆 Crée d\'abord ton avatar !'); return; }
+
+  localStorage.setItem('macadam_rpm_avatar', JSON.stringify({
+    glbUrl: avatarGlbUrl, pseudo, savedAt: Date.now()
   }));
-  const a = document.createElement('a');
-  a.href = dataUrl;
-  a.download = `avatar_${pseudo}.png`;
-  a.click();
   showToast('✨ Avatar sauvegardé !');
 }
 
 // ===== TOAST =====
-function showToast(msg){
+function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-// ===== INIT =====
-function buildAllGrids(){
-  buildBodyGrid();
-  buildHairGrid();
-  buildHairColors();
-  buildBangsGrid();
-  buildHairBonusGrid();
-  buildSimpleGrid('grid-eyelashes','eyelashes','EYELASHES',5);
-  buildSimpleGrid('grid-pupils','pupils','PUPILS',16);
-  buildSimpleGrid('grid-eyebrows','eyebrows','EYEBROWS',5);
-  buildSimpleGrid('grid-mouth','mouth','MOUTH',20, false);
-  buildSimpleGrid('grid-beard','beard','BEARD',5, true);
-  buildTopGrid();
-  buildDressGrid();
-  buildBottomGrid();
-  buildShoesGrid();
-  buildGlovesGrid();
-}
-
-function loadSaved(){
+// ===== CHARGER L'AVATAR SAUVEGARDÉ =====
+function loadSaved() {
   try {
-    const saved = JSON.parse(localStorage.getItem('macadam_avatar') || 'null');
-    if(saved) {
-      Object.assign(S, saved.state);
-      document.getElementById('pseudo').value = saved.pseudo || '';
+    const saved = JSON.parse(localStorage.getItem('macadam_rpm_avatar') || 'null');
+    if(saved && saved.glbUrl) {
+      avatarGlbUrl = saved.glbUrl;
+      if(saved.pseudo) document.getElementById('pseudo').value = saved.pseudo;
+      showAvatar(saved.glbUrl);
     }
-  } catch(e){}
+  } catch(e) {}
 }
 
 loadSaved();
 
-// ===== BOOT =====
-(async () => {
-  try {
-    await loadAssetsZip();
-    const boot = document.getElementById('boot-screen');
-    boot.style.transition = 'opacity .4s';
-    boot.style.opacity = '0';
-    setTimeout(() => boot.remove(), 400);
-    buildAllGrids();
-    scheduleRender();
-  } catch(err) {
-    document.getElementById('load-error').style.display = 'block';
-    document.getElementById('load-error-msg').textContent = err.message;
-    document.getElementById('load-status').style.display = 'none';
-    document.getElementById('load-bar').parentElement.style.display = 'none';
-    console.error('Assets load error:', err);
-  }
-})();
+// Fermer modal en cliquant l'overlay
+document.getElementById('modal-overlay').addEventListener('click', (e) => {
+  if(e.target === e.currentTarget) closeRPM();
+});
 </script>
 
 </body>
