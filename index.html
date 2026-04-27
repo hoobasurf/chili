@@ -266,14 +266,19 @@ function openRPM() {
   iframe.style.display  = 'none';
   iframe.src = RPM_URL;
 
-  iframe.onload = () => {
+  // Safari/iOS : onload peu fiable sur iframe cross-origin
+  // On cache le spinner après 3s max dans tous les cas
+  function revealIframe() {
     loading.style.display = 'none';
     iframe.style.display  = 'block';
-    iframe.contentWindow.postMessage(
+    iframe.contentWindow?.postMessage(
       JSON.stringify({ target:'readyplayerme', type:'subscribe', eventName:'v1.**' }),
       '*'
     );
-  };
+  }
+
+  iframe.onload = revealIframe;
+  setTimeout(revealIframe, 3000); // fallback Safari
 }
 
 function closeRPM() {
