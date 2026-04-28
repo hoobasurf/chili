@@ -13,227 +13,104 @@
   --lav:#B388FF;--sky:#5BC8F5;--peach:#FF9E7A;
   --dark:#12082A;
 }
-
-/* PAGE FIXE SANS SCROLL */
 html,body{
 height:100%;width:100%;
-font-family:‘Nunito’,sans-serif;
-background:var(–dark);
+font-family:'Nunito',sans-serif;
+background:var(--dark);
 overflow:hidden;
 }
-
-/* ====== FOND MACADAM STYLISÉ ====== */
-.bg{
-position:fixed;inset:0;z-index:0;
-background:#0e0620;
-overflow:hidden;
-}
-/* Grandes formes géométriques colorées */
-.bg::before{
-content:’’;position:absolute;inset:0;
+.bg{position:fixed;inset:0;z-index:0;background:#0e0620;overflow:hidden;}
+.bg::before{content:'';position:absolute;inset:0;
 background:
 radial-gradient(ellipse 80% 50% at 10% 15%, #FF6EB455 0%, transparent 60%),
 radial-gradient(ellipse 60% 40% at 90% 80%, #B388FF44 0%, transparent 55%),
 radial-gradient(ellipse 70% 45% at 85% 10%, #3DDBB833 0%, transparent 55%),
 radial-gradient(ellipse 50% 35% at 15% 85%, #FFD74733 0%, transparent 50%),
-radial-gradient(ellipse 40% 30% at 50% 50%, #FF9E7A22 0%, transparent 60%);
-}
-/* Grille / texture macadam */
-.bg::after{
-content:’’;position:absolute;inset:0;
-background-image:
-linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
-linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
-background-size:40px 40px;
-}
-/* Canvas SVG pour les formes décoratives */
+radial-gradient(ellipse 40% 30% at 50% 50%, #FF9E7A22 0%, transparent 60%);}
+.bg::after{content:'';position:absolute;inset:0;
+background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);
+background-size:40px 40px;}
 .bg-shapes{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
-
 .stars{position:fixed;inset:0;z-index:0;pointer-events:none;}
-.star{position:absolute;border-radius:50%;background:white;animation:twinkle var(–d,3s) ease-in-out infinite var(–del,0s);}
+.star{position:absolute;border-radius:50%;background:white;animation:twinkle var(--d,3s) ease-in-out infinite var(--del,0s);}
 @keyframes twinkle{0%,100%{opacity:.1;transform:scale(1);}50%{opacity:.9;transform:scale(1.6);}}
 
-/* ====== LAYOUT FIXE ====== */
-.app{
-position:relative;z-index:1;
-height:100%;
-display:flex;flex-direction:column;align-items:center;justify-content:center;
-padding:12px 16px;
-gap:10px;
-}
+.app{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 16px;gap:10px;}
 
-/* HEADER compact */
-.logo-tag{
-display:inline-block;background:var(–yellow);color:var(–dark);
-font-size:.6rem;font-weight:900;letter-spacing:2px;text-transform:uppercase;
-padding:3px 10px;border-radius:20px;
-}
-.logo-title{
-font-family:‘Baloo 2’,cursive;font-size:clamp(1.3rem,5vw,2rem);
-font-weight:800;line-height:1;color:white;letter-spacing:-1px;text-align:center;
-}
+.logo-tag{display:inline-block;background:var(–yellow);color:var(–dark);font-size:.6rem;font-weight:900;letter-spacing:2px;text-transform:uppercase;padding:3px 10px;border-radius:20px;}
+.logo-title{font-family:‘Baloo 2’,cursive;font-size:clamp(1.3rem,5vw,2rem);font-weight:800;line-height:1;color:white;letter-spacing:-1px;text-align:center;}
 .logo-sub{font-size:.7rem;color:rgba(255,255,255,.3);font-weight:700;letter-spacing:1px;}
 
-/* CARD */
-.avatar-card{
-width:100%;max-width:340px;
-background:rgba(18,8,42,.7);
-backdrop-filter:blur(20px);
-border:1.5px solid rgba(255,255,255,.12);
-border-radius:24px;
-padding:16px;
-display:flex;flex-direction:column;align-items:center;gap:10px;
-box-shadow:
-0 20px 60px rgba(0,0,0,.5),
-0 0 0 1px rgba(255,110,180,.1),
-inset 0 1px 0 rgba(255,255,255,.08);
-}
+.avatar-card{width:100%;max-width:340px;background:rgba(18,8,42,.7);backdrop-filter:blur(20px);border:1.5px solid rgba(255,255,255,.12);border-radius:24px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:10px;box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(255,110,180,.1),inset 0 1px 0 rgba(255,255,255,.08);}
 
-/* VIEWER PETIT — avatar entier visible */
-.viewer-wrap{
-width:140px;height:200px;
-flex-shrink:0;
-background:linear-gradient(160deg,#1a0838 0%,#0d1535 60%,#0a1f2e 100%);
-border-radius:18px;
-box-shadow:
-0 0 0 2px rgba(255,110,180,.7),
-0 0 20px rgba(255,110,180,.3),
-0 0 40px rgba(179,136,255,.15);
-overflow:hidden;
-position:relative;
-align-self:center;
-}
-.viewer-wrap::before{
-content:’’;position:absolute;inset:0;z-index:0;pointer-events:none;
-background:
-radial-gradient(ellipse at 20% 5%,rgba(255,110,180,.2) 0%,transparent 50%),
-radial-gradient(ellipse at 80% 95%,rgba(179,136,255,.2) 0%,transparent 50%);
-}
-.viewer-wrap::after{
-content:‘✦ MW ✦’;
-position:absolute;bottom:6px;left:50%;transform:translateX(-50%);
-font-family:‘Baloo 2’,cursive;font-size:.45rem;font-weight:800;
-letter-spacing:2px;color:rgba(255,255,255,.25);z-index:2;pointer-events:none;
-white-space:nowrap;
-}
-.viewer-placeholder{
-width:100%;height:100%;
-display:flex;flex-direction:column;align-items:center;justify-content:center;
-gap:6px;color:rgba(255,255,255,.25);font-size:.7rem;font-weight:700;
-}
+.viewer-wrap{width:140px;height:200px;flex-shrink:0;background:linear-gradient(160deg,#1a0838 0%,#0d1535 60%,#0a1f2e 100%);border-radius:18px;box-shadow:0 0 0 2px rgba(255,110,180,.7),0 0 20px rgba(255,110,180,.3),0 0 40px rgba(179,136,255,.15);overflow:hidden;position:relative;align-self:center;}
+.viewer-wrap::before{content:’’;position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at 20% 5%,rgba(255,110,180,.2) 0%,transparent 50%),radial-gradient(ellipse at 80% 95%,rgba(179,136,255,.2) 0%,transparent 50%);}
+.viewer-wrap::after{content:‘✦ MW ✦’;position:absolute;bottom:6px;left:50%;transform:translateX(-50%);font-family:‘Baloo 2’,cursive;font-size:.45rem;font-weight:800;letter-spacing:2px;color:rgba(255,255,255,.25);z-index:2;pointer-events:none;white-space:nowrap;}
+.viewer-placeholder{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:rgba(255,255,255,.25);font-size:.7rem;font-weight:700;}
 .viewer-placeholder .icon{font-size:2rem;opacity:.4;}
 
-/* PSEUDO */
 .pseudo-wrap{width:100%;}
 .pseudo-label{font-size:.58rem;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.3);display:block;margin-bottom:5px;}
-.pseudo-input{
-width:100%;background:rgba(255,255,255,.07);
-border:1.5px solid rgba(255,255,255,.12);border-radius:12px;
-padding:9px 12px;font-family:‘Nunito’,sans-serif;font-size:15px;font-weight:700;
-color:white;outline:none;transition:all .2s;
-}
+.pseudo-input{width:100%;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.12);border-radius:12px;padding:9px 12px;font-family:‘Nunito’,sans-serif;font-size:16px;font-weight:700;color:white;outline:none;transition:all .2s;}
 .pseudo-input::placeholder{color:rgba(255,255,255,.2);}
 .pseudo-input:focus{border-color:var(–pink);background:rgba(255,110,180,.08);}
 
-/* BOUTONS */
-.btn-create{
-width:100%;background:linear-gradient(135deg,var(–pink),var(–lav));
-border:none;border-radius:12px;padding:12px;
-font-family:‘Baloo 2’,cursive;font-size:.95rem;font-weight:700;
-color:white;cursor:pointer;
-box-shadow:0 4px 16px rgba(255,110,180,.4);
-transition:transform .15s;
-}
+.btn-create{width:100%;background:linear-gradient(135deg,var(–pink),var(–lav));border:none;border-radius:12px;padding:12px;font-family:‘Baloo 2’,cursive;font-size:.95rem;font-weight:700;color:white;cursor:pointer;box-shadow:0 4px 16px rgba(255,110,180,.4);transition:transform .15s;}
 .btn-create:active{transform:scale(.97);}
-.btn-save{
-width:100%;background:rgba(61,219,184,.12);
-border:1.5px solid var(–mint);border-radius:12px;padding:10px;
-font-family:‘Nunito’,sans-serif;font-size:.88rem;font-weight:800;
-color:var(–mint);cursor:pointer;transition:all .2s;display:none;
-}
+
+.btn-save{width:100%;background:rgba(61,219,184,.12);border:1.5px solid var(–mint);border-radius:12px;padding:10px;font-family:‘Nunito’,sans-serif;font-size:.88rem;font-weight:800;color:var(–mint);cursor:pointer;transition:all .2s;display:none;}
 .btn-save.visible{display:block;}
 
-/* BADGE */
-.avatar-badge{
-display:none;align-items:center;gap:6px;
-background:rgba(61,219,184,.1);border:1px solid rgba(61,219,184,.3);
-border-radius:10px;padding:6px 12px;width:100%;
-}
+/* Bouton Jouer — apparaît après avatar prêt */
+.btn-play{width:100%;background:linear-gradient(135deg,var(–mint),var(–sky));border:none;border-radius:12px;padding:13px;font-family:‘Baloo 2’,cursive;font-size:1rem;font-weight:700;color:var(–dark);cursor:pointer;box-shadow:0 4px 16px rgba(61,219,184,.4);transition:transform .15s;display:none;animation:glow 2s ease-in-out infinite;}
+.btn-play.visible{display:block;}
+.btn-play:active{transform:scale(.97);}
+@keyframes glow{0%,100%{box-shadow:0 4px 16px rgba(61,219,184,.4);}50%{box-shadow:0 4px 28px rgba(61,219,184,.7);}}
+
+.avatar-badge{display:none;align-items:center;gap:6px;background:rgba(61,219,184,.1);border:1px solid rgba(61,219,184,.3);border-radius:10px;padding:6px 12px;width:100%;}
 .avatar-badge.visible{display:flex;}
 .avatar-badge .dot{width:7px;height:7px;border-radius:50%;background:var(–mint);flex-shrink:0;animation:pulse 1.5s ease-in-out infinite;}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.3);}}
 .avatar-badge span{font-size:.72rem;font-weight:800;color:var(–mint);}
 
-/* MODAL */
-.modal-overlay{
-position:fixed;inset:0;z-index:100;
-background:rgba(0,0,0,.95);
-display:flex;flex-direction:column;
-opacity:0;pointer-events:none;transition:opacity .3s;
-}
+.modal-overlay{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.95);display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .3s;}
 .modal-overlay.open{opacity:1;pointer-events:all;}
-.modal-header{
-display:flex;align-items:center;justify-content:space-between;
-padding:12px 16px;
-background:rgba(255,255,255,.04);
-border-bottom:1px solid rgba(255,255,255,.08);
-flex-shrink:0;
-}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0;}
 .modal-title{font-size:.85rem;font-weight:800;color:rgba(255,255,255,.6);letter-spacing:1px;}
-.btn-close{
-background:rgba(255,255,255,.1);border:none;border-radius:10px;
-width:36px;height:36px;cursor:pointer;font-size:1.1rem;color:white;
-display:flex;align-items:center;justify-content:center;
-}
+.btn-close{background:rgba(255,255,255,.1);border:none;border-radius:10px;width:36px;height:36px;cursor:pointer;font-size:1.1rem;color:white;display:flex;align-items:center;justify-content:center;}
 #avaturn-sdk-container{flex:1;width:100%;overflow:hidden;}
 #avaturn-sdk-container iframe{width:100%!important;height:100%!important;border:none!important;}
 
-.toast{
-position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
-background:var(–mint);color:var(–dark);
-padding:10px 22px;border-radius:14px;font-size:.88rem;font-weight:800;
-box-shadow:0 8px 24px rgba(61,219,184,.4);
-transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:999;pointer-events:none;
-}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(–mint);color:var(–dark);padding:10px 22px;border-radius:14px;font-size:.88rem;font-weight:800;box-shadow:0 8px 24px rgba(61,219,184,.4);transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:999;pointer-events:none;}
 .toast.show{transform:translateX(-50%) translateY(0);}
+
+/* Écran de transition */
+#transition-screen{position:fixed;inset:0;z-index:200;background:#0e0620;opacity:0;pointer-events:none;transition:opacity .5s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
+#transition-screen.show{opacity:1;pointer-events:all;}
+.transition-logo{font-family:‘Baloo 2’,cursive;font-size:2rem;font-weight:800;color:white;}
+.transition-txt{font-size:.8rem;color:rgba(255,255,255,.5);font-weight:700;letter-spacing:1px;}
+.transition-spinner{width:36px;height:36px;border:3px solid rgba(255,110,180,.2);border-top-color:var(–pink);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
 </style>
 
 </head>
 <body>
 
 <div class="bg"></div>
-
-<!-- FORMES DÉCORATIVES SVG MACADAM -->
-
 <div class="bg-shapes">
 <svg width="100%" height="100%" viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-  <!-- Cercles flottants -->
   <circle cx="340" cy="80" r="90" fill="#FF6EB4" opacity=".07"/>
   <circle cx="50" cy="200" r="60" fill="#B388FF" opacity=".09"/>
   <circle cx="360" cy="700" r="110" fill="#3DDBB8" opacity=".06"/>
   <circle cx="30" cy="750" r="70" fill="#FFD747" opacity=".07"/>
-  <circle cx="200" cy="420" r="50" fill="#FF9E7A" opacity=".05"/>
-  <!-- Losanges / formes géométriques -->
   <polygon points="320,150 360,200 320,250 280,200" fill="#FFD747" opacity=".06"/>
   <polygon points="60,550 100,600 60,650 20,600" fill="#FF6EB4" opacity=".07"/>
-  <polygon points="350,420 390,470 350,520 310,470" fill="#5BC8F5" opacity=".06"/>
-  <!-- Lignes diagonales décoratives -->
   <line x1="0" y1="300" x2="150" y2="0" stroke="#B388FF" stroke-width="1" opacity=".12"/>
   <line x1="390" y1="500" x2="240" y2="844" stroke="#FF6EB4" stroke-width="1" opacity=".12"/>
-  <line x1="0" y1="600" x2="390" y2="200" stroke="#3DDBB8" stroke-width=".8" opacity=".08"/>
-  <!-- Petits carrés rotatifs -->
-  <rect x="70" y="100" width="20" height="20" rx="4" fill="#3DDBB8" opacity=".1" transform="rotate(20 80 110)"/>
-  <rect x="300" y="350" width="16" height="16" rx="3" fill="#FFD747" opacity=".1" transform="rotate(35 308 358)"/>
-  <rect x="40" y="680" width="18" height="18" rx="3" fill="#FF6EB4" opacity=".1" transform="rotate(15 49 689)"/>
-  <rect x="330" y="600" width="14" height="14" rx="3" fill="#5BC8F5" opacity=".1" transform="rotate(25 337 607)"/>
-  <!-- Étoiles déco -->
   <text x="20" y="400" font-size="18" fill="#FFD747" opacity=".15">✦</text>
   <text x="350" y="300" font-size="14" fill="#FF6EB4" opacity=".15">✦</text>
-  <text x="180" y="800" font-size="16" fill="#B388FF" opacity=".15">✦</text>
-  <text x="100" y="50" font-size="12" fill="#3DDBB8" opacity=".15">✦</text>
 </svg>
 </div>
-
 <div class="stars" id="stars"></div>
 
 <div class="app">
@@ -246,16 +123,14 @@ transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:999;pointer-events:n
   <div class="logo-sub">Avatar 3D — Powered by Avaturn</div>
 
   <div class="avatar-card">
+    <div class="viewer-wrap" id="viewer-wrap">
+      <div class="viewer-placeholder" id="viewer-placeholder">
+        <div class="icon">🧍</div>
+        <span>Avatar ici</span>
+      </div>
+    </div>
 
 ```
-<!-- VIEWER PETIT centré -->
-<div class="viewer-wrap" id="viewer-wrap">
-  <div class="viewer-placeholder" id="viewer-placeholder">
-    <div class="icon">🧍</div>
-    <span>Avatar ici</span>
-  </div>
-</div>
-
 <div class="avatar-badge" id="avatar-badge">
   <div class="dot"></div>
   <span>Avatar 3D prêt ✨</span>
@@ -267,7 +142,8 @@ transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:999;pointer-events:n
 </div>
 
 <button class="btn-create" onclick="openAvaturn()">🧬 Créer / Modifier mon avatar 3D</button>
-<button class="btn-save" id="btn-save" onclick="saveAvatar()">✨ Sauvegarder</button>
+<button class="btn-save" id="btn-save" onclick="saveAndPlay()">✨ Sauvegarder</button>
+<button class="btn-play" id="btn-play" onclick="goToWorld()">🌍 Entrer dans Macadam World →</button>
 ```
 
   </div>
@@ -281,6 +157,16 @@ transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:999;pointer-events:n
     <button class="btn-close" onclick="closeAvaturn()">✕</button>
   </div>
   <div id="avaturn-sdk-container"></div>
+</div>
+
+<!-- ÉCRAN DE TRANSITION -->
+
+<div id="transition-screen">
+  <div class="transition-logo">
+    <span style="color:var(--pink)">M</span><span style="color:var(--yellow)">A</span><span style="color:var(--mint)">C</span><span style="color:var(--sky)">A</span><span style="color:var(--lav)">D</span><span style="color:var(--peach)">A</span><span style="color:var(--pink)">M</span>
+  </div>
+  <div class="transition-spinner"></div>
+  <div class="transition-txt">Chargement de Place Pastel…</div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -319,17 +205,18 @@ async function openAvaturn(){
     sdk=new AvaturnSDK();
     await sdk.init(container,{url:'https://demo.avaturn.dev'});
     sdk.on('export',(data)=>{
-      // Avaturn peut retourner l'URL sous différentes clés
       const glb=data?.url||data?.avatarUrl||data?.glbUrl||data?.modelUrl;
       if(glb){
         avatarGlbUrl=glb;
         closeAvaturn();
         showAvatar(glb);
-        persistAvatar(glb,document.getElementById('pseudo').value.trim());
-        showToast('🎉 Avatar créé et sauvegardé !');
+        // Sauvegarder automatiquement avec le pseudo actuel
+        const pseudo=document.getElementById('pseudo').value.trim();
+        persistAvatar(glb, pseudo);
+        showToast('🎉 Avatar créé !');
         document.getElementById('btn-save').classList.add('visible');
+        document.getElementById('btn-play').classList.add('visible');
       } else {
-        // Log pour debug si l'URL n'est pas trouvée
         console.log('Export data:', JSON.stringify(data));
         showToast('❓ Export reçu — voir console');
       }
@@ -362,7 +249,6 @@ function showAvatar(glbUrl){
   mv.setAttribute('auto-rotate-delay','1000');
   mv.setAttribute('rotation-per-second','30deg');
   mv.setAttribute('camera-orbit','0deg 88deg auto');
-  mv.setAttribute('camera-target','auto auto auto');
   mv.setAttribute('field-of-view','45deg');
   mv.setAttribute('shadow-intensity','1');
   mv.setAttribute('environment-image','neutral');
@@ -374,16 +260,37 @@ function showAvatar(glbUrl){
 
 // SAUVEGARDER
 function persistAvatar(glbUrl,pseudo){
+  if(!pseudo) pseudo = document.getElementById('pseudo').value.trim();
   localStorage.setItem(storageKey(),JSON.stringify({glbUrl,pseudo,savedAt:Date.now()}));
-  if(pseudo)document.getElementById('pseudo').value=pseudo;
+  if(pseudo) document.getElementById('pseudo').value=pseudo;
 }
 
-window.saveAvatar=function(){
+// SAUVEGARDER + JOUER (bouton Sauvegarder)
+window.saveAndPlay=function(){
   const pseudo=document.getElementById('pseudo').value.trim();
   if(!pseudo){showToast('✏️ Entre ton pseudo !');return;}
   if(!avatarGlbUrl){showToast('👆 Crée d\'abord ton avatar !');return;}
   persistAvatar(avatarGlbUrl,pseudo);
-  showToast('✨ Avatar sauvegardé !');
+  showToast('✨ Sauvegardé !');
+  // Afficher le bouton Jouer si pas déjà visible
+  document.getElementById('btn-play').classList.add('visible');
+};
+
+// ALLER DANS LE MONDE
+window.goToWorld=function(){
+  const pseudo=document.getElementById('pseudo').value.trim();
+  if(!pseudo){showToast('✏️ Entre ton pseudo d\'abord !');return;}
+  // Sauvegarder le pseudo même si avatar pas changé
+  if(avatarGlbUrl) persistAvatar(avatarGlbUrl,pseudo);
+  else {
+    // Sauvegarder juste le pseudo avec l'avatar existant
+    const existing=JSON.parse(localStorage.getItem(storageKey())||'{}');
+    if(existing.glbUrl) persistAvatar(existing.glbUrl,pseudo);
+  }
+  // Transition
+  const ts=document.getElementById('transition-screen');
+  ts.classList.add('show');
+  setTimeout(()=>{ window.location.href='world.html'; }, 1200);
 };
 
 // TOAST
@@ -402,6 +309,7 @@ function loadSaved(){
       if(saved.pseudo)document.getElementById('pseudo').value=saved.pseudo;
       showAvatar(saved.glbUrl);
       document.getElementById('btn-save').classList.add('visible');
+      document.getElementById('btn-play').classList.add('visible');
     }
   }catch(e){}
 }
