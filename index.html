@@ -37,10 +37,30 @@ radial-gradient(ellipse at 90% 80%,#FFD74730 0%,transparent 45%),
   box-shadow:0 24px 60px rgba(0,0,0,.4);
 }
 .viewer-wrap{
-  width:100%;aspect-ratio:3/4;max-height:340px;
-  background:rgba(255,255,255,.04);border-radius:20px;
-  border:1.5px solid rgba(255,255,255,.08);overflow:hidden;
+  width:100%;aspect-ratio:9/14;
+  background:linear-gradient(160deg,#1a0838 0%,#0d1535 50%,#0a1f2e 100%);
+  border-radius:24px;
+  box-shadow:
+    0 0 0 2px rgba(255,110,180,.6),
+    0 0 24px rgba(255,110,180,.25),
+    0 0 50px rgba(179,136,255,.15),
+    inset 0 0 40px rgba(0,0,0,.5);
+  overflow:hidden;
   position:relative;display:flex;align-items:center;justify-content:center;
+}
+.viewer-wrap::before{
+  content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse at 15% 5%,rgba(255,110,180,.18) 0%,transparent 45%),
+    radial-gradient(ellipse at 85% 95%,rgba(179,136,255,.18) 0%,transparent 45%),
+    radial-gradient(ellipse at 80% 5%,rgba(61,219,184,.1) 0%,transparent 40%);
+}
+.viewer-wrap::after{
+  content:'✦ MACADAM WORLD ✦';
+  position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
+  font-family:'Baloo 2',cursive;font-size:.55rem;font-weight:800;
+  letter-spacing:3px;color:rgba(255,255,255,.2);z-index:2;pointer-events:none;
+  white-space:nowrap;
 }
 .viewer-placeholder{display:flex;flex-direction:column;align-items:center;gap:10px;color:rgba(255,255,255,.25);font-size:.85rem;font-weight:700;}
 .viewer-placeholder .icon{font-size:3rem;opacity:.4;}
@@ -243,11 +263,16 @@ function showAvatar(glbUrl){
   mv.setAttribute('auto-rotate','');
   mv.setAttribute('auto-rotate-delay','1000');
   mv.setAttribute('rotation-per-second','30deg');
-  mv.setAttribute('camera-orbit','0deg 80deg 2.5m');
-  mv.setAttribute('shadow-intensity','1');
+  mv.setAttribute('camera-orbit','0deg 85deg 2m');
+  mv.setAttribute('camera-target','0m 1m 0m');
+  mv.setAttribute('field-of-view','25deg');
+  mv.setAttribute('min-field-of-view','15deg');
+  mv.setAttribute('max-field-of-view','40deg');
+  mv.setAttribute('shadow-intensity','1.5');
+  mv.setAttribute('shadow-softness','1');
   mv.setAttribute('environment-image','neutral');
-  mv.setAttribute('exposure','1');
-  mv.style.cssText='width:100%;height:100%;background:transparent;--progress-bar-color:var(--pink);';
+  mv.setAttribute('exposure','1.1');
+  mv.style.cssText='width:100%;height:100%;background:transparent;--progress-bar-color:var(--pink);position:relative;z-index:1;';
   wrap.appendChild(mv);
   document.getElementById('avatar-badge').classList.add('visible');
 }
