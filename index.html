@@ -14,7 +14,6 @@
   --dark:#12082A;
 }
 html,body{min-height:100vh;font-family:'Nunito',sans-serif;background:var(--dark);overflow-x:hidden;}
-
 .bg{position:fixed;inset:0;z-index:0;
 background:
 radial-gradient(ellipse at 15% 20%,#FF6EB440 0%,transparent 45%),
@@ -23,80 +22,87 @@ radial-gradient(ellipse at 10% 80%,#3DDBB830 0%,transparent 45%),
 radial-gradient(ellipse at 90% 80%,#FFD74730 0%,transparent 45%),
 #12082A;}
 .stars{position:fixed;inset:0;z-index:0;pointer-events:none;}
-.star{position:absolute;border-radius:50%;background:white;animation:twinkle var(–d,3s) ease-in-out infinite var(–del,0s);}
+.star{position:absolute;border-radius:50%;background:white;animation:twinkle var(--d,3s) ease-in-out infinite var(--del,0s);}
 @keyframes twinkle{0%,100%{opacity:.1;transform:scale(1);}50%{opacity:.8;transform:scale(1.5);}}
-
 .app{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:24px 16px 40px;}
-
-.logo-tag{display:inline-block;background:var(–yellow);color:var(–dark);font-size:.65rem;font-weight:900;letter-spacing:3px;text-transform:uppercase;padding:4px 12px;border-radius:20px;margin-bottom:10px;}
-.logo-title{font-family:‘Baloo 2’,cursive;font-size:clamp(1.6rem,6vw,2.8rem);font-weight:800;line-height:1;color:white;letter-spacing:-1px;text-align:center;margin-bottom:6px;}
+.logo-tag{display:inline-block;background:var(--yellow);color:var(--dark);font-size:.65rem;font-weight:900;letter-spacing:3px;text-transform:uppercase;padding:4px 12px;border-radius:20px;margin-bottom:10px;}
+.logo-title{font-family:'Baloo 2',cursive;font-size:clamp(1.6rem,6vw,2.8rem);font-weight:800;line-height:1;color:white;letter-spacing:-1px;text-align:center;margin-bottom:6px;}
 .logo-sub{font-size:.8rem;color:rgba(255,255,255,.35);font-weight:700;letter-spacing:1px;margin-bottom:28px;}
-
 .avatar-card{
-width:100%;max-width:360px;
-background:rgba(255,255,255,.05);
-border:1.5px solid rgba(255,255,255,.1);
-border-radius:28px;
-padding:24px 20px;
-display:flex;flex-direction:column;align-items:center;gap:16px;
-box-shadow:0 24px 60px rgba(0,0,0,.4);
+  width:100%;max-width:360px;
+  background:rgba(255,255,255,.05);
+  border:1.5px solid rgba(255,255,255,.1);
+  border-radius:28px;padding:24px 20px;
+  display:flex;flex-direction:column;align-items:center;gap:16px;
+  box-shadow:0 24px 60px rgba(0,0,0,.4);
 }
-
 .viewer-wrap{
-width:100%;aspect-ratio:3/4;max-height:340px;
-background:rgba(255,255,255,.04);
-border-radius:20px;
-border:1.5px solid rgba(255,255,255,.08);
-overflow:hidden;position:relative;
-display:flex;align-items:center;justify-content:center;
+  width:100%;aspect-ratio:3/4;max-height:340px;
+  background:rgba(255,255,255,.04);border-radius:20px;
+  border:1.5px solid rgba(255,255,255,.08);overflow:hidden;
+  position:relative;display:flex;align-items:center;justify-content:center;
 }
-.viewer-placeholder{
-display:flex;flex-direction:column;align-items:center;gap:10px;
-color:rgba(255,255,255,.25);font-size:.85rem;font-weight:700;
-}
+.viewer-placeholder{display:flex;flex-direction:column;align-items:center;gap:10px;color:rgba(255,255,255,.25);font-size:.85rem;font-weight:700;}
 .viewer-placeholder .icon{font-size:3rem;opacity:.4;}
-
 .pseudo-wrap{width:100%;}
 .pseudo-label{font-size:.62rem;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.3);display:block;margin-bottom:6px;}
 .pseudo-input{
-width:100%;background:rgba(255,255,255,.07);
-border:1.5px solid rgba(255,255,255,.12);border-radius:14px;
-padding:11px 14px;font-family:‘Nunito’,sans-serif;font-size:16px;font-weight:700;
-color:white;outline:none;transition:all .2s;
+  width:100%;background:rgba(255,255,255,.07);
+  border:1.5px solid rgba(255,255,255,.12);border-radius:14px;
+  padding:11px 14px;font-family:'Nunito',sans-serif;font-size:16px;font-weight:700;
+  color:white;outline:none;transition:all .2s;
 }
 .pseudo-input::placeholder{color:rgba(255,255,255,.2);}
-.pseudo-input:focus{border-color:var(–pink);background:rgba(255,110,180,.08);}
-
+.pseudo-input:focus{border-color:var(--pink);background:rgba(255,110,180,.08);}
 .btn-create{
-width:100%;background:linear-gradient(135deg,var(–pink),var(–lav));
-border:none;border-radius:14px;padding:14px;
-font-family:‘Baloo 2’,cursive;font-size:1.05rem;font-weight:700;
-color:white;cursor:pointer;
-box-shadow:0 6px 20px rgba(255,110,180,.4);
-transition:transform .15s,box-shadow .15s;
+  width:100%;background:linear-gradient(135deg,var(--pink),var(--lav));
+  border:none;border-radius:14px;padding:14px;
+  font-family:'Baloo 2',cursive;font-size:1.05rem;font-weight:700;
+  color:white;cursor:pointer;
+  box-shadow:0 6px 20px rgba(255,110,180,.4);
+  transition:transform .15s,box-shadow .15s;
 }
-.btn-create:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(255,110,180,.55);}
 .btn-create:active{transform:scale(.97);}
-
 .btn-save{
-width:100%;background:rgba(61,219,184,.15);
-border:1.5px solid var(–mint);border-radius:14px;padding:12px;
-font-family:‘Nunito’,sans-serif;font-size:.95rem;font-weight:800;
-color:var(–mint);cursor:pointer;transition:all .2s;
-display:none;
+  width:100%;background:rgba(61,219,184,.15);
+  border:1.5px solid var(--mint);border-radius:14px;padding:12px;
+  font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:800;
+  color:var(--mint);cursor:pointer;transition:all .2s;display:none;
 }
-.btn-save:hover{background:rgba(61,219,184,.25);}
 .btn-save.visible{display:block;}
-
 .avatar-badge{
-display:none;align-items:center;gap:8px;
-background:rgba(61,219,184,.12);border:1px solid rgba(61,219,184,.3);
-border-radius:12px;padding:8px 14px;width:100%;
+  display:none;align-items:center;gap:8px;
+  background:rgba(61,219,184,.12);border:1px solid rgba(61,219,184,.3);
+  border-radius:12px;padding:8px 14px;width:100%;
 }
 .avatar-badge.visible{display:flex;}
-.avatar-badge .dot{width:8px;height:8px;border-radius:50%;background:var(–mint);flex-shrink:0;animation:pulse 1.5s ease-in-out infinite;}
+.avatar-badge .dot{width:8px;height:8px;border-radius:50%;background:var(--mint);flex-shrink:0;animation:pulse 1.5s ease-in-out infinite;}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.3);}}
-.avatar-badge span{font-size:.78rem;font-weight:800;color:var(–mint);}
+.avatar-badge span{font-size:.78rem;font-weight:800;color:var(--mint);}
+
+/* MODAL */
+.modal-overlay{
+position:fixed;inset:0;z-index:100;
+background:rgba(0,0,0,.95);
+display:flex;flex-direction:column;
+opacity:0;pointer-events:none;transition:opacity .3s;
+}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal-header{
+display:flex;align-items:center;justify-content:space-between;
+padding:12px 16px;
+background:rgba(255,255,255,.04);
+border-bottom:1px solid rgba(255,255,255,.08);
+flex-shrink:0;
+}
+.modal-title{font-size:.85rem;font-weight:800;color:rgba(255,255,255,.6);letter-spacing:1px;}
+.btn-close{
+background:rgba(255,255,255,.1);border:none;border-radius:10px;
+width:36px;height:36px;cursor:pointer;font-size:1.1rem;color:white;
+display:flex;align-items:center;justify-content:center;
+}
+#avaturn-sdk-container{flex:1;width:100%;overflow:hidden;}
+#avaturn-sdk-container iframe{width:100%!important;height:100%!important;border:none!important;}
 
 .toast{
 position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
@@ -121,18 +127,17 @@ transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:999;pointer-events:n
     <span style="color:rgba(255,255,255,.2);font-size:.7em;margin:0 8px;">✦</span>
     <span style="color:var(--yellow)">W</span><span style="color:var(--mint)">O</span><span style="color:var(--sky)">R</span><span style="color:var(--lav)">L</span><span style="color:var(--peach)">D</span>
   </div>
-  <div class="logo-sub">Avatar 3D — Powered by Ready Player Me</div>
+  <div class="logo-sub">Avatar 3D — Powered by Avaturn</div>
 
   <div class="avatar-card">
+    <div class="viewer-wrap" id="viewer-wrap">
+      <div class="viewer-placeholder" id="viewer-placeholder">
+        <div class="icon">🧍</div>
+        <span>Ton avatar apparaîtra ici</span>
+      </div>
+    </div>
 
 ```
-<div class="viewer-wrap" id="viewer-wrap">
-  <div class="viewer-placeholder" id="viewer-placeholder">
-    <div class="icon">🧍</div>
-    <span>Ton avatar apparaîtra ici</span>
-  </div>
-</div>
-
 <div class="avatar-badge" id="avatar-badge">
   <div class="dot"></div>
   <span>Avatar 3D prêt ✨</span>
@@ -143,25 +148,31 @@ transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:999;pointer-events:n
   <input class="pseudo-input" id="pseudo" type="text" maxlength="16" placeholder="StarMochi…" autocomplete="off"/>
 </div>
 
-<button class="btn-create" id="btn-create" onclick="openRPM()">
-  🧬 Créer / Modifier mon avatar 3D
-</button>
-<button class="btn-save" id="btn-save" onclick="saveAvatar()">
-  ✨ Sauvegarder
-</button>
+<button class="btn-create" onclick="openAvaturn()">🧬 Créer / Modifier mon avatar 3D</button>
+<button class="btn-save" id="btn-save" onclick="saveAvatar()">✨ Sauvegarder</button>
 ```
 
   </div>
 </div>
 
-<!-- Modal supprimée : RPM s'ouvre dans le même onglet via redirectUrl -->
+<!-- MODAL AVATURN -->
+
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-header">
+    <span class="modal-title">✦ CRÉATEUR D'AVATAR</span>
+    <button class="btn-close" onclick="closeAvaturn()">✕</button>
+  </div>
+  <div id="avaturn-sdk-container"></div>
+</div>
 
 <div class="toast" id="toast"></div>
 
 <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
 
-<script>
-// ===== ÉTOILES =====
+<script type="module">
+import { AvaturnSDK } from 'https://cdn.jsdelivr.net/npm/@avaturn/sdk/dist/index.js';
+
+// ÉTOILES
 const starsEl = document.getElementById('stars');
 for(let i=0;i<60;i++){
   const s=document.createElement('div');s.className='star';
@@ -170,114 +181,120 @@ for(let i=0;i<60;i++){
   starsEl.appendChild(s);
 }
 
-// ===== CLÉ LOCALE UNIQUE PAR APPAREIL =====
-function getUserId() {
-  let uid = localStorage.getItem('macadam_user_id');
-  if (!uid) {
-    uid = crypto.randomUUID();
-    localStorage.setItem('macadam_user_id', uid);
-  }
+// UUID par appareil
+function getUserId(){
+  let uid=localStorage.getItem('macadam_user_id');
+  if(!uid){uid=crypto.randomUUID();localStorage.setItem('macadam_user_id',uid);}
   return uid;
 }
-function storageKey() {
-  return 'macadam_avatar_' + getUserId();
-}
+function storageKey(){return 'macadam_avatar_'+getUserId();}
 
-let avatarGlbUrl = null;
+let avatarGlbUrl=null;
+let sdk=null;
 
-// ===== RPM — MÊME ONGLET + REDIRECT =====
-// Safari iOS bloque les iframes cross-origin.
-// On redirige vers RPM avec redirectUrl= pointant vers cette page.
-// RPM renvoie vers ?avatarUrl=https://....glb
-function openRPM() {
-  const base = window.location.href.split('?')[0];
-  const redirectUrl = encodeURIComponent(base);
-  window.location.href = `https://demo.readyplayer.me/avatar?frameApi&redirectUrl=${redirectUrl}`;
-}
-
-// Au retour de RPM, lire le paramètre avatarUrl dans l'URL
-function checkRedirectReturn() {
-  const params = new URLSearchParams(window.location.search);
-  const glbUrl = params.get('avatarUrl');
-  if (glbUrl) {
-    avatarGlbUrl = glbUrl;
-    showAvatar(glbUrl);
-    persistAvatar(glbUrl, document.getElementById('pseudo').value.trim());
-    showToast('🎉 Avatar créé et sauvegardé !');
-    document.getElementById('btn-save').classList.add('visible');
-    // Nettoyer l'URL sans recharger
-    window.history.replaceState({}, '', window.location.pathname);
+// OUVRIR AVATURN
+async function openAvaturn(){
+  document.getElementById('modal-overlay').classList.add('open');
+  const container=document.getElementById('avaturn-sdk-container');
+  container.innerHTML='';
+  try{
+    sdk=new AvaturnSDK();
+    await sdk.init(container,{url:'https://demo.avaturn.dev'});
+    sdk.on('export',(data)=>{
+      // Avaturn peut retourner l'URL sous différentes clés
+      const glb=data?.url||data?.avatarUrl||data?.glbUrl||data?.modelUrl;
+      if(glb){
+        avatarGlbUrl=glb;
+        closeAvaturn();
+        showAvatar(glb);
+        persistAvatar(glb,document.getElementById('pseudo').value.trim());
+        showToast('🎉 Avatar créé et sauvegardé !');
+        document.getElementById('btn-save').classList.add('visible');
+      } else {
+        // Log pour debug si l'URL n'est pas trouvée
+        console.log('Export data:', JSON.stringify(data));
+        showToast('❓ Export reçu — voir console');
+      }
+    });
+  }catch(e){
+    console.error(e);
+    showToast('❌ Erreur — réessaie');
   }
 }
 
-function showAvatar(glbUrl) {
-  const wrap        = document.getElementById('viewer-wrap');
-  const placeholder = document.getElementById('viewer-placeholder');
-  const badge       = document.getElementById('avatar-badge');
+// FERMER
+function closeAvaturn(){
+  document.getElementById('modal-overlay').classList.remove('open');
+  try{if(sdk)sdk.destroy?.();}catch(e){}
+  sdk=null;
+  setTimeout(()=>{document.getElementById('avaturn-sdk-container').innerHTML='';},300);
+}
 
-  if (placeholder) placeholder.remove();
-  const old = wrap.querySelector('model-viewer');
-  if (old) old.remove();
-
-  const mv = document.createElement('model-viewer');
-  mv.setAttribute('src', glbUrl);
-  mv.setAttribute('camera-controls', '');
-  mv.setAttribute('auto-rotate', '');
-  mv.setAttribute('auto-rotate-delay', '1000');
-  mv.setAttribute('rotation-per-second', '30deg');
-  mv.setAttribute('camera-orbit', '0deg 80deg 2.5m');
-  mv.setAttribute('min-camera-orbit', 'auto 0deg auto');
-  mv.setAttribute('max-camera-orbit', 'auto 180deg auto');
-  mv.setAttribute('shadow-intensity', '1');
-  mv.setAttribute('environment-image', 'neutral');
-  mv.setAttribute('exposure', '1');
-  mv.style.cssText = 'width:100%;height:100%;background:transparent;--progress-bar-color:var(--pink);';
+// AFFICHER L'AVATAR
+function showAvatar(glbUrl){
+  const wrap=document.getElementById('viewer-wrap');
+  const ph=document.getElementById('viewer-placeholder');
+  if(ph)ph.remove();
+  const old=wrap.querySelector('model-viewer');
+  if(old)old.remove();
+  const mv=document.createElement('model-viewer');
+  mv.setAttribute('src',glbUrl);
+  mv.setAttribute('camera-controls','');
+  mv.setAttribute('auto-rotate','');
+  mv.setAttribute('auto-rotate-delay','1000');
+  mv.setAttribute('rotation-per-second','30deg');
+  mv.setAttribute('camera-orbit','0deg 80deg 2.5m');
+  mv.setAttribute('shadow-intensity','1');
+  mv.setAttribute('environment-image','neutral');
+  mv.setAttribute('exposure','1');
+  mv.style.cssText='width:100%;height:100%;background:transparent;--progress-bar-color:var(--pink);';
   wrap.appendChild(mv);
-
-  badge.classList.add('visible');
+  document.getElementById('avatar-badge').classList.add('visible');
 }
 
-function persistAvatar(glbUrl, pseudo) {
-  localStorage.setItem(storageKey(), JSON.stringify({
-    glbUrl,
-    pseudo,
-    savedAt: Date.now()
-  }));
-  // Met aussi à jour le pseudo affiché
-  if (pseudo) document.getElementById('pseudo').value = pseudo;
+// SAUVEGARDER
+function persistAvatar(glbUrl,pseudo){
+  localStorage.setItem(storageKey(),JSON.stringify({glbUrl,pseudo,savedAt:Date.now()}));
+  if(pseudo)document.getElementById('pseudo').value=pseudo;
 }
 
-function saveAvatar() {
-  const pseudo = document.getElementById('pseudo').value.trim();
-  if (!pseudo)        { showToast('✏️ Entre ton pseudo !');          return; }
-  if (!avatarGlbUrl)  { showToast('👆 Crée d\'abord ton avatar !');  return; }
-  persistAvatar(avatarGlbUrl, pseudo);
+window.saveAvatar=function(){
+  const pseudo=document.getElementById('pseudo').value.trim();
+  if(!pseudo){showToast('✏️ Entre ton pseudo !');return;}
+  if(!avatarGlbUrl){showToast('👆 Crée d\'abord ton avatar !');return;}
+  persistAvatar(avatarGlbUrl,pseudo);
   showToast('✨ Avatar sauvegardé !');
+};
+
+// TOAST
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
 }
 
-// ===== TOAST =====
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-// ===== CHARGER L'AVATAR AU RETOUR =====
-function loadSaved() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(storageKey()) || 'null');
-    if (saved && saved.glbUrl) {
-      avatarGlbUrl = saved.glbUrl;
-      if (saved.pseudo) document.getElementById('pseudo').value = saved.pseudo;
+// CHARGER AVATAR SAUVEGARDÉ
+function loadSaved(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(storageKey())||'null');
+    if(saved?.glbUrl){
+      avatarGlbUrl=saved.glbUrl;
+      if(saved.pseudo)document.getElementById('pseudo').value=saved.pseudo;
       showAvatar(saved.glbUrl);
       document.getElementById('btn-save').classList.add('visible');
     }
-  } catch(e) {}
+  }catch(e){}
 }
-
 loadSaved();
-checkRedirectReturn();
+
+// Exposer globalement
+window.openAvaturn=openAvaturn;
+window.closeAvaturn=closeAvaturn;
+
+// Clic overlay pour fermer
+document.getElementById('modal-overlay').addEventListener('click',(e)=>{
+  if(e.target===e.currentTarget)closeAvaturn();
+});
 </script>
 
 </body>
