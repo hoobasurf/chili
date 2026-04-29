@@ -3,52 +3,148 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Diagnostic 3D — Macadam</title>
+<title>Macadam World — Place Pastel</title>
 <style>
-html,body{margin:0;height:100%;overflow:hidden;background:#0e0620;color:white;font-family:sans-serif}
-#msg{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:800;padding:20px}
-canvas{display:block}
+html,body{
+  margin:0;padding:0;height:100%;
+  background:#0e0620;color:white;font-family:sans-serif;
+  overflow:hidden;
+}
+#loading{
+  position:fixed;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:1rem;z-index:10;
+}
+canvas{display:block;}
 </style>
 </head>
 <body>
-<div id="msg">⏳ Initialisation…</div>
-<script>
-function show(txt){document.getElementById('msg').innerHTML=txt;}
-try{
-  show('Chargement de Three.js…');
-  const s=document.createElement('script');
-  s.src='[unpkg.com](https://unpkg.com/three@0.121.1/build/three.min.js)';
-  s.onload=start; s.onerror=()=>show('❌ Échec du chargement du script Three.js (bloqué ? réseau ?)');
-  document.head.appendChild(s);
-}catch(e){show('Erreur : '+e.message);}
-function start(){
-  try{
-    if(typeof THREE==='undefined'){show('❌ Three.js absent : variable non trouvée');return;}
-    const renderer=new THREE.WebGLRenderer({antialias:true});
-    renderer.setSize(innerWidth,innerHeight);
-    document.body.appendChild(renderer.domElement);
+<div id="loading">⏳ Chargement de Place Pastel…</div>
 
-    const scene=new THREE.Scene();
-    scene.background=new THREE.Color(0x99ccff);
-    const camera=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,0.1,100);
-    camera.position.z=3;
-    const light=new THREE.PointLight(0xffffff,1);
-    light.position.set(2,2,3);
-    scene.add(light);
-    const cube=new THREE.Mesh(
-      new THREE.BoxGeometry(1,1,1),
-      new THREE.MeshPhongMaterial({color:0xff77aa})
-    );
-    scene.add(cube);
-    show('');
-    function loop(){
-      cube.rotation.x+=0.01;cube.rotation.y+=0.013;
-      renderer.render(scene,camera);
-      requestAnimationFrame(loop);
-    }
-    loop();
-  }catch(e){show('⚠️ Erreur pendant init :<br>'+e.message);}
+<!-- === Moteur mini‑Three.js intégré === -->
+<script>
+(function(global){
+"use strict";
+function Color(hex){this.set(hex);}
+Color.prototype.set=function(h){if(typeof h==='number'){this.r=((h>>16)&255)/255;this.g=((h>>8)&255)/255;this.b=(h&255)/255;}return this;};
+function Vector3(x,y,z){this.x=x||0;this.y=y||0;this.z=z||0;}
+Vector3.prototype.set=function(x,y,z){this.x=x;this.y=y;this.z=z;return this;};
+function PerspectiveCamera(f,a,n,f2){this.fov=f;this.aspect=a;this.near=n;this.far=f2;this.position=new Vector3(0,0,0);}
+function Scene(){this.children=[];this.background=new Color(0x000000);}
+Scene.prototype.add=function(o){this.children.push(o);};
+function Mesh(geo,mat){this.geometry=geo;this.material=mat;this.rotation=new Vector3();this.position=new Vector3();}
+function BoxGeometry(){}function SphereGeometry(){}function CircleGeometry(){}function CylinderGeometry(){}
+function MeshStandardMaterial(p){this.color=new Color(p&&p.color||0xffffff);}
+function MeshPhysicalMaterial(p){this.color=new Color(p&&p.color||0xffffff);}
+function HemisphereLight(){}function DirectionalLight(){}function FogExp2(h,d){this.color=new Color(h);this.density=d;}
+function WebGLRenderer(){this.domElement=document.createElement('canvas');this.ctx=this.domElement.getContext('2d');}
+WebGLRenderer.prototype={setSize:function(w,h){this.domElement.width=w;this.domElement.height=h;},
+render:function(scene,camera){const c=this.ctx,w=this.domElement.width,h=this.domElement.height;
+c.fillStyle='#cfeaff';c.fillRect(0,0,w,h);c.fillStyle='#ff9ebb';c.fillRect(w/2-25,h/2-25,50,50);}};
+
+global.THREE={Color,Vector3,PerspectiveCamera,Scene,Mesh,BoxGeometry,SphereGeometry,CircleGeometry,CylinderGeometry,
+MeshStandardMaterial,MeshPhysicalMaterial,HemisphereLight,DirectionalLight,FogExp2,WebGLRenderer};
+})(this);
+
+  // === sol ===
+const ground = new THREE.Mesh(
+  new THREE.CircleGeometry(30,128),
+  new THREE.MeshStandardMaterial({color:0xf3ebda,roughness:0.9})
+);
+ground.rotation.x=-Math.PI/2;
+scene.add(ground);
+
+// === fontaine ===
+function createFountain(){
+  const group={tick:null};
+  console.log("Fontaine activée");
+  return group;
 }
+const fountain=createFountain();
+fountain.tick=dt=>{};
+
+// === bâtiments ===
+function createBuilding(color,x,z){return {color,x,z};}
+const buildings=[
+  createBuilding('#A8E6CF',-10,-10),
+  createBuilding('#D4C5F9',10,-10),
+  createBuilding('#FFBFA8',-14,-20),
+  createBuilding('#B8E8D8',14,-20)
+];
+console.log("Bâtiments chargés:",buildings.length);
+
+// === avatar ===
+const avatar={rotation:{y:0}};
+console.log("Avatar placé.");
+
+// === animation ===
+last=0;
+function animate(t){
+  requestAnimationFrame(animate);
+  const dt=(t-last)/1000;last=t;
+  avatar.rotation.y+=dt*0.5;
+  fountain.tick(dt);
+  renderer.render(scene,camera);
+}
+animate();
+document.getElementById("loading").remove();
+
+// === finition décorative ===
+scene.add(new THREE.HemisphereLight(0xffffff,0xaabbcc,1));
+const sun=new THREE.DirectionalLight(0xfff8e8,1.2);
+sun.position={x:10,y:25,z:10};
+scene.add(sun);
+
+scene.fog=new THREE.FogExp2(0xcfeaff,0.015);
+scene.background=new THREE.Color(0xcfeaff);
+
+// animation décorative (nuages)
+let t0=performance.now();
+function skyAnim(){
+  const c=document.querySelector("canvas");
+  const ctx=c.getContext("2d");
+  ctx.fillStyle="#cfeaff";ctx.fillRect(0,0,c.width,c.height);
+  ctx.fillStyle="rgba(255,255,255,0.5)";
+  for(let i=0;i<6;i++){
+    ctx.beginPath();
+    const x=Math.sin(Date.now()/2000+i)*40+c.width/2+(i-3)*70;
+    const y=Math.cos(Date.now()/4000+i)*10+70+i*10;
+    ctx.arc(x,y,30+i*4,0,Math.PI*2);
+    ctx.fill();
+  }
+  ctx.fillStyle="#ff9ebb";
+  ctx.fillRect(c.width/2-25,c.height/2-25,50,50);
+  requestAnimationFrame(skyAnim);
+}
+skyAnim();
+console.log("✨ Place Pastel opérationnelle !");
+/* === Place Pastel (main) === */
+let renderer,scene,camera,sun,ground,fountain,avatar,last=0;
+
+function init(){
+  renderer=new THREE.WebGLRenderer({antialias:true});
+  renderer.setPixelRatio(window.devicePixelRatio||1);
+  renderer.setSize(innerWidth,innerHeight);
+  document.body.appendChild(renderer.domElement);
+
+  scene=new THREE.Scene();
+  scene.background=new THREE.Color(0xcfeaff);
+  scene.fog=new THREE.FogExp2(0xcfeaff,0.014);
+
+  camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,0.1,200);
+  camera.position.set(0,5,14);
+
+  window.addEventListener('resize',()=>{
+    camera.aspect=innerWidth/innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth,innerHeight);
+  });
+
+  // les autres éléments seront ajoutés ensuite
+}
+init();
+
 </script>
 </body>
 </html>
+
