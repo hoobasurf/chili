@@ -1,14 +1,12 @@
-<!-- ✅ VERSION COMPLÈTE CORRIGÉE (post-processing supprimé uniquement) -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Macadam World — Place Pastel</title>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
 
 <style>
-{margin:0;padding:0;box-sizing:border-box;}
+*{margin:0;padding:0;box-sizing:border-box;}
 html,body{width:100%;height:100%;overflow:hidden;background:#0a0618;}
 #canvas-container{position:fixed;inset:0;}
 canvas{display:block;width:100%!important;height:100%!important;}
@@ -32,10 +30,6 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 
-/ ❌ SUPPRIMÉ :
-import EffectComposer / RenderPass / UnrealBloomPass
-/
-
 const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
 renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
 renderer.setSize(window.innerWidth,window.innerHeight);
@@ -52,10 +46,6 @@ scene.fog=new THREE.FogExp2(0xC8E8FF,0.018);
 
 const camera=new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,0.1,300);
 camera.position.set(0,4,10);
-
-/ ❌ SUPPRIMÉ :
-const composer = ...
-*/
 
 // lumières
 scene.add(new THREE.AmbientLight(0xfff0e8,0.6));
@@ -74,7 +64,7 @@ ground.rotation.x=-Math.PI/2;
 ground.receiveShadow=true;
 scene.add(ground);
 
-// objet test (ton monde reste compatible)
+// cube test
 const cube=new THREE.Mesh(
   new THREE.BoxGeometry(1,1,1),
   new THREE.MeshStandardMaterial({color:0xFF6EB4})
@@ -83,12 +73,6 @@ cube.position.y=1;
 cube.castShadow=true;
 scene.add(cube);
 
-// loader avatar (inchangé)
-const loader=new GLTFLoader();
-const draco=new DRACOLoader();
-draco.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/libs/draco/');
-loader.setDRACOLoader(draco);
-
 // animation
 const clock=new THREE.Clock();
 
@@ -96,21 +80,16 @@ function animate(){
   requestAnimationFrame(animate);
 
   const dt=clock.getDelta();
-
   cube.rotation.y += 0.6 * dt;
 
-  // ✅ RENDER NORMAL (fix iOS)
   renderer.render(scene, camera);
 }
 animate();
 
-// resize
 window.addEventListener('resize',()=>{
   camera.aspect=window.innerWidth/window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth,window.innerHeight);
-
-  // ❌ composer.setSize supprimé
 });
 </script>
 </body>
