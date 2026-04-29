@@ -9,15 +9,19 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
-  --pink:#FF6EB4;--mint:#3DDBB8;--yellow:#FFD747;
-  --lav:#B388FF;--sky:#5BC8F5;--peach:#FF9E7A;
+  --pink:#FF6EB4;
+  --mint:#3DDBB8;
+  --yellow:#FFD747;
+  --lav:#B388FF;
+  --sky:#5BC8F5;
+  --peach:#FF9E7A;
   --dark:#12082A;
 }
 html,body{
-height:100%;width:100%;
-font-family:'Nunito',sans-serif;
-background:var(--dark);
-overflow:hidden;
+  height:100%;width:100%;
+  font-family:'Nunito',sans-serif;
+  background:var(--dark);
+  overflow:hidden;
 }
 .bg{position:fixed;inset:0;z-index:0;background:#0e0620;overflow:hidden;}
 .bg::before{content:'';position:absolute;inset:0;
@@ -61,7 +65,6 @@ background-size:40px 40px;}
 .btn-save{width:100%;background:rgba(61,219,184,.12);border:1.5px solid var(–mint);border-radius:12px;padding:10px;font-family:‘Nunito’,sans-serif;font-size:.88rem;font-weight:800;color:var(–mint);cursor:pointer;transition:all .2s;display:none;}
 .btn-save.visible{display:block;}
 
-/* Bouton Jouer — apparaît après avatar prêt */
 .btn-play{width:100%;background:linear-gradient(135deg,var(–mint),var(–sky));border:none;border-radius:12px;padding:13px;font-family:‘Baloo 2’,cursive;font-size:1rem;font-weight:700;color:var(–dark);cursor:pointer;box-shadow:0 4px 16px rgba(61,219,184,.4);transition:transform .15s;display:none;animation:glow 2s ease-in-out infinite;}
 .btn-play.visible{display:block;}
 .btn-play:active{transform:scale(.97);}
@@ -84,7 +87,6 @@ background-size:40px 40px;}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(–mint);color:var(–dark);padding:10px 22px;border-radius:14px;font-size:.88rem;font-weight:800;box-shadow:0 8px 24px rgba(61,219,184,.4);transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:999;pointer-events:none;}
 .toast.show{transform:translateX(-50%) translateY(0);}
 
-/* Écran de transition */
 #transition-screen{position:fixed;inset:0;z-index:200;background:#0e0620;opacity:0;pointer-events:none;transition:opacity .5s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
 #transition-screen.show{opacity:1;pointer-events:all;}
 .transition-logo{font-family:‘Baloo 2’,cursive;font-size:2rem;font-weight:800;color:white;}
@@ -210,7 +212,6 @@ async function openAvaturn(){
         avatarGlbUrl=glb;
         closeAvaturn();
         showAvatar(glb);
-        // Sauvegarder automatiquement avec le pseudo actuel
         const pseudo=document.getElementById('pseudo').value.trim();
         persistAvatar(glb, pseudo);
         showToast('🎉 Avatar créé !');
@@ -265,14 +266,13 @@ function persistAvatar(glbUrl,pseudo){
   if(pseudo) document.getElementById('pseudo').value=pseudo;
 }
 
-// SAUVEGARDER + JOUER (bouton Sauvegarder)
+// SAUVEGARDER + JOUER
 window.saveAndPlay=function(){
   const pseudo=document.getElementById('pseudo').value.trim();
   if(!pseudo){showToast('✏️ Entre ton pseudo !');return;}
   if(!avatarGlbUrl){showToast('👆 Crée d\'abord ton avatar !');return;}
   persistAvatar(avatarGlbUrl,pseudo);
   showToast('✨ Sauvegardé !');
-  // Afficher le bouton Jouer si pas déjà visible
   document.getElementById('btn-play').classList.add('visible');
 };
 
@@ -280,14 +280,11 @@ window.saveAndPlay=function(){
 window.goToWorld=function(){
   const pseudo=document.getElementById('pseudo').value.trim();
   if(!pseudo){showToast('✏️ Entre ton pseudo d\'abord !');return;}
-  // Sauvegarder le pseudo même si avatar pas changé
   if(avatarGlbUrl) persistAvatar(avatarGlbUrl,pseudo);
   else {
-    // Sauvegarder juste le pseudo avec l'avatar existant
     const existing=JSON.parse(localStorage.getItem(storageKey())||'{}');
     if(existing.glbUrl) persistAvatar(existing.glbUrl,pseudo);
   }
-  // Transition
   const ts=document.getElementById('transition-screen');
   ts.classList.add('show');
   setTimeout(()=>{ window.location.href='world-place-pastel.html'; }, 1200);
@@ -315,11 +312,9 @@ function loadSaved(){
 }
 loadSaved();
 
-// Exposer globalement
 window.openAvaturn=openAvaturn;
 window.closeAvaturn=closeAvaturn;
 
-// Clic overlay pour fermer
 document.getElementById('modal-overlay').addEventListener('click',(e)=>{
   if(e.target===e.currentTarget)closeAvaturn();
 });
