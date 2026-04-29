@@ -340,7 +340,7 @@ scene.add(paveIn);
 });
 
 // ===== FLEURS =====
-[[3.5,0],[−3.5,0],[0,3.5],[0,-3.5],[5,3],[-5,3],[3,-5],[-3,-5],
+[[3.5,0],[-3.5,0],[0,3.5],[0,-3.5],[5,3],[-5,3],[3,-5],[-3,-5],
  [7,-2],[-7,-2],[2,7],[-2,7]].forEach((p, i) => {
   const colors = [0xFF9EBB, 0xFFD6EC, 0xC5B5FF, 0xA8E6CF, 0xFFE87A];
   const f = mkSph(0.18, colors[i % colors.length]);
@@ -356,7 +356,7 @@ scene.add(paveIn);
 
 // ===== NUAGES =====
 const clouds = [];
-[[18,14,-18,4],[−12,16,-22,5],[5,12,-30,3.5],[-25,15,-10,4.5],[30,18,-5,3]].forEach(c => {
+[[18,14,-18,4],[-12,16,-22,5],[5,12,-30,3.5],[-25,15,-10,4.5],[30,18,-5,3]].forEach(c => {
   const g = new THREE.Group();
   [[0,0,0,c[3]],[c[3]*1.1,.3,0,c[3]*.75],[-c[3]*.9,.2,0,c[3]*.7],[c[3]*.4,-.2,c[3]*.6,c[3]*.6]].forEach(p => {
     const cloud = new THREE.Mesh(
@@ -496,14 +496,13 @@ function showToast(msg) { const t=document.getElementById('toast'); t.textConten
 
 // ===== BOUCLE =====
 const clock = new THREE.Clock();
-let ready = false;
-setTimeout(() => { if (!ready) { ready=true; finishLoading(); } }, 1800);
+// Scène prête immédiatement, avatar charge en parallèle
+finishLoading();
+const ready = true;
 
 function animate() {
   requestAnimationFrame(animate);
   const dt = Math.min(clock.getDelta(), 0.1);
-  if (!ready) return;
-
   if (avatarMixer) avatarMixer.update(dt);
 
   // Nuages
