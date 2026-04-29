@@ -3,71 +3,61 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Test 3D — Macadam</title>
+<title>Test 3D Safari iPhone</title>
 <style>
-html,body{margin:0;height:100%;overflow:hidden;background:#0e0620;color:white;font-family:sans-serif}
-#loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-weight:800;}
+html,body{
+  margin:0;padding:0;overflow:hidden;height:100%;
+  background:#0e0620;color:white;font-family:sans-serif;
+}
+#msg{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-weight:800}
 canvas{display:block}
 </style>
 </head>
 <body>
-<div id="loading">⏳ Chargement du test 3D…</div>
-<script src="[cdn.jsdelivr.net](https://cdn.jsdelivr.net/npm/three@0.167/build/three.min.js)"></script>
-<script src="[cdn.jsdelivr.net](https://cdn.jsdelivr.net/npm/three@0.167/examples/js/controls/OrbitControls.min.js)"></script>
+<div id="msg">⏳ Chargement du test 3D…</div>
+
+<!-- On charge directement un build compatible anciens navigateurs -->
+<script src="[unpkg.com](https://unpkg.com/three@0.121.1/build/three.min.js)"></script>
 <script>
-const scene=new THREE.Scene();
-scene.background=new THREE.Color(0xcfeaff);
-scene.fog=new THREE.FogExp2(0xcfeaff,0.014);
+try {
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x99ccff);
+  const camera = new THREE.PerspectiveCamera(70, innerWidth/innerHeight, 0.1, 100);
+  camera.position.z = 3;
 
-const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,0.1,100);
-camera.position.set(3,2,5);
+  const renderer = new THREE.WebGLRenderer({antialias:true});
+  renderer.setSize(innerWidth, innerHeight);
+  document.body.appendChild(renderer.domElement);
 
-const renderer=new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(innerWidth,innerHeight);
-renderer.shadowMap.enabled=true;
-renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-renderer.toneMapping=THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure=1;
-document.body.appendChild(renderer.domElement);
+  const light = new THREE.PointLight(0xffffff,1);
+  light.position.set(3,3,3);
+  scene.add(light);
 
-const controls=new THREE.OrbitControls(camera,renderer.domElement);
-controls.enableDamping=true;
-controls.target.set(0,0.6,0);
+  const cube = new THREE.Mesh(
+    new THREE.BoxGeometry(1,1,1),
+    new THREE.MeshPhongMaterial({color:0xff77aa})
+  );
+  scene.add(cube);
 
-const hemi=new THREE.HemisphereLight(0xffffff,0x88aacc,1);
-scene.add(hemi);
-const sun=new THREE.DirectionalLight(0xfff8e8,1);
-sun.position.set(5,8,5);
-sun.castShadow=true;
-scene.add(sun);
+  document.getElementById('msg').remove();
 
-const ground=new THREE.Mesh(
-  new THREE.PlaneGeometry(10,10),
-  new THREE.MeshStandardMaterial({color:0xf0e8dc,roughness:0.9})
-);
-ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
+  function loop() {
+    cube.rotation.x += 0.01;
+    cube.rotation.y += 0.013;
+    renderer.render(scene, camera);
+    requestAnimationFrame(loop);
+  }
+  loop();
 
-const cube=new THREE.Mesh(
-  new THREE.BoxGeometry(1,1,1),
-  new THREE.MeshStandardMaterial({color:0xff9ebb,metalness:0.2,roughness:0.6})
-);
-cube.position.y=0.5;cube.castShadow=true;scene.add(cube);
+  window.addEventListener('resize',()=>{
+    camera.aspect = innerWidth/innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth, innerHeight);
+  });
 
-document.getElementById("loading").remove();
-
-function animate(time){
-  requestAnimationFrame(animate);
-  cube.rotation.y=time*0.001;
-  controls.update();
-  renderer.render(scene,camera);
+} catch(e) {
+  document.getElementById('msg').textContent = '❌ WebGL non supporté : ' + e.message;
 }
-animate();
-
-addEventListener("resize",()=>{
-  camera.aspect=innerWidth/innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth,innerHeight);
-});
 </script>
 </body>
 </html>
