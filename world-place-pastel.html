@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -176,7 +175,7 @@ scene.add(new THREE.AmbientLight(0xfff0e8, 0.75));
 const sun = new THREE.DirectionalLight(0xfff4d0, 2.5);
 sun.position.set(20, 40, 15);
 sun.castShadow = true;
-sun.shadow.mapSize.set(1024, 1024);
+sun.shadow.mapSize.set(2048, 2048);
 sun.shadow.camera.near = 1; sun.shadow.camera.far = 120;
 sun.shadow.camera.left = sun.shadow.camera.bottom = -40;
 sun.shadow.camera.right = sun.shadow.camera.top = 40;
@@ -188,8 +187,8 @@ scene.add(fillLight);
 
 // ===== HELPERS =====
 function mkBox(w,h,d,color){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshStandardMaterial({color}));m.castShadow=true;m.receiveShadow=true;return m;}
-function mkCyl(rt,rb,h,seg,color){const m=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,seg),new THREE.MeshStandardMaterial({color}));m.castShadow=true;return m;}
-function mkSph(r,color,emissive=false){const mat=new THREE.MeshStandardMaterial({color});if(emissive){mat.emissive=new THREE.Color(color);mat.emissiveIntensity=0.5;}const m=new THREE.Mesh(new THREE.SphereGeometry(r,12,12),mat);m.castShadow=true;return m;}
+function mkCyl(rt,rb,h,seg,color){const m=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,seg),new THREE.MeshStandardMaterial({color}));m.castShadow=true;m.receiveShadow=true;return m;}
+function mkSph(r,color,emissive=false){const mat=new THREE.MeshStandardMaterial({color});if(emissive){mat.emissive=new THREE.Color(color);mat.emissiveIntensity=0.5;}const m=new THREE.Mesh(new THREE.SphereGeometry(r,12,12),mat);m.castShadow=true;m.receiveShadow=true;return m;}
 
 // ===== SOL =====
 const ground=new THREE.Mesh(new THREE.PlaneGeometry(80,80),new THREE.MeshStandardMaterial({color:0xE8DDD0,roughness:0.92}));
@@ -197,18 +196,18 @@ ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
 for(let r=0;r<3;r++){
   const radii=[9,6,3.5],colors=[0xDDD0C0,0xEADDCC,0xF5EEE0];
   const ring=new THREE.Mesh(new THREE.CylinderGeometry(radii[r],radii[r],0.04+r*0.01,r===0?32:24),new THREE.MeshStandardMaterial({color:colors[r],roughness:0.75}));
-  ring.position.y=0.01+r*0.01;scene.add(ring);
+  ring.position.y=0.01+r*0.01;ring.receiveShadow=true;scene.add(ring);
 }
 for(let i=0;i<8;i++){
   const angle=(i/8)*Math.PI*2;
   const ray=new THREE.Mesh(new THREE.PlaneGeometry(0.3,9),new THREE.MeshStandardMaterial({color:0xD0C4B4}));
   ray.rotation.x=-Math.PI/2;ray.rotation.z=angle;
   ray.position.set(Math.cos(angle)*4.5,0.035,Math.sin(angle)*4.5);
-  scene.add(ray);
+  ray.receiveShadow=true;scene.add(ray);
 }
 [0,Math.PI/2].forEach(ry=>{
   const a=new THREE.Mesh(new THREE.PlaneGeometry(40,1.6),new THREE.MeshStandardMaterial({color:0xD8CCBC}));
-  a.rotation.x=-Math.PI/2;a.rotation.z=ry;a.position.y=0.04;scene.add(a);
+  a.rotation.x=-Math.PI/2;a.rotation.z=ry;a.position.y=0.04;a.receiveShadow=true;scene.add(a);
 });
 
 // ===== FONTAINE =====
@@ -301,10 +300,8 @@ const avatarGroup = new THREE.Group();
 avatarGroup.position.set(0, 0, 6);
 scene.add(avatarGroup);
 
-// Référence aux bones Avaturn (nommés comme Mixamo)
-// On les trouvera après le chargement du GLB
+// Référence aux bones Avaturn/RPM
 const bones = {};
-// Noms de bones Avaturn/RPM standard à chercher
 const BONE_NAMES = {
   hips:      ['mixamorigHips','Hips','pelvis'],
   spine:     ['mixamorigSpine','Spine','spine_01'],
@@ -330,18 +327,10 @@ function findBones(model) {
       }
     }
   });
-  // Log pour debug
   const found = Object.keys(bones).join(', ');
   console.log('Bones trouvés:', found || 'AUCUN');
-  if (!found) {
-    // Dernier recours : lister tous les bones
-    const allBones = [];
-    model.traverse(n => { if (n.isBone || n.type === 'Bone') allBones.push(n.name); });
-    console.log('Tous les bones:', allBones.slice(0,20).join(', '));
-  }
 }
 
-// Stocke les rotations initiales des bones (rest pose)
 const boneRestRot = {};
 function saveRestPose() {
   for (const [key, bone] of Object.entries(bones)) {
@@ -349,38 +338,22 @@ function saveRestPose() {
   }
 }
 
-// walkTime global pour l'animation procédurale
 let walkTime = 0;
-let isWalking = false;
 
-// Applique l'animation procédurale sur les bones Avaturn
 function animateBones(dt, walking) {
   if (Object.keys(bones).length === 0) return;
-
   walkTime += dt * (walking ? 7.0 : 1.2);
   const sw = Math.sin(walkTime);
-  const speed = walking ? 1.0 : 0.08; // amplitude
-
-  // Hanches — oscillation latérale en marche
+  const speed = walking ? 1.0 : 0.08;
   if (bones.hips) {
     bones.hips.rotation.z = (boneRestRot.hips?.z || 0) + sw * 0.06 * speed;
     if (walking) bones.hips.position.y = (boneRestRot.hips?.y || 0) + Math.abs(sw) * 0.04;
   }
-  // Colonne — contre-rotation légère
   if (bones.spine) bones.spine.rotation.z = (boneRestRot.spine?.z || 0) + sw * 0.04 * speed;
   if (bones.spine1) bones.spine1.rotation.z = (boneRestRot.spine1?.z || 0) - sw * 0.03 * speed;
-
-  // Tête — légère oscillation idle
-  if (bones.head) {
-    bones.head.rotation.x = (boneRestRot.head?.x || 0) + Math.sin(walkTime * 0.3) * 0.02;
-  }
-
-  // Bras — ON NE TOUCHE PAS, rest pose Avaturn = bras tombants naturellement
-
-  // Jambes — pas alternés
+  if (bones.head) bones.head.rotation.x = (boneRestRot.head?.x || 0) + Math.sin(walkTime * 0.3) * 0.02;
   if (bones.upLegR) bones.upLegR.rotation.x = (boneRestRot.upLegR?.x || 0) + sw * 0.55 * speed;
   if (bones.upLegL) bones.upLegL.rotation.x = (boneRestRot.upLegL?.x || 0) - sw * 0.55 * speed;
-  // Genoux — fléchissement naturel (toujours positif = plié en avant)
   if (bones.legR) bones.legR.rotation.x = (boneRestRot.legR?.x || 0) + (walking ? Math.max(0, sw)*0.4 : 0.05);
   if (bones.legL) bones.legL.rotation.x = (boneRestRot.legL?.x || 0) + (walking ? Math.max(0,-sw)*0.4 : 0.05);
 }
@@ -393,25 +366,18 @@ function loadAvatar(meshUrl) {
     model.traverse(n => {
       if (n.isMesh) { n.castShadow = true; n.receiveShadow = true; }
     });
-    // Normalise ~1.75m
     const bb = new THREE.Box3().setFromObject(model);
     const size = new THREE.Vector3(); bb.getSize(size);
     if (size.y > 0) model.scale.setScalar(1.75 / size.y);
     const bb2 = new THREE.Box3().setFromObject(model);
     model.position.y = -bb2.min.y;
     avatarGroup.add(model);
-
-    // Trouve les bones
     findBones(model);
     saveRestPose();
-
-    // Si le GLB a des animations intégrées, on les joue quand même en fallback
     if (gltf.animations?.length && Object.keys(bones).length === 0) {
       const mixer = new THREE.AnimationMixer(model);
       mixer.clipAction(gltf.animations[0]).play();
-      // On va quand même utiliser animateBones si des bones sont trouvés après coup
     }
-
     showToast('✨ Avatar chargé !');
   }, undefined, err => {
     console.warn('GLB avatar error:', err);
@@ -419,34 +385,152 @@ function loadAvatar(meshUrl) {
   });
 }
 
+// ===== OMBRE BLOB AU SOL =====
+// Suit le personnage dynamiquement dans la boucle
+const shadowBlob = new THREE.Mesh(
+  new THREE.CircleGeometry(0.42, 20),
+  new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.18, depthWrite: false })
+);
+shadowBlob.rotation.x = -Math.PI / 2;
+shadowBlob.position.y = 0.011; // juste au-dessus du sol
+scene.add(shadowBlob);
+
 function makeFallbackAvatar() {
-  // Avatar géométrique simple avec bras tombants (pas T-pose)
+  // ─── Corps complet avec anatomie correcte ───
+  // Hauteur totale : ~1.72m, pieds à y=0, tête à y=1.72
+  // Structure :
+  //   Tête         y=1.55 (centre)
+  //   Cou          y=1.35
+  //   Torse        y=0.98  (centre torse = 0.66..1.30)
+  //   Hanches      y=0.62  (boîte courte)
+  //   Jambes       partent de y=0.55 vers le bas, fins à y=0
+  //   Bras         épaule y=1.22, tombants
+
   const g = new THREE.Group();
-  const body = mkBox(0.48,0.65,0.28,0xFF9EBB); body.position.y=0.98; g.add(body);
-  const head = mkSph(0.27,0xFFDFC4); head.position.y=1.63; g.add(head);
-  const hair = mkSph(0.29,0x3D1800); hair.position.y=1.80; g.add(hair);
-  [[0.09,1.67,0.25],[-0.09,1.67,0.25]].forEach(p=>{const e=mkSph(0.045,0x1A1A2E);e.position.set(...p);g.add(e);});
-  const legMat=new THREE.MeshStandardMaterial({color:0xD4C5F9});
-  // Groupes pivotants pour animation
-  const legR=new THREE.Group(); legR.position.set(0.13,0.68,0);
-  const lrm=new THREE.Mesh(new THREE.CylinderGeometry(.1,.1,.66,8),legMat); lrm.position.y=-0.33; legR.add(lrm);
-  const footR=mkSph(.11,0xAA88FF); footR.position.y=-0.66; legR.add(footR); g.add(legR);
-  const legL=new THREE.Group(); legL.position.set(-0.13,0.68,0);
-  const llm=new THREE.Mesh(new THREE.CylinderGeometry(.1,.1,.66,8),legMat); llm.position.y=-0.33; legL.add(llm);
-  const footL=mkSph(.11,0xAA88FF); footL.position.y=-0.66; legL.add(footL); g.add(legL);
-  const armMat=new THREE.MeshStandardMaterial({color:0xFF9EBB});
-  // Bras tombants naturellement (rotation z ~ 0.3 vers le bas)
-  const armR=new THREE.Group(); armR.position.set(0.32,1.28,0);
-  const arm_r=new THREE.Mesh(new THREE.CylinderGeometry(.075,.075,.48,8),armMat); arm_r.position.y=-0.24; armR.add(arm_r);
-  const handR=mkSph(.085,0xFFDFC4); handR.position.y=-0.5; armR.add(handR); armR.rotation.z=0.25; g.add(armR);
-  const armL=new THREE.Group(); armL.position.set(-0.32,1.28,0);
-  const arm_l=new THREE.Mesh(new THREE.CylinderGeometry(.075,.075,.48,8),armMat); arm_l.position.y=-0.24; armL.add(arm_l);
-  const handL=mkSph(.085,0xFFDFC4); handL.position.y=-0.5; armL.add(handL); armL.rotation.z=-0.25; g.add(armL);
-  const shadow=new THREE.Mesh(new THREE.CircleGeometry(.36,16),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.13}));
-  shadow.rotation.x=-Math.PI/2;shadow.position.y=0.01;g.add(shadow);
+
+  // — Torse —
+  const body = mkBox(0.46, 0.64, 0.26, 0xFF9EBB);
+  body.position.y = 0.97; // centre du torse : bas=0.65, haut=1.29
+  g.add(body);
+
+  // — Hanches (pelvis) — partie clé qui manquait !
+  const hips = mkBox(0.50, 0.26, 0.28, 0xD4B8F0);
+  hips.position.y = 0.55; // centre : 0.42..0.68
+  g.add(hips);
+
+  // — Tête —
+  const head = mkSph(0.24, 0xFFDFC4);
+  head.position.y = 1.60;
+  g.add(head);
+
+  // — Cheveux —
+  const hair = mkSph(0.255, 0x3D1800);
+  hair.position.set(0, 1.72, -0.03);
+  g.add(hair);
+
+  // — Yeux —
+  [[0.09, 1.63, 0.22], [-0.09, 1.63, 0.22]].forEach(p => {
+    const e = mkSph(0.04, 0x1A1A2E); e.position.set(...p); g.add(e);
+  });
+
+  // — Cou —
+  const neck = mkCyl(0.09, 0.09, 0.18, 8, 0xFFDFC4);
+  neck.position.y = 1.38;
+  g.add(neck);
+
+  // ─── Jambes ───
+  // Cuisse (thigh) : de y=0.55 à y=0.27 → centre=0.41, hauteur=0.28
+  // Tibia (shin)   : de y=0.27 à y=0.06 → centre=0.165, hauteur=0.22
+  // Pied           : sphère y≈0.05
+  const legMat = new THREE.MeshStandardMaterial({ color: 0xD4C5F9 });
+  const footMat = new THREE.MeshStandardMaterial({ color: 0xAA88FF });
+
+  // Jambe droite
+  const legRGroup = new THREE.Group();
+  legRGroup.position.set(0.14, 0.55, 0); // pivot à la hanche droite
+  const thighR = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.09, 0.30, 8), legMat);
+  thighR.position.y = -0.15; thighR.castShadow = true; thighR.receiveShadow = true;
+  legRGroup.add(thighR);
+  // Genou + tibia (groupe pivotant pour animation)
+  const kneeRGroup = new THREE.Group();
+  kneeRGroup.position.y = -0.30;
+  const shinR = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.07, 0.26, 8), legMat);
+  shinR.position.y = -0.13; shinR.castShadow = true; shinR.receiveShadow = true;
+  kneeRGroup.add(shinR);
+  const footR = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.08, 0.20), footMat);
+  footR.position.set(0, -0.27, 0.05); footR.castShadow = true; footR.receiveShadow = true;
+  kneeRGroup.add(footR);
+  legRGroup.add(kneeRGroup);
+  g.add(legRGroup);
+
+  // Jambe gauche
+  const legLGroup = new THREE.Group();
+  legLGroup.position.set(-0.14, 0.55, 0);
+  const thighL = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.09, 0.30, 8), legMat);
+  thighL.position.y = -0.15; thighL.castShadow = true; thighL.receiveShadow = true;
+  legLGroup.add(thighL);
+  const kneeLGroup = new THREE.Group();
+  kneeLGroup.position.y = -0.30;
+  const shinL = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.07, 0.26, 8), legMat);
+  shinL.position.y = -0.13; shinL.castShadow = true; shinL.receiveShadow = true;
+  kneeLGroup.add(shinL);
+  const footL = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.08, 0.20), footMat);
+  footL.position.set(0, -0.27, 0.05); footL.castShadow = true; footL.receiveShadow = true;
+  kneeLGroup.add(footL);
+  legLGroup.add(kneeLGroup);
+  g.add(legLGroup);
+
+  // ─── Bras ───
+  const armMat = new THREE.MeshStandardMaterial({ color: 0xFF9EBB });
+  const handMat = new THREE.MeshStandardMaterial({ color: 0xFFDFC4 });
+
+  // Bras droit (tombant naturellement, léger angle)
+  const armRGroup = new THREE.Group();
+  armRGroup.position.set(0.30, 1.22, 0);
+  armRGroup.rotation.z = 0.22;
+  const upperArmR = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.065, 0.38, 8), armMat);
+  upperArmR.position.y = -0.19; upperArmR.castShadow = true;
+  armRGroup.add(upperArmR);
+  const elbowRGroup = new THREE.Group();
+  elbowRGroup.position.y = -0.38;
+  const foreArmR = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.055, 0.34, 8), armMat);
+  foreArmR.position.y = -0.17; foreArmR.castShadow = true;
+  elbowRGroup.add(foreArmR);
+  const handR2 = new THREE.Mesh(new THREE.SphereGeometry(0.075, 8, 8), handMat);
+  handR2.position.y = -0.36; handR2.castShadow = true;
+  elbowRGroup.add(handR2);
+  armRGroup.add(elbowRGroup);
+  g.add(armRGroup);
+
+  // Bras gauche
+  const armLGroup = new THREE.Group();
+  armLGroup.position.set(-0.30, 1.22, 0);
+  armLGroup.rotation.z = -0.22;
+  const upperArmL = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.065, 0.38, 8), armMat);
+  upperArmL.position.y = -0.19; upperArmL.castShadow = true;
+  armLGroup.add(upperArmL);
+  const elbowLGroup = new THREE.Group();
+  elbowLGroup.position.y = -0.38;
+  const foreArmL = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.055, 0.34, 8), armMat);
+  foreArmL.position.y = -0.17; foreArmL.castShadow = true;
+  elbowLGroup.add(foreArmL);
+  const handL2 = new THREE.Mesh(new THREE.SphereGeometry(0.075, 8, 8), handMat);
+  handL2.position.y = -0.36; handL2.castShadow = true;
+  elbowLGroup.add(handL2);
+  armLGroup.add(elbowLGroup);
+  g.add(armLGroup);
+
   avatarGroup.add(g);
-  // Stocke refs pour animation manuelle
-  bones._fallback = { legR, legL, armR, armL, isFallback: true };
+
+  // Stocke refs pour animation
+  bones._fallback = {
+    legRGroup, legLGroup,
+    kneeRGroup, kneeLGroup,
+    armRGroup, armLGroup,
+    elbowRGroup, elbowLGroup,
+    hipsObj: hips,
+    isFallback: true
+  };
 }
 
 if (profile.glbUrl) {
@@ -461,7 +545,6 @@ const playerPos = new THREE.Vector3(0, 0, 6);
 let playerRotY = 0;
 let cameraYaw = Math.PI;
 
-// Joystick droit (déplacement)
 const joyBase = document.getElementById('joy-base');
 const joyKnob = document.getElementById('joy-knob');
 const JR = 42;
@@ -477,9 +560,7 @@ joyBase.addEventListener('touchstart',e=>{e.preventDefault();const t=e.changedTo
 document.addEventListener('touchmove',e=>{if(!joy.active)return;for(const t of e.changedTouches)if(t.identifier===joy.id){e.preventDefault();updateJoy(t.clientX,t.clientY);}},{passive:false});
 document.addEventListener('touchend',e=>{for(const t of e.changedTouches)if(t.identifier===joy.id){joy.active=false;joy.x=0;joy.y=0;joyKnob.style.transform='translate(0,0)';}});
 
-// Joystick gauche (caméra) — zone invisible plein écran gauche, delta depuis startX
 const camZone = document.getElementById('cam-joystick-zone');
-const camJoyKnob = document.getElementById('cam-joy-knob');
 const camJoy = { active:false, x:0, startX:0, id:null };
 camZone.addEventListener('touchstart',e=>{
   e.preventDefault();
@@ -491,7 +572,6 @@ document.addEventListener('touchmove',e=>{
   for(const t of e.changedTouches){
     if(t.identifier===camJoy.id){
       e.preventDefault();
-      // dx normalisé : glisser droite = valeur positive
       camJoy.x=(t.clientX-camJoy.startX)/80;
     }
   }
@@ -500,7 +580,6 @@ document.addEventListener('touchend',e=>{
   for(const t of e.changedTouches) if(t.identifier===camJoy.id){camJoy.active=false;camJoy.x=0;}
 });
 
-// Souris desktop
 let mDrag={active:false,lastX:0};
 renderer.domElement.addEventListener('mousedown',e=>{mDrag.active=true;mDrag.lastX=e.clientX;});
 document.addEventListener('mousemove',e=>{if(!mDrag.active)return;cameraYaw-=(e.clientX-mDrag.lastX)*0.005;mDrag.lastX=e.clientX;});
@@ -554,12 +633,10 @@ function animate(){
   clouds.forEach(c=>{ c.mesh.position.x-=c.speed*dt; if(c.mesh.position.x<-35)c.mesh.position.x=35; });
 
   let mx=joy.x, mz=joy.y;
-  // Clavier : W/haut = avancer (mz négatif), S/bas = reculer (mz positif)
   if(keys['ArrowUp']||keys['w']||keys['W']) mz=-1;
   if(keys['ArrowDown']||keys['s']||keys['S']) mz=1;
   if(keys['ArrowLeft']||keys['a']||keys['A']) mx=-1;
   if(keys['ArrowRight']||keys['d']||keys['D']) mx=1;
-  // Joystick gauche : glisser droite = caméra tourne à droite (cameraYaw diminue)
   if(camJoy.active&&Math.abs(camJoy.x)>0.02) cameraYaw-=camJoy.x*3.0*dt;
   if(keys['q']||keys['Q']) cameraYaw+=1.8*dt;
   if(keys['e']||keys['E']) cameraYaw-=1.8*dt;
@@ -568,14 +645,11 @@ function animate(){
 
   if(moving){
     const sinC=Math.sin(cameraYaw), cosC=Math.cos(cameraYaw);
-    // joystick Y : pousser vers le haut physique = mz<0 = avancer = -Z monde
-    // Donc on utilise mz directement (pas -mz)
     const dx=(sinC*mz+cosC*mx)*SPEED*dt;
     const dz=(cosC*mz-sinC*mx)*SPEED*dt;
     playerPos.x=Math.max(-BOUNDARY,Math.min(BOUNDARY,playerPos.x+dx));
     playerPos.z=Math.max(-BOUNDARY,Math.min(BOUNDARY,playerPos.z+dz));
     playerRotY=Math.atan2(dx,dz);
-    // Caméra suit le dos
     const targetYaw=playerRotY+Math.PI;
     let diff=targetYaw-cameraYaw;
     while(diff>Math.PI)diff-=2*Math.PI;
@@ -583,34 +657,55 @@ function animate(){
     cameraYaw+=diff*Math.min(CAM_LERP*dt,1.0);
   }
 
-  // Animation bones Avaturn
+  // Animation bones GLB
   if(Object.keys(bones).length > 0 && !bones._fallback){
     animateBones(dt, moving);
   } else if(bones._fallback){
-    // Animation fallback géométrique
-    walkTime += dt*(moving?7.0:1.2);
-    const sw=Math.sin(walkTime), spd=moving?1.0:0.06;
-    const fb=bones._fallback;
-    fb.legR.rotation.x=sw*0.55*spd;
-    fb.legL.rotation.x=-sw*0.55*spd;
-    fb.armR.rotation.x=-sw*0.45*spd;
-    fb.armL.rotation.x=sw*0.45*spd;
-    fb.armR.rotation.z=0.25-Math.abs(sw)*0.05*spd;
-    fb.armL.rotation.z=-0.25+Math.abs(sw)*0.05*spd;
+    // Animation fallback géométrique avec jambes complètes
+    walkTime += dt*(moving ? 7.0 : 1.2);
+    const sw = Math.sin(walkTime);
+    const spd = moving ? 1.0 : 0.06;
+    const fb = bones._fallback;
+
+    // Hanches légère oscillation
+    if(fb.hipsObj) fb.hipsObj.rotation.z = sw * 0.06 * spd;
+
+    // Jambes : pivot depuis la hanche
+    fb.legRGroup.rotation.x = sw * 0.55 * spd;
+    fb.legLGroup.rotation.x = -sw * 0.55 * spd;
+
+    // Genoux (pli naturel)
+    fb.kneeRGroup.rotation.x = moving ? Math.max(0, sw) * 0.35 : 0.05;
+    fb.kneeLGroup.rotation.x = moving ? Math.max(0, -sw) * 0.35 : 0.05;
+
+    // Bras balancent en opposition aux jambes
+    fb.armRGroup.rotation.x = -sw * 0.40 * spd;
+    fb.armLGroup.rotation.x = sw * 0.40 * spd;
+
+    // Léger balancement coudes
+    fb.elbowRGroup.rotation.x = moving ? Math.abs(sw) * 0.18 : 0;
+    fb.elbowLGroup.rotation.x = moving ? Math.abs(sw) * 0.18 : 0;
   }
 
-  avatarGroup.position.set(playerPos.x,playerPos.y,playerPos.z);
-  avatarGroup.rotation.y=playerRotY;
+  avatarGroup.position.set(playerPos.x, playerPos.y, playerPos.z);
+  avatarGroup.rotation.y = playerRotY;
+
+  // ─── Ombre blob suit le personnage ───
+  shadowBlob.position.x = playerPos.x;
+  shadowBlob.position.z = playerPos.z;
+  // Légère réduction de l'ombre quand les pieds bougent
+  const shadowScale = moving ? 0.92 + Math.abs(Math.sin(walkTime)) * 0.12 : 1.0;
+  shadowBlob.scale.set(shadowScale, shadowScale, 1);
 
   camera.position.set(
     playerPos.x+Math.sin(cameraYaw)*CAM_DIST,
     playerPos.y+CAM_HEIGHT,
     playerPos.z+Math.cos(cameraYaw)*CAM_DIST
   );
-  camera.lookAt(playerPos.x,playerPos.y+CAM_LOOK_Y,playerPos.z);
+  camera.lookAt(playerPos.x, playerPos.y+CAM_LOOK_Y, playerPos.z);
 
   updateBubblePos();
-  renderer.render(scene,camera);
+  renderer.render(scene, camera);
 }
 animate();
 
