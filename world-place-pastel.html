@@ -1,188 +1,518 @@
 <!DOCTYPE html>
+
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>GLB Joystick Fix</title>
-
+<title>Macadam World — Place Pastel</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
 <style>
-body { margin: 0; overflow: hidden; background: #000; }
-
-/* Joystick */
-#joystick {
-  position: absolute;
-  bottom: 40px;
-  left: 40px;
-  width: 120px;
-  height: 120px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 50%;
-  touch-action: none;
-}
-
-#knob {
-  position: absolute;
-  width: 60px;
-  height: 60px;
-  left: 30px;
-  top: 30px;
-  background: rgba(255,255,255,0.5);
-  border-radius: 50%;
-}
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--pink:#FF6EB4;--mint:#3DDBB8;--yellow:#FFD747;--lav:#B388FF;--sky:#5BC8F5;--dark:#12082A;}
+html,body{width:100%;height:100%;overflow:hidden;background:#0a0618;font-family:'Nunito',sans-serif;user-select:none;-webkit-user-select:none;}
+#canvas-container{position:fixed;inset:0;}
+canvas{display:block;width:100%!important;height:100%!important;}
+#hud{position:fixed;inset:0;z-index:10;pointer-events:none;}
+.hud-top{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:linear-gradient(180deg,rgba(18,8,42,.85) 0%,transparent 100%);}
+.hud-logo{font-family:'Baloo 2',cursive;font-size:1.1rem;font-weight:800;color:white;text-shadow:0 2px 8px rgba(0,0,0,.5);}
+.hud-logo span{color:var(--pink);}
+.hud-location{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:5px 12px;}
+.hud-location span{font-size:.75rem;font-weight:800;color:white;}
+.loc-dot{width:7px;height:7px;border-radius:50%;background:var(--mint);flex-shrink:0;animation:pulsedot 2s infinite;}
+@keyframes pulsedot{0%,100%{box-shadow:0 0 0 0 rgba(61,219,184,.6);}50%{box-shadow:0 0 0 5px rgba(61,219,184,0);}}
+.hud-info{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:5px 12px 5px 6px;}
+.hud-pic{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--lav));display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:900;color:white;border:2px solid rgba(255,255,255,.2);}
+.hud-pseudo{font-size:.75rem;font-weight:800;color:white;}
+.hud-chat{position:absolute;bottom:148px;left:12px;right:12px;max-width:300px;pointer-events:all;}
+.chat-messages{max-height:110px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;margin-bottom:6px;scrollbar-width:none;}
+.chat-messages::-webkit-scrollbar{display:none;}
+.chat-msg{background:rgba(18,8,42,.78);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:5px 10px;font-size:.7rem;color:white;animation:fadeup .3s ease;line-height:1.4;}
+@keyframes fadeup{from{opacity:0;transform:translateY(4px);}to{opacity:1;}}
+.chat-msg .name{font-weight:900;color:var(--pink);margin-right:4px;}
+.chat-input-wrap{display:flex;gap:6px;}
+.chat-input{flex:1;background:rgba(18,8,42,.85);backdrop-filter:blur(10px);border:1.5px solid rgba(255,255,255,.15);border-radius:12px;padding:8px 12px;font-size:16px;font-weight:700;color:white;outline:none;font-family:'Nunito',sans-serif;}
+.chat-input::placeholder{color:rgba(255,255,255,.25);}
+.chat-input:focus{border-color:var(--pink);}
+.chat-send{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--pink),var(--lav));border:none;color:white;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;pointer-events:all;flex-shrink:0;}
+#joystick-zone{position:absolute;bottom:24px;right:24px;width:110px;height:110px;pointer-events:all;}
+.joy-base{width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.14);backdrop-filter:blur(8px);position:relative;display:flex;align-items:center;justify-content:center;}
+.joy-knob{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--lav));box-shadow:0 4px 16px rgba(255,110,180,.45);position:absolute;}
+#cam-joystick-zone{position:absolute;bottom:24px;left:24px;width:110px;height:110px;pointer-events:all;}
+#btn-emote{position:absolute;bottom:44px;right:148px;width:50px;height:50px;border-radius:50%;background:rgba(61,219,184,.12);border:2px solid var(--mint);color:var(--mint);font-size:1.2rem;display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:all;backdrop-filter:blur(8px);}
+#btn-emote:active{transform:scale(.9);}
+.toast{position:fixed;bottom:170px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(18,8,42,.92);border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(12px);color:white;padding:8px 18px;border-radius:20px;font-size:.78rem;font-weight:800;opacity:0;transition:all .3s;z-index:50;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+#speech-bubble{position:fixed;z-index:20;background:white;color:#12082A;border-radius:12px;padding:5px 11px;font-size:.72rem;font-weight:800;pointer-events:none;box-shadow:0 4px 14px rgba(0,0,0,.3);max-width:150px;text-align:center;transform:translateX(-50%);opacity:0;transition:opacity .3s;white-space:nowrap;}
+#speech-bubble::after{content:'';position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:white;border-bottom:none;}
+#loading-screen{position:fixed;inset:0;z-index:100;background:#0e0620;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .6s;}
+#loading-screen.hidden{opacity:0;pointer-events:none;}
+.load-logo{font-family:'Baloo 2',cursive;font-size:2.5rem;font-weight:800;color:white;}
+.load-logo .c1{color:var(--pink);}.load-logo .c2{color:var(--yellow);}.load-logo .c3{color:var(--mint);}.load-logo .c4{color:var(--sky);}
+.load-bar-wrap{width:200px;height:4px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;}
+.load-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--pink),var(--lav));border-radius:2px;transition:width .25s;}
+.load-txt{font-size:.76rem;color:rgba(255,255,255,.4);font-weight:700;}
 </style>
 </head>
-
 <body>
 
-<div id="joystick">
-  <div id="knob"></div>
+<div id="canvas-container"></div>
+
+<div id="loading-screen">
+  <div class="load-logo">
+    <span class="c1">M</span><span class="c2">A</span><span class="c3">C</span><span class="c4">A</span><span class="c1">D</span><span class="c2">A</span><span class="c3">M</span>
+  </div>
+  <div class="load-bar-wrap"><div class="load-bar" id="load-bar"></div></div>
+  <div class="load-txt" id="load-txt">Chargement de Place Pastel…</div>
 </div>
 
+<div id="hud">
+  <div class="hud-top">
+    <div class="hud-logo">✦ <span>Macadam</span> World</div>
+    <div class="hud-location"><div class="loc-dot"></div><span>Place Pastel</span></div>
+    <div class="hud-info">
+      <div class="hud-pic" id="hud-pic">?</div>
+      <span class="hud-pseudo" id="hud-pseudo">Joueur</span>
+    </div>
+  </div>
+  <div class="hud-chat">
+    <div class="chat-messages" id="chat-messages"></div>
+    <div class="chat-input-wrap">
+      <input class="chat-input" id="chat-input" type="text" placeholder="Dis quelque chose…" maxlength="80" autocomplete="off"/>
+      <button class="chat-send" id="chat-send">➤</button>
+    </div>
+  </div>
+  <div id="btn-emote">🌸</div>
+  <div id="joystick-zone">
+    <div class="joy-base" id="joy-base">
+      <div class="joy-knob" id="joy-knob"></div>
+    </div>
+  </div>
+  <div id="cam-joystick-zone"></div>
+</div>
+
+<div id="speech-bubble"></div>
+<div class="toast" id="toast"></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
+  }
+}
+</script>
+
 <script type="module">
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.165/build/three.module.js";
-import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.165/examples/jsm/loaders/GLTFLoader.js";
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-/* =====================
-   CONFIG GLB (CORS FIX)
-===================== */
-const URL_IDLE = "https://cdn.jsdelivr.net/gh/hoobasurf/chili@main/Idle.glb";
-const URL_WALK = "https://cdn.jsdelivr.net/gh/hoobasurf/chili@main/Walking.glb";
+// ===== URLS GLB =====
+const GLB_IDLE   = 'https://raw.githubusercontent.com/hoobasurf/chili/main/Idle.glb';
+const GLB_WALK   = 'https://raw.githubusercontent.com/hoobasurf/chili/main/Walking.glb';
 
-/* =====================
-   SCENE
-===================== */
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x222222);
+// ===== PROFIL =====
+function loadProfile() {
+  try {
+    const uid = localStorage.getItem('macadam_user_id') || ('p_' + Math.random().toString(36).slice(2,8));
+    localStorage.setItem('macadam_user_id', uid);
+    const saved = JSON.parse(localStorage.getItem('macadam_avatar_' + uid) || 'null');
+    return { pseudo: saved?.pseudo || 'Joueur', glbUrl: saved?.glbUrl || null };
+  } catch(e) { return { pseudo: 'Joueur', glbUrl: null }; }
+}
+const profile = loadProfile();
+document.getElementById('hud-pseudo').textContent = profile.pseudo;
+document.getElementById('hud-pic').textContent = profile.pseudo.slice(0,2).toUpperCase();
 
-const camera = new THREE.PerspectiveCamera(75, innerWidth / innerHeight, 0.1, 100);
-camera.position.set(0, 1.5, 3);
+// ===== LOADING =====
+let loadPct = 0;
+const loadBar = document.getElementById('load-bar');
+const loadTxt = document.getElementById('load-txt');
+const loadMsgs = ['Chargement de Place Pastel…','Plantation des arbres…','Remplissage de la fontaine…','Presque prêt…'];
+let loadMsgIdx = 0;
+const loadInterval = setInterval(() => {
+  loadPct += Math.random() * 14;
+  if (loadPct > 90) { loadPct = 90; clearInterval(loadInterval); }
+  loadBar.style.width = loadPct + '%';
+  const idx = Math.min(Math.floor(loadPct / 25), loadMsgs.length - 1);
+  if (idx > loadMsgIdx) { loadMsgIdx = idx; loadTxt.textContent = loadMsgs[loadMsgIdx]; }
+}, 200);
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(innerWidth, innerHeight);
-document.body.appendChild(renderer.domElement);
-
-/* LIGHT */
-const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1);
-scene.add(light);
-
-/* =====================
-   MODEL + ANIMATIONS
-===================== */
-const loader = new GLTFLoader();
-
-let mixer;
-let model;
-let idleAction, walkAction;
-let currentAction = null;
-
-function playAction(action) {
-  if (!action || currentAction === action) return;
-
-  if (currentAction) currentAction.stop();
-
-  action.reset();
-  action.play();
-
-  currentAction = action;
+function finishLoading() {
+  clearInterval(loadInterval);
+  loadBar.style.width = '100%';
+  loadTxt.textContent = 'Bienvenue à Place Pastel !';
+  setTimeout(() => {
+    const ls = document.getElementById('loading-screen');
+    ls.classList.add('hidden');
+    setTimeout(() => ls.style.display = 'none', 700);
+  }, 400);
+  addChat('🌸 Bienvenue, ' + profile.pseudo + ' !', 'Macadam');
+  addChat('💬 Joystick droit = marcher | Joystick gauche = caméra', 'Système');
 }
 
-/* LOAD IDLE */
-loader.load(URL_IDLE, (gltf) => {
-  model = gltf.scene;
-  scene.add(model);
+// ===== RENDERER =====
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-  mixer = new THREE.AnimationMixer(model);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xC8E8FF);
+scene.fog = new THREE.FogExp2(0xD0EDFF, 0.015);
 
-  idleAction = mixer.clipAction(gltf.animations[0]);
-  idleAction.play();
-  currentAction = idleAction;
+const camera = new THREE.PerspectiveCamera(58, window.innerWidth / window.innerHeight, 0.1, 300);
+
+// ===== LUMIÈRES =====
+scene.add(new THREE.AmbientLight(0xfff0e8, 0.75));
+const sun = new THREE.DirectionalLight(0xfff4d0, 2.5);
+sun.position.set(20, 40, 15);
+sun.castShadow = true;
+sun.shadow.mapSize.set(1024, 1024);
+sun.shadow.camera.near = 1; sun.shadow.camera.far = 120;
+sun.shadow.camera.left = sun.shadow.camera.bottom = -40;
+sun.shadow.camera.right = sun.shadow.camera.top = 40;
+scene.add(sun);
+scene.add(new THREE.HemisphereLight(0xB8E8FF, 0x88C880, 0.9));
+const fillLight = new THREE.DirectionalLight(0xe8f0ff, 0.6);
+fillLight.position.set(-10, 15, -10);
+scene.add(fillLight);
+
+// ===== HELPERS =====
+function mkBox(w,h,d,color){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshStandardMaterial({color}));m.castShadow=true;m.receiveShadow=true;return m;}
+function mkCyl(rt,rb,h,seg,color){const m=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,seg),new THREE.MeshStandardMaterial({color}));m.castShadow=true;return m;}
+function mkSph(r,color,emissive=false){const mat=new THREE.MeshStandardMaterial({color});if(emissive){mat.emissive=new THREE.Color(color);mat.emissiveIntensity=0.5;}const m=new THREE.Mesh(new THREE.SphereGeometry(r,12,12),mat);m.castShadow=true;return m;}
+
+// ===== SOL =====
+const ground=mkBox(80,0.1,80,0xF0E8D8);ground.position.y=-0.05;scene.add(ground);
+const pave=new THREE.Mesh(new THREE.CylinderGeometry(8,8,0.06,32),new THREE.MeshStandardMaterial({color:0xE8D8C8,roughness:0.8}));pave.position.y=0.03;scene.add(pave);
+const paveIn=new THREE.Mesh(new THREE.CylinderGeometry(4,4,0.07,32),new THREE.MeshStandardMaterial({color:0xF8E8D8,roughness:0.7}));paveIn.position.y=0.035;scene.add(paveIn);
+[0,Math.PI/2].forEach(ry=>{const a=new THREE.Mesh(new THREE.PlaneGeometry(40,1.4),new THREE.MeshStandardMaterial({color:0xD8C8B8}));a.rotation.x=-Math.PI/2;a.rotation.z=ry;a.position.y=0.04;scene.add(a);});
+
+// ===== FONTAINE =====
+(function(){
+  const basin=mkCyl(2.5,2.8,0.62,24,0xD4C4F0);basin.position.y=0.31;scene.add(basin);
+  const water=new THREE.Mesh(new THREE.CylinderGeometry(2.2,2.2,0.06,24),new THREE.MeshStandardMaterial({color:0xA8D8FF,roughness:0.05,metalness:0.4,transparent:true,opacity:0.88}));water.position.y=0.6;scene.add(water);
+  const col=mkCyl(0.18,0.22,2.2,12,0xC8B8E8);col.position.y=1.72;scene.add(col);
+  const topBowl=mkCyl(0.85,0.6,0.18,20,0xD4C4F0);topBowl.position.y=2.92;scene.add(topBowl);
+  const ball=new THREE.Mesh(new THREE.SphereGeometry(0.22,12,12),new THREE.MeshStandardMaterial({color:0xB8E8FF,roughness:0.1,metalness:0.5}));ball.position.y=3.22;scene.add(ball);
+  const fl=new THREE.PointLight(0xA8D8FF,1.2,8);fl.position.y=1.5;scene.add(fl);
+})();
+
+// ===== BÂTIMENTS =====
+[
+  {p:[-18,-14],w:8,h:8,d:6,wall:0xA8E6CF,roof:0x7DD4B2},
+  {p:[18,-14],w:7,h:9,d:6,wall:0xD4C5F9,roof:0xB8A8F0},
+  {p:[-12,-23],w:5,h:6,d:5,wall:0xFFBFA8,roof:0xF0A898},
+  {p:[12,-23],w:6,h:8,d:5,wall:0xB8E8D8,roof:0x88D0B8},
+  {p:[-22,-4],w:6,h:7,d:5,wall:0xFFE0B2,roof:0xFFB74D},
+  {p:[22,-4],w:6,h:7,d:5,wall:0xF8BBD9,roof:0xE887B8},
+].forEach(b=>{
+  const wall=mkBox(b.w,b.h,b.d,b.wall);wall.position.set(b.p[0],b.h/2,b.p[1]);scene.add(wall);
+  const roof=new THREE.Mesh(new THREE.ConeGeometry(Math.max(b.w,b.d)*0.72,b.h*0.42,4),new THREE.MeshStandardMaterial({color:b.roof}));
+  roof.position.set(b.p[0],b.h+b.h*0.21,b.p[1]);roof.rotation.y=Math.PI/4;roof.castShadow=true;scene.add(roof);
+  const aw=mkBox(b.w+1.4,0.15,1.8,b.roof);aw.position.set(b.p[0],b.h*0.48,b.p[1]+b.d/2+0.75);aw.rotation.x=0.15;scene.add(aw);
+  [[b.p[0]-b.w*0.22,b.h*0.55,b.p[1]+b.d/2+0.01],[b.p[0]+b.w*0.22,b.h*0.55,b.p[1]+b.d/2+0.01]].forEach(wp=>{const win=mkBox(1.2,1.6,0.08,0xFFE87A);win.position.set(...wp);scene.add(win);});
 });
 
-/* LOAD WALK */
-loader.load(URL_WALK, (gltf) => {
-  if (!mixer) return;
-  walkAction = mixer.clipAction(gltf.animations[0]);
+// ===== ARBRES =====
+[[-6,-8,2.2,2],[6,-8,2.0,1.8],[-14,-5,2.5,2.2],[14,-5,2.2,2],
+ [-8,5,1.9,1.7],[8,5,1.8,1.6],[-18,5,2.0,1.9],[18,5,2.0,1.9],
+ [-4,12,1.7,1.5],[4,12,1.7,1.5]
+].forEach(t=>{
+  const[x,z,h,r]=t;
+  const trunk=mkCyl(0.18,0.24,h,8,0x8B6914);trunk.position.set(x,h/2,z);scene.add(trunk);
+  [[0,r,0],[r*-.7,r*.7,0],[r*.7,r*.7,0]].forEach((off,i)=>{
+    const leaf=mkSph(r*(.55+i*.07),[0x5CC87A,0x48B868,0x7DD87A][i]);
+    leaf.position.set(x+off[0],h+off[1],z+off[2]);scene.add(leaf);
+  });
 });
 
-/* =====================
-   JOYSTICK
-===================== */
-const joystick = document.getElementById("joystick");
-const knob = document.getElementById("knob");
-
-let joy = { x: 0, y: 0 };
-let dragging = false;
-
-joystick.addEventListener("touchstart", () => dragging = true);
-joystick.addEventListener("touchend", () => {
-  dragging = false;
-  joy.x = 0;
-  joy.y = 0;
-  knob.style.left = "30px";
-  knob.style.top = "30px";
+// ===== BANCS =====
+[[5,0,0],[-5,0,0],[0,5,Math.PI/2],[0,-5,Math.PI/2]].forEach(b=>{
+  const g=new THREE.Group();
+  const seat=mkBox(2.5,0.15,0.62,0xC8A878);seat.position.y=0.5;g.add(seat);
+  [-1,1].forEach(s=>{const leg=mkBox(0.14,0.5,0.5,0xA88858);leg.position.set(s,0.25,0);g.add(leg);});
+  g.position.set(b[0],0,b[1]);g.rotation.y=b[2];scene.add(g);
 });
 
-joystick.addEventListener("touchmove", (e) => {
-  if (!dragging) return;
+// ===== LAMPADAIRES =====
+[[4,4],[-4,4],[4,-4],[-4,-4],[10,1],[-10,1],[0,11]].forEach(p=>{
+  const pole=mkCyl(0.07,0.09,5.2,8,0xC0A8F0);pole.position.set(p[0],2.6,p[1]);scene.add(pole);
+  const lamp=mkSph(0.28,0xFFE87A,true);lamp.position.set(p[0],5.3,p[1]);scene.add(lamp);
+  const pl=new THREE.PointLight(0xFFE87A,0.7,9);pl.position.set(p[0],5.3,p[1]);scene.add(pl);
+});
 
-  const rect = joystick.getBoundingClientRect();
-  const touch = e.touches[0];
+// ===== FLEURS =====
+[[3.5,0],[-3.5,0],[0,3.5],[0,-3.5],[5,3],[-5,3],[3,-5],[-3,-5],[7,-2],[-7,-2],[2,7],[-2,7]].forEach((p,i)=>{
+  const colors=[0xFF9EBB,0xFFD6EC,0xC5B5FF,0xA8E6CF,0xFFE87A];
+  const f=mkSph(0.18,colors[i%colors.length]);
+  f.material.emissive=new THREE.Color(colors[i%colors.length]);f.material.emissiveIntensity=0.12;
+  f.position.set(p[0],0.18,p[1]);scene.add(f);
+  const stem=mkCyl(0.03,0.03,0.2,6,0x5CC87A);stem.position.set(p[0],0.08,p[1]);scene.add(stem);
+});
 
-  let x = touch.clientX - rect.left - 60;
-  let y = touch.clientY - rect.top - 60;
+// ===== NUAGES =====
+const clouds=[];
+[[18,14,-18,4],[-12,16,-22,5],[5,12,-30,3.5],[-25,15,-10,4.5],[30,18,-5,3]].forEach(c=>{
+  const g=new THREE.Group();
+  [[0,0,0,c[3]],[c[3]*1.1,.3,0,c[3]*.75],[-c[3]*.9,.2,0,c[3]*.7],[c[3]*.4,-.2,c[3]*.6,c[3]*.6]].forEach(p=>{
+    const cloud=new THREE.Mesh(new THREE.SphereGeometry(p[3],8,8),new THREE.MeshStandardMaterial({color:0xffffff,transparent:true,opacity:0.88}));
+    cloud.position.set(p[0],p[1],p[2]);g.add(cloud);
+  });
+  g.position.set(c[0],c[1],c[2]);scene.add(g);
+  clouds.push({mesh:g,speed:0.8+Math.random()*0.6});
+});
 
-  const dist = Math.sqrt(x*x + y*y);
-  const max = 40;
+// ===== AVATAR =====
+const avatarGroup = new THREE.Group();
+avatarGroup.position.set(0, 0, 6);
+scene.add(avatarGroup);
 
-  if (dist > max) {
-    x = x / dist * max;
-    y = y / dist * max;
+let avatarMixer = null;
+let idleAction  = null;
+let walkAction  = null;
+let currentAction = null;
+let isWalking = false;
+
+function crossFadeTo(toAction, duration = 0.25) {
+  if (!toAction || toAction === currentAction) return;
+  toAction.reset();
+  toAction.setEffectiveTimeScale(1);
+  toAction.setEffectiveWeight(1);
+  if (currentAction) {
+    currentAction.crossFadeTo(toAction, duration, true);
+  } else {
+    toAction.play();
   }
+  currentAction = toAction;
+}
 
-  knob.style.left = (x + 60 - 30) + "px";
-  knob.style.top = (y + 60 - 30) + "px";
+function setWalk(walking) {
+  if (walking === isWalking) return;
+  isWalking = walking;
+  if (!avatarMixer) return;
+  if (walking && walkAction) crossFadeTo(walkAction, 0.2);
+  else if (!walking && idleAction) crossFadeTo(idleAction, 0.3);
+}
 
-  joy.x = x / max;
-  joy.y = y / max;
+const gltfLoader = new GLTFLoader();
+
+// Charge le mesh depuis l'avatar Avaturn (ou fallback) + les 2 clips GLB externes
+function loadAvatarAndAnims(meshUrl) {
+  gltfLoader.load(meshUrl, gltfMesh => {
+    const model = gltfMesh.scene;
+    model.traverse(n => { if (n.isMesh) { n.castShadow=true; n.receiveShadow=true; }});
+    // Normalise la taille à ~1.75m
+    const bb = new THREE.Box3().setFromObject(model);
+    const size = new THREE.Vector3(); bb.getSize(size);
+    if (size.y > 0) model.scale.setScalar(1.75 / size.y);
+    const bb2 = new THREE.Box3().setFromObject(model);
+    model.position.y = -bb2.min.y;
+    avatarGroup.add(model);
+
+    avatarMixer = new THREE.AnimationMixer(model);
+
+    // Charge Idle.glb
+    gltfLoader.load(GLB_IDLE, gltfIdle => {
+      if (gltfIdle.animations?.length) {
+        const clip = gltfIdle.animations[0];
+        idleAction = avatarMixer.clipAction(clip);
+        idleAction.play();
+        currentAction = idleAction;
+      }
+      // Charge Walking.glb
+      gltfLoader.load(GLB_WALK, gltfWalk => {
+        if (gltfWalk.animations?.length) {
+          const clip = gltfWalk.animations[0];
+          walkAction = avatarMixer.clipAction(clip);
+        }
+        showToast('✨ Avatar chargé !');
+      }, undefined, () => showToast('⚠️ Walking.glb non trouvé'));
+    }, undefined, () => showToast('⚠️ Idle.glb non trouvé'));
+
+  }, undefined, () => {
+    // Fallback mesh si GLB Avaturn échoue
+    makeFallbackAvatar();
+    // Charge quand même les anims (elles ne s'appliqueront pas mais ne bloquent pas)
+  });
+}
+
+function makeFallbackAvatar() {
+  const g = new THREE.Group();
+  const body = mkBox(0.5,0.7,0.3,0xFF9EBB); body.position.y=0.95; g.add(body);
+  const head = mkSph(0.28,0xFFDFC4); head.position.y=1.65; g.add(head);
+  const hair = mkSph(0.3,0x3D1800); hair.position.y=1.83; g.add(hair);
+  [[0.1,1.68,0.26],[-0.1,1.68,0.26]].forEach(p=>{const e=mkSph(0.05,0x1A1A2E);e.position.set(...p);g.add(e);});
+  const legMat=new THREE.MeshStandardMaterial({color:0xD4C5F9});
+  [[0.12,0.35,0],[-0.12,0.35,0]].forEach(p=>{const l=new THREE.Mesh(new THREE.CylinderGeometry(.1,.1,.68,8),legMat);l.position.set(...p);g.add(l);});
+  [[0.12,0.04,0.06],[-0.12,0.04,0.06]].forEach(p=>{const f=mkSph(.12,0xAA88FF);f.position.set(...p);g.add(f);});
+  const armMat=new THREE.MeshStandardMaterial({color:0xFF9EBB});
+  const aR=new THREE.Mesh(new THREE.CylinderGeometry(.08,.08,.5,8),armMat);aR.position.set(.33,.95,0);aR.rotation.z=-.35;g.add(aR);
+  const aL=new THREE.Mesh(new THREE.CylinderGeometry(.08,.08,.5,8),armMat);aL.position.set(-.33,.95,0);aL.rotation.z=.35;g.add(aL);
+  const shadow=new THREE.Mesh(new THREE.CircleGeometry(.38,16),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.14}));
+  shadow.rotation.x=-Math.PI/2;shadow.position.y=0.01;g.add(shadow);
+  avatarGroup.add(g);
+}
+
+if (profile.glbUrl) {
+  loadAvatarAndAnims(profile.glbUrl);
+} else {
+  makeFallbackAvatar();
+  // Charge quand même les anims sur un mixer "vide" — pas d'effet visible mais pas d'erreur
+}
+
+// ===== MOUVEMENT =====
+const SPEED = 4.5, BOUNDARY = 24;
+const playerPos = new THREE.Vector3(0, 0, 6);
+let playerRotY = 0;
+let cameraYaw  = Math.PI;
+
+// ── Joystick droit (déplacement) ──
+const joyBase = document.getElementById('joy-base');
+const joyKnob = document.getElementById('joy-knob');
+const JR = 42;
+const joy = { active:false, x:0, y:0, id:null };
+function getJoyCenter(){ const r=joyBase.getBoundingClientRect(); return {x:r.left+r.width/2,y:r.top+r.height/2}; }
+function updateJoy(cx,cy){
+  const c=getJoyCenter(); let dx=cx-c.x, dy=cy-c.y;
+  const d=Math.sqrt(dx*dx+dy*dy); if(d>JR){dx=dx/d*JR;dy=dy/d*JR;}
+  joy.x=dx/JR; joy.y=dy/JR;
+  joyKnob.style.transform=`translate(${dx}px,${dy}px)`;
+}
+joyBase.addEventListener('touchstart',e=>{e.preventDefault();const t=e.changedTouches[0];joy.active=true;joy.id=t.identifier;updateJoy(t.clientX,t.clientY);},{passive:false});
+document.addEventListener('touchmove',e=>{if(!joy.active)return;for(const t of e.changedTouches)if(t.identifier===joy.id){e.preventDefault();updateJoy(t.clientX,t.clientY);}},{passive:false});
+document.addEventListener('touchend',e=>{for(const t of e.changedTouches)if(t.identifier===joy.id){joy.active=false;joy.x=0;joy.y=0;joyKnob.style.transform='translate(0,0)';}});
+
+// ── Joystick gauche invisible (rotation caméra) ──
+const camZone = document.getElementById('cam-joystick-zone');
+const CAM_JR = 55;
+const camJoy = { active:false, x:0, y:0, id:null };
+function getCamCenter(){ const r=camZone.getBoundingClientRect(); return {x:r.left+r.width/2,y:r.top+r.height/2}; }
+function updateCamJoy(cx,cy){
+  const c=getCamCenter(); let dx=cx-c.x, dy=cy-c.y;
+  const d=Math.sqrt(dx*dx+dy*dy); if(d>CAM_JR){dx=dx/d*CAM_JR;dy=dy/d*CAM_JR;}
+  camJoy.x=dx/CAM_JR; camJoy.y=dy/CAM_JR;
+}
+camZone.addEventListener('touchstart',e=>{e.preventDefault();const t=e.changedTouches[0];camJoy.active=true;camJoy.id=t.identifier;updateCamJoy(t.clientX,t.clientY);},{passive:false});
+document.addEventListener('touchmove',e=>{if(!camJoy.active)return;for(const t of e.changedTouches)if(t.identifier===camJoy.id){e.preventDefault();updateCamJoy(t.clientX,t.clientY);}},{passive:false});
+document.addEventListener('touchend',e=>{for(const t of e.changedTouches)if(t.identifier===camJoy.id){camJoy.active=false;camJoy.x=0;camJoy.y=0;}});
+
+// ── Souris desktop ──
+let mDrag={active:false,lastX:0};
+renderer.domElement.addEventListener('mousedown',e=>{mDrag.active=true;mDrag.lastX=e.clientX;});
+document.addEventListener('mousemove',e=>{if(!mDrag.active)return;cameraYaw-=(e.clientX-mDrag.lastX)*0.005;mDrag.lastX=e.clientX;});
+document.addEventListener('mouseup',()=>mDrag.active=false);
+
+// ── Clavier ──
+const keys={};
+document.addEventListener('keydown',e=>keys[e.key]=true);
+document.addEventListener('keyup',e=>keys[e.key]=false);
+
+// ===== BULLE =====
+const bubbleEl=document.getElementById('speech-bubble');
+let bubbleTimer=null;
+function showBubble(text){bubbleEl.textContent=text;bubbleEl.style.opacity='1';clearTimeout(bubbleTimer);bubbleTimer=setTimeout(()=>bubbleEl.style.opacity='0',4000);}
+function updateBubblePos(){
+  if(bubbleEl.style.opacity==='0')return;
+  const pos=new THREE.Vector3(playerPos.x,playerPos.y+2.3,playerPos.z).project(camera);
+  bubbleEl.style.left=((pos.x+1)/2*window.innerWidth)+'px';
+  bubbleEl.style.top=((1-pos.y)/2*window.innerHeight-44)+'px';
+}
+
+// ===== CHAT =====
+function addChat(text,from){
+  const msgs=document.getElementById('chat-messages');
+  const div=document.createElement('div');div.className='chat-msg';
+  div.innerHTML=`<span class="name">${from}</span>${text}`;
+  msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;
+  while(msgs.children.length>20)msgs.removeChild(msgs.firstChild);
+}
+function sendChat(){const inp=document.getElementById('chat-input');const msg=inp.value.trim();if(!msg)return;inp.value='';addChat(msg,profile.pseudo);showBubble(msg);}
+document.getElementById('chat-send').addEventListener('click',sendChat);
+document.getElementById('chat-input').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();sendChat();}});
+
+const emotes=['🌸','💫','✨','🎉','👋','💕','🌈','🦋'];
+let emoteIdx=0;
+document.getElementById('btn-emote').addEventListener('click',()=>{
+  const em=emotes[emoteIdx++%emotes.length];
+  addChat(em,profile.pseudo);showBubble(em);showToast(em);
 });
 
-/* =====================
-   LOOP
-===================== */
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+// ===== BOUCLE =====
 const clock = new THREE.Clock();
+const CAM_DIST = 5.5, CAM_HEIGHT = 2.8, CAM_LOOK_Y = 1.2;
+const CAM_LERP_SPEED = 3.5;
 
-function animate() {
+finishLoading();
+
+function animate(){
   requestAnimationFrame(animate);
+  const dt = Math.min(clock.getDelta(), 0.1);
+  if (avatarMixer) avatarMixer.update(dt);
 
-  const dt = clock.getDelta();
+  clouds.forEach(c=>{ c.mesh.position.x -= c.speed*dt; if(c.mesh.position.x<-35)c.mesh.position.x=35; });
 
-  if (mixer) mixer.update(dt);
+  // Inputs joystick droit
+  let mx = joy.x, mz = joy.y;
+  if (keys['ArrowUp']   || keys['w'] || keys['W']) mz = -1;
+  if (keys['ArrowDown'] || keys['s'] || keys['S']) mz =  1;
+  if (keys['ArrowLeft'] || keys['a'] || keys['A']) mx = -1;
+  if (keys['ArrowRight']|| keys['d'] || keys['D']) mx =  1;
 
-  if (model) {
-    /* 🔥 FIX JOYSTICK */
-    const mz = joy.y; // ✔️ CORRIGÉ (plus inversé)
+  // Rotation caméra via joystick gauche
+  if (camJoy.active && Math.abs(camJoy.x) > 0.05) cameraYaw -= camJoy.x * 2.0 * dt;
+  if (keys['q'] || keys['Q']) cameraYaw += 1.8 * dt;
+  if (keys['e'] || keys['E']) cameraYaw -= 1.8 * dt;
 
-    const speed = 2;
+  const moving = Math.abs(mx) > 0.05 || Math.abs(mz) > 0.05;
+  setWalk(moving);
 
-    if (Math.abs(mz) > 0.1) {
-      model.position.z += mz * dt * speed;
+  if (moving) {
+    const sinC = Math.sin(cameraYaw);
+    const cosC = Math.cos(cameraYaw);
+    // ── CORRECTION : joystick Y vers le haut (mz<0) = avancer ──
+    // mz du joystick : -1 = haut physique = avancer = -Z monde
+    const dx = (sinC * (-mz) + cosC * mx) * SPEED * dt;
+    const dz = (cosC * (-mz) - sinC * mx) * SPEED * dt;
 
-      if (walkAction) playAction(walkAction);
-    } else {
-      if (idleAction) playAction(idleAction);
-    }
+    playerPos.x = Math.max(-BOUNDARY, Math.min(BOUNDARY, playerPos.x + dx));
+    playerPos.z = Math.max(-BOUNDARY, Math.min(BOUNDARY, playerPos.z + dz));
+    playerRotY = Math.atan2(dx, dz);
+
+    // Caméra suit le dos (lerp GTA)
+    const targetYaw = playerRotY + Math.PI;
+    let diff = targetYaw - cameraYaw;
+    while (diff >  Math.PI) diff -= 2*Math.PI;
+    while (diff < -Math.PI) diff += 2*Math.PI;
+    cameraYaw += diff * Math.min(CAM_LERP_SPEED * dt, 1.0);
   }
 
+  avatarGroup.position.set(playerPos.x, playerPos.y, playerPos.z);
+  avatarGroup.rotation.y = playerRotY;
+
+  camera.position.set(
+    playerPos.x + Math.sin(cameraYaw) * CAM_DIST,
+    playerPos.y + CAM_HEIGHT,
+    playerPos.z + Math.cos(cameraYaw) * CAM_DIST
+  );
+  camera.lookAt(playerPos.x, playerPos.y + CAM_LOOK_Y, playerPos.z);
+
+  updateBubblePos();
   renderer.render(scene, camera);
 }
-
 animate();
 
-/* RESIZE */
-window.addEventListener("resize", () => {
-  camera.aspect = innerWidth / innerHeight;
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth/window.innerHeight;
   camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth, innerHeight);
+  renderer.setSize(window.innerWidth, window.innerHeight);
 });
 </script>
 
