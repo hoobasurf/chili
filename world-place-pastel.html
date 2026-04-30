@@ -107,8 +107,8 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 // ===== URLS GLB =====
-const GLB_IDLE   = 'https://raw.githubusercontent.com/hoobasurf/chili/main/Idle.glb';
-const GLB_WALK   = 'https://raw.githubusercontent.com/hoobasurf/chili/main/Walking.glb';
+const GLB_IDLE   = 'https://raw.githubusercontent.com/hoobasurf/chili/main/idle.glb';
+const GLB_WALK   = 'https://raw.githubusercontent.com/hoobasurf/chili/main/walking.glb';
 
 // ===== PROFIL =====
 function loadProfile() {
@@ -317,23 +317,23 @@ function loadAvatarAndAnims(meshUrl) {
 
     avatarMixer = new THREE.AnimationMixer(model);
 
-    // Charge Idle.glb
-    gltfLoader.load(GLB_IDLE, gltfIdle => {
-      if (gltfIdle.animations?.length) {
-        const clip = gltfIdle.animations[0];
+    // Charge idle.glb
+    gltfLoader.load(GLB_IDLE, gltfidle => {
+      if (gltfidle.animations?.length) {
+        const clip = gltfidle.animations[0];
         idleAction = avatarMixer.clipAction(clip);
         idleAction.play();
         currentAction = idleAction;
       }
-      // Charge Walking.glb
-      gltfLoader.load(GLB_WALK, gltfWalk => {
-        if (gltfWalk.animations?.length) {
-          const clip = gltfWalk.animations[0];
+      // Charge walking.glb
+      gltfLoader.load(GLB_WALK, gltfwalk => {
+        if (gltfwalk.animations?.length) {
+          const clip = gltfwalk.animations[0];
           walkAction = avatarMixer.clipAction(clip);
         }
         showToast('✨ Avatar chargé !');
-      }, undefined, () => showToast('⚠️ Walking.glb non trouvé'));
-    }, undefined, () => showToast('⚠️ Idle.glb non trouvé'));
+      }, undefined, () => showToast('⚠️ walking.glb non trouvé'));
+    }, undefined, () => showToast('⚠️ idle.glb non trouvé'));
 
   }, undefined, () => {
     // Fallback mesh si GLB Avaturn échoue
@@ -461,8 +461,8 @@ function animate(){
 
   // Inputs joystick droit
   let mx = joy.x, mz = joy.y;
-  if (keys['ArrowUp']   || keys['w'] || keys['W']) mz = -1;
-  if (keys['ArrowDown'] || keys['s'] || keys['S']) mz =  1;
+  if (keys['ArrowDown']   || keys['w'] || keys['W']) mz = -1;
+  if (keys['ArrowUp'] || keys['s'] || keys['S']) mz =  1;
   if (keys['ArrowLeft'] || keys['a'] || keys['A']) mx = -1;
   if (keys['ArrowRight']|| keys['d'] || keys['D']) mx =  1;
 
