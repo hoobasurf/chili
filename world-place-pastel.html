@@ -26,18 +26,21 @@ canvas{display:block;width:100%!important;height:100%!important;}
 .hud-chat{position:absolute;bottom:148px;left:12px;right:12px;max-width:300px;pointer-events:all;}
 .chat-messages{max-height:110px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;margin-bottom:6px;scrollbar-width:none;}
 .chat-messages::-webkit-scrollbar{display:none;}
-.chat-msg{background:rgba(18,8,42,.78);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:5px 10px;font-size:.7rem;color:white;animation:fadeup .3s ease;line-height:1.4;}
+.chat-msg{background:rgba(10,4,30,.45);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:5px 10px;font-size:.7rem;color:rgba(255,255,255,.9);animation:fadeup .3s ease;line-height:1.4;}
 @keyframes fadeup{from{opacity:0;transform:translateY(4px);}to{opacity:1;}}
 .chat-msg .name{font-weight:900;color:var(--pink);margin-right:4px;}
 .chat-input-wrap{display:flex;gap:6px;}
-.chat-input{flex:1;background:rgba(18,8,42,.85);backdrop-filter:blur(10px);border:1.5px solid rgba(255,255,255,.15);border-radius:12px;padding:8px 12px;font-size:16px;font-weight:700;color:white;outline:none;font-family:'Nunito',sans-serif;}
-.chat-input::placeholder{color:rgba(255,255,255,.25);}
+.chat-input{flex:1;background:rgba(10,4,30,.35);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:8px 12px;font-size:16px;font-weight:700;color:white;outline:none;font-family:'Nunito',sans-serif;}
+.chat-input::placeholder{color:rgba(255,255,255,.2);}
 .chat-input:focus{border-color:var(--pink);}
-.chat-send{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--pink),var(--lav));border:none;color:white;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;pointer-events:all;flex-shrink:0;}
+.chat-send{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--pink),var(--lav));border:none;color:white;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;pointer-events:all;flex-shrink:0;opacity:.85;}
 #joystick-zone{position:absolute;bottom:24px;right:24px;width:110px;height:110px;pointer-events:all;}
 .joy-base{width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.14);backdrop-filter:blur(8px);position:relative;display:flex;align-items:center;justify-content:center;}
 .joy-knob{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--lav));box-shadow:0 4px 16px rgba(255,110,180,.45);position:absolute;}
-#cam-joystick-zone{position:absolute;bottom:24px;left:24px;width:110px;height:110px;pointer-events:all;}
+#cam-joystick-zone{position:absolute;top:0;bottom:0;left:0;width:44%;pointer-events:all;}
+.cam-joy-base{width:100%;height:100%;position:relative;}
+.cam-joy-knob{display:none;}
+.cam-joy-label{display:none;}
 #btn-emote{position:absolute;bottom:44px;right:148px;width:50px;height:50px;border-radius:50%;background:rgba(61,219,184,.12);border:2px solid var(--mint);color:var(--mint);font-size:1.2rem;display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:all;backdrop-filter:blur(8px);}
 #btn-emote:active{transform:scale(.9);}
 .toast{position:fixed;bottom:170px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(18,8,42,.92);border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(12px);color:white;padding:8px 18px;border-radius:20px;font-size:.78rem;font-weight:800;opacity:0;transition:all .3s;z-index:50;pointer-events:none;white-space:nowrap;}
@@ -87,7 +90,12 @@ canvas{display:block;width:100%!important;height:100%!important;}
       <div class="joy-knob" id="joy-knob"></div>
     </div>
   </div>
-  <div id="cam-joystick-zone"></div>
+  <div id="cam-joystick-zone">
+    <div class="cam-joy-base" id="cam-joy-base">
+      <div class="cam-joy-knob" id="cam-joy-knob"></div>
+      <span class="cam-joy-label">📷 Caméra</span>
+    </div>
+  </div>
 </div>
 
 <div id="speech-bubble"></div>
@@ -367,18 +375,16 @@ function animateBones(dt, walking) {
     bones.head.rotation.x = (boneRestRot.head?.x || 0) + Math.sin(walkTime * 0.3) * 0.02;
   }
 
-  // Bras — balancement avant/arrière (en opposition aux jambes)
+  // Bras — balancement avant/arrière uniquement sur X, jamais sur Z (ça fait s'envoler)
   if (bones.armR) {
-    bones.armR.rotation.x = (boneRestRot.armR?.x || 0) + sw * 0.5 * speed;
-    bones.armR.rotation.z = (boneRestRot.armR?.z || 0) - 0.12; // bras naturellement tombants
+    bones.armR.rotation.x = (boneRestRot.armR?.x || 0) + sw * 0.4 * speed;
   }
   if (bones.armL) {
-    bones.armL.rotation.x = (boneRestRot.armL?.x || 0) - sw * 0.5 * speed;
-    bones.armL.rotation.z = (boneRestRot.armL?.z || 0) + 0.12;
+    bones.armL.rotation.x = (boneRestRot.armL?.x || 0) - sw * 0.4 * speed;
   }
   // Avant-bras — légère flexion en marche
-  if (bones.foreArmR) bones.foreArmR.rotation.x = (boneRestRot.foreArmR?.x || 0) + (walking ? 0.3 : 0.1);
-  if (bones.foreArmL) bones.foreArmL.rotation.x = (boneRestRot.foreArmL?.x || 0) + (walking ? 0.3 : 0.1);
+  if (bones.foreArmR) bones.foreArmR.rotation.x = (boneRestRot.foreArmR?.x || 0) + (walking ? 0.25 : 0.08);
+  if (bones.foreArmL) bones.foreArmL.rotation.x = (boneRestRot.foreArmL?.x || 0) + (walking ? 0.25 : 0.08);
 
   // Jambes — pas alternés
   if (bones.upLegR) bones.upLegR.rotation.x = (boneRestRot.upLegR?.x || 0) + sw * 0.55 * speed;
@@ -482,17 +488,19 @@ document.addEventListener('touchend',e=>{for(const t of e.changedTouches)if(t.id
 
 // Joystick gauche (caméra)
 const camZone = document.getElementById('cam-joystick-zone');
-const CAM_JR = 55;
+const camJoyKnob = document.getElementById('cam-joy-knob');
+const CAM_JR = 42;
 const camJoy = { active:false, x:0, y:0, id:null };
 function getCamCenter(){ const r=camZone.getBoundingClientRect(); return {x:r.left+r.width/2,y:r.top+r.height/2}; }
 function updateCamJoy(cx,cy){
   const c=getCamCenter(); let dx=cx-c.x, dy=cy-c.y;
   const d=Math.sqrt(dx*dx+dy*dy); if(d>CAM_JR){dx=dx/d*CAM_JR;dy=dy/d*CAM_JR;}
   camJoy.x=dx/CAM_JR; camJoy.y=dy/CAM_JR;
+  camJoyKnob.style.transform=`translate(${dx}px,${dy}px)`;
 }
 camZone.addEventListener('touchstart',e=>{e.preventDefault();const t=e.changedTouches[0];camJoy.active=true;camJoy.id=t.identifier;updateCamJoy(t.clientX,t.clientY);},{passive:false});
 document.addEventListener('touchmove',e=>{if(!camJoy.active)return;for(const t of e.changedTouches)if(t.identifier===camJoy.id){e.preventDefault();updateCamJoy(t.clientX,t.clientY);}},{passive:false});
-document.addEventListener('touchend',e=>{for(const t of e.changedTouches)if(t.identifier===camJoy.id){camJoy.active=false;camJoy.x=0;camJoy.y=0;}});
+document.addEventListener('touchend',e=>{for(const t of e.changedTouches)if(t.identifier===camJoy.id){camJoy.active=false;camJoy.x=0;camJoy.y=0;camJoyKnob.style.transform='translate(0,0)';}});
 
 // Souris desktop
 let mDrag={active:false,lastX:0};
@@ -548,11 +556,13 @@ function animate(){
   clouds.forEach(c=>{ c.mesh.position.x-=c.speed*dt; if(c.mesh.position.x<-35)c.mesh.position.x=35; });
 
   let mx=joy.x, mz=joy.y;
-  if(keys['ArrowDown']||keys['w']||keys['W']) mz=-1;
-  if(keys['ArrowUp']||keys['s']||keys['S']) mz=1;
+  // Clavier : W/haut = avancer (mz négatif), S/bas = reculer (mz positif)
+  if(keys['ArrowUp']||keys['w']||keys['W']) mz=-1;
+  if(keys['ArrowDown']||keys['s']||keys['S']) mz=1;
   if(keys['ArrowLeft']||keys['a']||keys['A']) mx=-1;
   if(keys['ArrowRight']||keys['d']||keys['D']) mx=1;
-  if(camJoy.active&&Math.abs(camJoy.x)>0.05) cameraYaw-=camJoy.x*2.0*dt;
+  // Joystick gauche : x gauche/droite tourne la caméra — sensibilité augmentée
+  if(camJoy.active&&Math.abs(camJoy.x)>0.02) cameraYaw+=camJoy.x*3.0*dt;
   if(keys['q']||keys['Q']) cameraYaw+=1.8*dt;
   if(keys['e']||keys['E']) cameraYaw-=1.8*dt;
 
@@ -560,8 +570,10 @@ function animate(){
 
   if(moving){
     const sinC=Math.sin(cameraYaw), cosC=Math.cos(cameraYaw);
-    const dx=(sinC*(-mz)+cosC*mx)*SPEED*dt;
-    const dz=(cosC*(-mz)-sinC*mx)*SPEED*dt;
+    // joystick Y : pousser vers le haut physique = mz<0 = avancer = -Z monde
+    // Donc on utilise mz directement (pas -mz)
+    const dx=(sinC*mz+cosC*mx)*SPEED*dt;
+    const dz=(cosC*mz-sinC*mx)*SPEED*dt;
     playerPos.x=Math.max(-BOUNDARY,Math.min(BOUNDARY,playerPos.x+dx));
     playerPos.z=Math.max(-BOUNDARY,Math.min(BOUNDARY,playerPos.z+dz));
     playerRotY=Math.atan2(dx,dz);
