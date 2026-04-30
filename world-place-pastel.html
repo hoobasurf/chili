@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -33,23 +34,31 @@ canvas{display:block;width:100%!important;height:100%!important;}
 .chat-input::placeholder{color:rgba(255,255,255,.25);}
 .chat-input:focus{border-color:var(--pink);}
 .chat-send{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--pink),var(--lav));border:none;color:white;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;pointer-events:all;flex-shrink:0;}
+
+/* ── JOYSTICK DROIT (déplacement) ── */
 #joystick-zone{position:absolute;bottom:24px;right:24px;width:110px;height:110px;pointer-events:all;}
 .joy-base{width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.14);backdrop-filter:blur(8px);position:relative;display:flex;align-items:center;justify-content:center;}
-.joy-knob{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--lav));box-shadow:0 4px 16px rgba(255,110,180,.45);position:absolute;}
-#btn-emote{position:absolute;bottom:44px;right:148px;width:50px;height:50px;border-radius:50%;background:rgba(61,219,184,.12);border:2px solid var(--mint);color:var(--mint);font-size:1.2rem;display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:all;backdrop-filter:blur(8px);}
+.joy-knob{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(–pink),var(–lav));box-shadow:0 4px 16px rgba(255,110,180,.45);position:absolute;}
+
+/* ── JOYSTICK GAUCHE (caméra) — INVISIBLE ── */
+#cam-joystick-zone{position:absolute;bottom:24px;left:24px;width:110px;height:110px;pointer-events:all;}
+/* Pas de visuel — zone tactile transparente uniquement */
+
+#btn-emote{position:absolute;bottom:44px;right:148px;width:50px;height:50px;border-radius:50%;background:rgba(61,219,184,.12);border:2px solid var(–mint);color:var(–mint);font-size:1.2rem;display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:all;backdrop-filter:blur(8px);}
 #btn-emote:active{transform:scale(.9);}
 .toast{position:fixed;bottom:170px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(18,8,42,.92);border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(12px);color:white;padding:8px 18px;border-radius:20px;font-size:.78rem;font-weight:800;opacity:0;transition:all .3s;z-index:50;pointer-events:none;white-space:nowrap;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 #speech-bubble{position:fixed;z-index:20;background:white;color:#12082A;border-radius:12px;padding:5px 11px;font-size:.72rem;font-weight:800;pointer-events:none;box-shadow:0 4px 14px rgba(0,0,0,.3);max-width:150px;text-align:center;transform:translateX(-50%);opacity:0;transition:opacity .3s;white-space:nowrap;}
-#speech-bubble::after{content:'';position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:white;border-bottom:none;}
+#speech-bubble::after{content:’’;position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:white;border-bottom:none;}
 #loading-screen{position:fixed;inset:0;z-index:100;background:#0e0620;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .6s;}
 #loading-screen.hidden{opacity:0;pointer-events:none;}
-.load-logo{font-family:'Baloo 2',cursive;font-size:2.5rem;font-weight:800;color:white;}
-.load-logo .c1{color:var(--pink);}.load-logo .c2{color:var(--yellow);}.load-logo .c3{color:var(--mint);}.load-logo .c4{color:var(--sky);}
+.load-logo{font-family:‘Baloo 2’,cursive;font-size:2.5rem;font-weight:800;color:white;}
+.load-logo .c1{color:var(–pink);}.load-logo .c2{color:var(–yellow);}.load-logo .c3{color:var(–mint);}.load-logo .c4{color:var(–sky);}
 .load-bar-wrap{width:200px;height:4px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;}
-.load-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--pink),var(--lav));border-radius:2px;transition:width .25s;}
+.load-bar{height:100%;width:0%;background:linear-gradient(90deg,var(–pink),var(–lav));border-radius:2px;transition:width .25s;}
 .load-txt{font-size:.76rem;color:rgba(255,255,255,.4);font-weight:700;}
 </style>
+
 </head>
 <body>
 
@@ -80,11 +89,14 @@ canvas{display:block;width:100%!important;height:100%!important;}
     </div>
   </div>
   <div id="btn-emote">🌸</div>
+  <!-- Joystick droit : déplacement -->
   <div id="joystick-zone">
     <div class="joy-base" id="joy-base">
       <div class="joy-knob" id="joy-knob"></div>
     </div>
   </div>
+  <!-- Joystick gauche : rotation caméra (invisible) -->
+  <div id="cam-joystick-zone"></div>
 </div>
 
 <div id="speech-bubble"></div>
@@ -98,6 +110,7 @@ canvas{display:block;width:100%!important;height:100%!important;}
   }
 }
 </script>
+
 <script type="module">
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -139,7 +152,7 @@ function finishLoading() {
     setTimeout(() => ls.style.display = 'none', 700);
   }, 400);
   addChat('🌸 Bienvenue, ' + profile.pseudo + ' !', 'Macadam');
-  addChat('💬 Joystick pour te déplacer', 'Système');
+  addChat('💬 Joystick droit = marcher | Joystick gauche = tourner caméra', 'Système');
 }
 
 // ===== RENDERER =====
@@ -194,7 +207,6 @@ const paveIn=new THREE.Mesh(new THREE.CylinderGeometry(4,4,0.07,32),new THREE.Me
   const col=mkCyl(0.18,0.22,2.2,12,0xC8B8E8);col.position.y=1.72;scene.add(col);
   const topBowl=mkCyl(0.85,0.6,0.18,20,0xD4C4F0);topBowl.position.y=2.92;scene.add(topBowl);
   const ball=new THREE.Mesh(new THREE.SphereGeometry(0.22,12,12),new THREE.MeshStandardMaterial({color:0xB8E8FF,roughness:0.1,metalness:0.5}));ball.position.y=3.22;scene.add(ball);
-  // Lumière fontaine
   const fl=new THREE.PointLight(0xA8D8FF,1.2,8);fl.position.y=1.5;scene.add(fl);
 })();
 
@@ -264,32 +276,46 @@ const clouds=[];
 });
 
 // ===== AVATAR =====
-const avatarGroup=new THREE.Group();
-avatarGroup.position.set(0,0,6);
+const avatarGroup = new THREE.Group();
+avatarGroup.position.set(0, 0, 6);
 scene.add(avatarGroup);
-let avatarMixer=null;
-let idleAction=null;
-let walkAction=null;
-let isWalking=false;
+let avatarMixer = null;
+let idleAction = null;
+let walkAction = null;
+let currentAction = null;
+let isWalking = false;
 
-function setWalk(walking){
-  if(walking===isWalking)return;
-  isWalking=walking;
-  if(!avatarMixer)return;
-  if(walking&&walkAction){
-    idleAction?.crossFadeTo(walkAction,0.25,true);
-    walkAction.play();
-  }else if(!walking&&idleAction){
-    walkAction?.crossFadeTo(idleAction,0.25,true);
-    idleAction.play();
+// ── Transition douce entre deux clips ──
+function crossFadeTo(toAction, duration = 0.25) {
+  if (!toAction || toAction === currentAction) return;
+  if (currentAction) {
+    toAction.reset();
+    toAction.setEffectiveTimeScale(1);
+    toAction.setEffectiveWeight(1);
+    currentAction.crossFadeTo(toAction, duration, true);
+  } else {
+    toAction.reset();
+    toAction.play();
+  }
+  currentAction = toAction;
+}
+
+function setWalk(walking) {
+  if (walking === isWalking) return;
+  isWalking = walking;
+  if (!avatarMixer) return;
+  if (walking && walkAction) {
+    crossFadeTo(walkAction, 0.2);
+  } else if (!walking && idleAction) {
+    crossFadeTo(idleAction, 0.3);
   }
 }
 
-function makeFallbackAvatar(){
-  const g=new THREE.Group();
-  const body=mkBox(0.5,0.7,0.3,0xFF9EBB);body.position.y=0.95;g.add(body);
-  const head=mkSph(0.28,0xFFDFC4);head.position.y=1.65;g.add(head);
-  const hair=mkSph(0.3,0x3D1800);hair.position.y=1.83;g.add(hair);
+function makeFallbackAvatar() {
+  const g = new THREE.Group();
+  const body = mkBox(0.5,0.7,0.3,0xFF9EBB); body.position.y=0.95; g.add(body);
+  const head = mkSph(0.28,0xFFDFC4); head.position.y=1.65; g.add(head);
+  const hair = mkSph(0.3,0x3D1800); hair.position.y=1.83; g.add(hair);
   [[0.1,1.68,0.26],[-0.1,1.68,0.26]].forEach(p=>{const e=mkSph(0.05,0x1A1A2E);e.position.set(...p);g.add(e);});
   const legMat=new THREE.MeshStandardMaterial({color:0xD4C5F9});
   [[0.12,0.35,0],[-0.12,0.35,0]].forEach(p=>{const l=new THREE.Mesh(new THREE.CylinderGeometry(.1,.1,.68,8),legMat);l.position.set(...p);g.add(l);});
@@ -302,62 +328,105 @@ function makeFallbackAvatar(){
   avatarGroup.add(g);
 }
 
-const gltfLoader=new GLTFLoader();
-if(profile.glbUrl){
-  gltfLoader.load(profile.glbUrl,gltf=>{
-    const model=gltf.scene;
-    model.traverse(n=>{if(n.isMesh){n.castShadow=true;n.receiveShadow=true;}});
-    // Auto-scale
-    const bb=new THREE.Box3().setFromObject(model);
-    const size=new THREE.Vector3();bb.getSize(size);
-    if(size.y>0)model.scale.setScalar(1.75/size.y);
-    const bb2=new THREE.Box3().setFromObject(model);
-    model.position.y=-bb2.min.y;
+// ── Noms d'animations Avaturn (+ fallbacks génériques) ──
+const IDLE_NAMES  = /idle|stand|neutral|breathe|t.pose/i;
+const WALK_NAMES  = /walk|run|move|jog|stride/i;
+
+const gltfLoader = new GLTFLoader();
+if (profile.glbUrl) {
+  gltfLoader.load(profile.glbUrl, gltf => {
+    const model = gltf.scene;
+    model.traverse(n => { if (n.isMesh) { n.castShadow=true; n.receiveShadow=true; }});
+    const bb = new THREE.Box3().setFromObject(model);
+    const size = new THREE.Vector3(); bb.getSize(size);
+    if (size.y > 0) model.scale.setScalar(1.75 / size.y);
+    const bb2 = new THREE.Box3().setFromObject(model);
+    model.position.y = -bb2.min.y;
     avatarGroup.add(model);
-    // Animations
-    if(gltf.animations?.length){
-      avatarMixer=new THREE.AnimationMixer(model);
-      console.log('Animations GLB:',gltf.animations.map(a=>a.name));
-      const idleClip=gltf.animations.find(a=>/idle|stand|neutral|breathe/i.test(a.name))||gltf.animations[0];
-      const walkClip=gltf.animations.find(a=>/walk|run|move|jog/i.test(a.name))||(gltf.animations.length>1?gltf.animations[1]:null);
-      if(idleClip){idleAction=avatarMixer.clipAction(idleClip);idleAction.play();}
-      if(walkClip&&walkClip!==idleClip){walkAction=avatarMixer.clipAction(walkClip);}
+
+    if (gltf.animations?.length) {
+      avatarMixer = new THREE.AnimationMixer(model);
+      console.log('🎬 Animations dispo:', gltf.animations.map(a => a.name));
+
+      const idleClip = gltf.animations.find(a => IDLE_NAMES.test(a.name))
+                    || gltf.animations[0];
+      const walkClip = gltf.animations.find(a => WALK_NAMES.test(a.name))
+                    || (gltf.animations.length > 1 ? gltf.animations[1] : null);
+
+      if (idleClip) {
+        idleAction = avatarMixer.clipAction(idleClip);
+        idleAction.play();
+        currentAction = idleAction;
+      }
+      if (walkClip && walkClip !== idleClip) {
+        walkAction = avatarMixer.clipAction(walkClip);
+      }
     }
     showToast('✨ Avatar chargé !');
-  },undefined,err=>{console.warn('GLB error:',err);makeFallbackAvatar();});
-}else{
+  }, undefined, err => { console.warn('GLB error:', err); makeFallbackAvatar(); });
+} else {
   makeFallbackAvatar();
 }
 
 // ===== MOUVEMENT =====
-const SPEED=4.5,BOUNDARY=24;
-const playerPos=new THREE.Vector3(0,0,6);
-let playerRotY=0,cameraRotY=0;
+const SPEED = 4.5, BOUNDARY = 24;
+const playerPos = new THREE.Vector3(0, 0, 6);
+let playerRotY = 0;       // rotation du personnage (radians)
+let cameraYaw  = Math.PI; // décalage horizontal caméra (0 = derrière)
 
-// Joystick
-const joyBase=document.getElementById('joy-base');
-const joyKnob=document.getElementById('joy-knob');
-const JR=42;
-const joy={active:false,x:0,y:0,id:null};
-function getJoyCenter(){const r=joyBase.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2};}
-function updateJoy(cx,cy){const c=getJoyCenter();let dx=cx-c.x,dy=cy-c.y;const d=Math.sqrt(dx*dx+dy*dy);if(d>JR){dx=dx/d*JR;dy=dy/d*JR;}joy.x=dx/JR;joy.y=dy/JR;joyKnob.style.transform=`translate(${dx}px,${dy}px)`;}
+// ── Joystick droit (déplacement) ──
+const joyBase  = document.getElementById('joy-base');
+const joyKnob  = document.getElementById('joy-knob');
+const JR = 42;
+const joy = { active:false, x:0, y:0, id:null };
+function getJoyCenter() { const r=joyBase.getBoundingClientRect(); return {x:r.left+r.width/2,y:r.top+r.height/2}; }
+function updateJoy(cx,cy) {
+  const c=getJoyCenter(); let dx=cx-c.x, dy=cy-c.y;
+  const d=Math.sqrt(dx*dx+dy*dy); if(d>JR){dx=dx/d*JR;dy=dy/d*JR;}
+  joy.x=dx/JR; joy.y=dy/JR;
+  joyKnob.style.transform=`translate(${dx}px,${dy}px)`;
+}
 joyBase.addEventListener('touchstart',e=>{e.preventDefault();const t=e.changedTouches[0];joy.active=true;joy.id=t.identifier;updateJoy(t.clientX,t.clientY);},{passive:false});
-document.addEventListener('touchmove',e=>{if(!joy.active)return;for(const t of e.changedTouches)if(t.identifier===joy.id){e.preventDefault();updateJoy(t.clientX,t.clientY);}},{passive:false});
-document.addEventListener('touchend',e=>{for(const t of e.changedTouches)if(t.identifier===joy.id){joy.active=false;joy.x=0;joy.y=0;joyKnob.style.transform='translate(0,0)';}});
+document.addEventListener('touchmove',e=>{
+  if(!joy.active)return;
+  for(const t of e.changedTouches)if(t.identifier===joy.id){e.preventDefault();updateJoy(t.clientX,t.clientY);}
+},{passive:false});
+document.addEventListener('touchend',e=>{
+  for(const t of e.changedTouches)if(t.identifier===joy.id){
+    joy.active=false;joy.x=0;joy.y=0;joyKnob.style.transform='translate(0,0)';
+  }
+});
 
-// Camera touch
-let camTouch={active:false,lastX:0,id:null};
-document.addEventListener('touchstart',e=>{for(const t of e.touches){const el=document.elementFromPoint(t.clientX,t.clientY);if(el?.closest('#joystick-zone')||el?.closest('#hud'))continue;if(!camTouch.active){camTouch.active=true;camTouch.id=t.identifier;camTouch.lastX=t.clientX;}}},{passive:true});
-document.addEventListener('touchmove',e=>{for(const t of e.changedTouches)if(t.identifier===camTouch.id){cameraRotY-=(t.clientX-camTouch.lastX)*.35;camTouch.lastX=t.clientX;}},{passive:true});
-document.addEventListener('touchend',e=>{for(const t of e.changedTouches)if(t.identifier===camTouch.id)camTouch.active=false;});
+// ── Joystick gauche invisible (rotation caméra) ──
+const camZone = document.getElementById('cam-joystick-zone');
+const CAM_JR  = 55; // rayon logique (px) — zone 110px/2
+const camJoy  = { active:false, x:0, y:0, id:null };
+function getCamCenter() { const r=camZone.getBoundingClientRect(); return {x:r.left+r.width/2,y:r.top+r.height/2}; }
+function updateCamJoy(cx,cy) {
+  const c=getCamCenter(); let dx=cx-c.x, dy=cy-c.y;
+  const d=Math.sqrt(dx*dx+dy*dy); if(d>CAM_JR){dx=dx/d*CAM_JR;dy=dy/d*CAM_JR;}
+  camJoy.x=dx/CAM_JR; camJoy.y=dy/CAM_JR;
+}
+camZone.addEventListener('touchstart',e=>{
+  e.preventDefault();const t=e.changedTouches[0];camJoy.active=true;camJoy.id=t.identifier;updateCamJoy(t.clientX,t.clientY);
+},{passive:false});
+document.addEventListener('touchmove',e=>{
+  if(!camJoy.active)return;
+  for(const t of e.changedTouches)if(t.identifier===camJoy.id){e.preventDefault();updateCamJoy(t.clientX,t.clientY);}
+},{passive:false});
+document.addEventListener('touchend',e=>{
+  for(const t of e.changedTouches)if(t.identifier===camJoy.id){
+    camJoy.active=false;camJoy.x=0;camJoy.y=0;
+  }
+});
 
-// Camera mouse
+// ── Souris (desktop) — rotation caméra sur clic-glissé ──
 let mDrag={active:false,lastX:0};
 renderer.domElement.addEventListener('mousedown',e=>{mDrag.active=true;mDrag.lastX=e.clientX;});
-document.addEventListener('mousemove',e=>{if(!mDrag.active)return;cameraRotY-=(e.clientX-mDrag.lastX)*.35;mDrag.lastX=e.clientX;});
+document.addEventListener('mousemove',e=>{if(!mDrag.active)return;cameraYaw-=(e.clientX-mDrag.lastX)*0.005;mDrag.lastX=e.clientX;});
 document.addEventListener('mouseup',()=>mDrag.active=false);
 
-// Clavier
+// ── Clavier ──
 const keys={};
 document.addEventListener('keydown',e=>keys[e.key]=true);
 document.addEventListener('keyup',e=>keys[e.key]=false);
@@ -397,58 +466,88 @@ document.getElementById('btn-emote').addEventListener('click',()=>{
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 
 // ===== BOUCLE =====
-const clock=new THREE.Clock();
+const clock = new THREE.Clock();
 finishLoading();
+
+// Distance et hauteur caméra
+const CAM_DIST   = 5.5;
+const CAM_HEIGHT = 2.8;
+const CAM_LOOK_Y = 1.2; // hauteur du point visé sur l'avatar
+
+// Lissage caméra (lerp vers rotation du personnage quand on marche)
+const CAM_LERP_SPEED = 3.5; // plus grand = suit plus vite
 
 function animate(){
   requestAnimationFrame(animate);
-  const dt=Math.min(clock.getDelta(),0.1);
-  if(avatarMixer)avatarMixer.update(dt);
+  const dt = Math.min(clock.getDelta(), 0.1);
+  if (avatarMixer) avatarMixer.update(dt);
 
   // Nuages
-  clouds.forEach(c=>{c.mesh.position.x-=c.speed*dt;if(c.mesh.position.x<-35)c.mesh.position.x=35;});
+  clouds.forEach(c => { c.mesh.position.x -= c.speed * dt; if(c.mesh.position.x < -35) c.mesh.position.x = 35; });
 
-  // Mouvement
-  let mx=joy.x,mz=joy.y;
-  if(keys['ArrowUp']||keys['w']||keys['W'])mz=-1;
-  if(keys['ArrowDown']||keys['s']||keys['S'])mz=1;
-  if(keys['ArrowLeft']||keys['a']||keys['A'])mx=-1;
-  if(keys['ArrowRight']||keys['d']||keys['D'])mx=1;
+  // ── Lecture joystick droit ──
+  let mx = joy.x, mz = joy.y;
+  if (keys['ArrowUp']  || keys['w'] || keys['W']) mz = -1;
+  if (keys['ArrowDown'] || keys['s'] || keys['S']) mz =  1;
+  if (keys['ArrowLeft'] || keys['a'] || keys['A']) mx = -1;
+  if (keys['ArrowRight']|| keys['d'] || keys['D']) mx =  1;
 
-  const moving=Math.abs(mx)>.05||Math.abs(mz)>.05;
+  // ── Rotation caméra via joystick gauche ou clavier Q/E ──
+  if (camJoy.active && Math.abs(camJoy.x) > 0.05) {
+    cameraYaw -= camJoy.x * 2.0 * dt;
+  }
+  if (keys['q'] || keys['Q']) cameraYaw += 1.8 * dt;
+  if (keys['e'] || keys['E']) cameraYaw -= 1.8 * dt;
+
+  const moving = Math.abs(mx) > 0.05 || Math.abs(mz) > 0.05;
   setWalk(moving);
 
-  if(moving){
-    const cr=cameraRotY*Math.PI/180;
-    const dx=(Math.sin(cr)*(-mz)+Math.cos(cr)*mx)*SPEED*dt;
-    const dz=(Math.cos(cr)*(-mz)-Math.sin(cr)*mx)*SPEED*dt;
-    playerPos.x=Math.max(-BOUNDARY,Math.min(BOUNDARY,playerPos.x+dx));
-    playerPos.z=Math.max(-BOUNDARY,Math.min(BOUNDARY,playerPos.z+dz));
-    playerRotY=Math.atan2(dx,dz)*180/Math.PI;
+  if (moving) {
+    // Direction de déplacement = relative à la caméra actuelle
+    const sinC = Math.sin(cameraYaw);
+    const cosC = Math.cos(cameraYaw);
+    const dx = (sinC * (-mz) + cosC * mx) * SPEED * dt;
+    const dz = (cosC * (-mz) - sinC * mx) * SPEED * dt;
+
+    playerPos.x = Math.max(-BOUNDARY, Math.min(BOUNDARY, playerPos.x + dx));
+    playerPos.z = Math.max(-BOUNDARY, Math.min(BOUNDARY, playerPos.z + dz));
+
+    // Le personnage tourne vers la direction de marche
+    playerRotY = Math.atan2(dx, dz);
+
+    // ── COMPORTEMENT GTA : caméra suit lentement derrière le dos ──
+    // On cible la direction opposée à la marche (dos du personnage)
+    const targetYaw = playerRotY + Math.PI;
+    // Lerp angulaire (court chemin)
+    let diff = targetYaw - cameraYaw;
+    while (diff >  Math.PI) diff -= 2 * Math.PI;
+    while (diff < -Math.PI) diff += 2 * Math.PI;
+    cameraYaw += diff * Math.min(CAM_LERP_SPEED * dt, 1.0);
   }
 
-  avatarGroup.position.set(playerPos.x,playerPos.y,playerPos.z);
-  avatarGroup.rotation.y=playerRotY*Math.PI/180;
+  // Appliquer la rotation au groupe avatar
+  avatarGroup.position.set(playerPos.x, playerPos.y, playerPos.z);
+  avatarGroup.rotation.y = playerRotY;
 
-  // Caméra TPS
-  const cr2=cameraRotY*Math.PI/180;
+  // ── Position caméra TPS (derrière le dos) ──
   camera.position.set(
-    playerPos.x+Math.sin(cr2)*5.5,
-    playerPos.y+2.8,
-    playerPos.z+Math.cos(cr2)*5.5
+    playerPos.x + Math.sin(cameraYaw) * CAM_DIST,
+    playerPos.y + CAM_HEIGHT,
+    playerPos.z + Math.cos(cameraYaw) * CAM_DIST
   );
-  camera.lookAt(playerPos.x,playerPos.y+1.2,playerPos.z);
+  camera.lookAt(playerPos.x, playerPos.y + CAM_LOOK_Y, playerPos.z);
 
   updateBubblePos();
-  renderer.render(scene,camera);
+  renderer.render(scene, camera);
 }
 animate();
 
-window.addEventListener('resize',()=>{
-  camera.aspect=window.innerWidth/window.innerHeight;
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth,window.innerHeight);
+  renderer.setSize(window.innerWidth, window.innerHeight);
 });
 </script>
+
 </body>
 </html>
