@@ -1,556 +1,345 @@
 <!DOCTYPE html>
-
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Macadam World — Place Pastel</title>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<title>Macadam World — Avatar 3D</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-:root{--pink:#FF6EB4;--mint:#3DDBB8;--yellow:#FFD747;--lav:#B388FF;--sky:#5BC8F5;--dark:#12082A;}
-html,body{width:100%;height:100%;overflow:hidden;background:#0a0618;font-family:'Nunito',sans-serif;user-select:none;-webkit-user-select:none;}
-#canvas-container{position:fixed;inset:0;}
-canvas{display:block;width:100%!important;height:100%!important;}
-#hud{position:fixed;inset:0;z-index:10;pointer-events:none;}
-.hud-top{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:linear-gradient(180deg,rgba(18,8,42,.85) 0%,transparent 100%);}
-.hud-logo{font-family:'Baloo 2',cursive;font-size:1.1rem;font-weight:800;color:white;text-shadow:0 2px 8px rgba(0,0,0,.5);}
-.hud-logo span{color:var(--pink);}
-.hud-location{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:5px 12px;}
-.hud-location span{font-size:.75rem;font-weight:800;color:white;}
-.loc-dot{width:7px;height:7px;border-radius:50%;background:var(--mint);flex-shrink:0;animation:pulsedot 2s infinite;}
-@keyframes pulsedot{0%,100%{box-shadow:0 0 0 0 rgba(61,219,184,.6);}50%{box-shadow:0 0 0 5px rgba(61,219,184,0);}}
-.hud-info{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:5px 12px 5px 6px;}
-.hud-pic{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--lav));display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:900;color:white;border:2px solid rgba(255,255,255,.2);}
-.hud-pseudo{font-size:.75rem;font-weight:800;color:white;}
-.hud-chat{position:absolute;bottom:148px;left:12px;right:12px;max-width:300px;pointer-events:all;}
-.chat-messages{max-height:110px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;margin-bottom:6px;scrollbar-width:none;}
-.chat-messages::-webkit-scrollbar{display:none;}
-.chat-msg{background:rgba(18,8,42,.78);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:5px 10px;font-size:.7rem;color:white;animation:fadeup .3s ease;line-height:1.4;}
-@keyframes fadeup{from{opacity:0;transform:translateY(4px);}to{opacity:1;}}
-.chat-msg .name{font-weight:900;color:var(--pink);margin-right:4px;}
-.chat-input-wrap{display:flex;gap:6px;}
-.chat-input{flex:1;background:rgba(18,8,42,.85);backdrop-filter:blur(10px);border:1.5px solid rgba(255,255,255,.15);border-radius:12px;padding:8px 12px;font-size:16px;font-weight:700;color:white;outline:none;font-family:'Nunito',sans-serif;}
-.chat-input::placeholder{color:rgba(255,255,255,.25);}
-.chat-input:focus{border-color:var(--pink);}
-.chat-send{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--pink),var(--lav));border:none;color:white;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;pointer-events:all;flex-shrink:0;}
-#joystick-zone{position:absolute;bottom:24px;right:24px;width:110px;height:110px;pointer-events:all;}
-.joy-base{width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.14);backdrop-filter:blur(8px);position:relative;display:flex;align-items:center;justify-content:center;}
-.joy-knob{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--lav));box-shadow:0 4px 16px rgba(255,110,180,.45);position:absolute;}
-#btn-emote{position:absolute;bottom:44px;right:148px;width:50px;height:50px;border-radius:50%;background:rgba(61,219,184,.12);border:2px solid var(--mint);color:var(--mint);font-size:1.2rem;display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:all;backdrop-filter:blur(8px);}
-#btn-emote:active{transform:scale(.9);}
-.toast{position:fixed;bottom:170px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(18,8,42,.92);border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(12px);color:white;padding:8px 18px;border-radius:20px;font-size:.78rem;font-weight:800;opacity:0;transition:all .3s;z-index:50;pointer-events:none;white-space:nowrap;}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-#speech-bubble{position:fixed;z-index:20;background:white;color:#12082A;border-radius:12px;padding:5px 11px;font-size:.72rem;font-weight:800;pointer-events:none;box-shadow:0 4px 14px rgba(0,0,0,.3);max-width:150px;text-align:center;transform:translateX(-50%);opacity:0;transition:opacity .3s;white-space:nowrap;}
-#speech-bubble::after{content:'';position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:white;border-bottom:none;}
-#loading-screen{position:fixed;inset:0;z-index:100;background:#0e0620;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .6s;}
-#loading-screen.hidden{opacity:0;pointer-events:none;}
-.load-logo{font-family:'Baloo 2',cursive;font-size:2.5rem;font-weight:800;color:white;}
-.load-logo .c1{color:var(--pink);}.load-logo .c2{color:var(--yellow);}.load-logo .c3{color:var(--mint);}.load-logo .c4{color:var(--sky);}
-.load-bar-wrap{width:200px;height:4px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;}
-.load-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--pink),var(--lav));border-radius:2px;transition:width .25s;}
-.load-txt{font-size:.76rem;color:rgba(255,255,255,.4);font-weight:700;}
+:root{
+  --pink:#FF6EB4;--mint:#3DDBB8;--yellow:#FFD747;
+  --lav:#B388FF;--sky:#5BC8F5;--peach:#FF9E7A;--dark:#12082A;
+}
+html,body{height:100%;width:100%;font-family:'Nunito',sans-serif;background:var(--dark);overflow:hidden;}
+.bg{position:fixed;inset:0;z-index:0;background:#0e0620;overflow:hidden;}
+.bg::before{content:'';position:absolute;inset:0;
+background:
+  radial-gradient(ellipse 80% 50% at 10% 15%,#FF6EB455 0%,transparent 60%),
+  radial-gradient(ellipse 60% 40% at 90% 80%,#B388FF44 0%,transparent 55%),
+  radial-gradient(ellipse 70% 45% at 85% 10%,#3DDBB833 0%,transparent 55%),
+  radial-gradient(ellipse 50% 35% at 15% 85%,#FFD74733 0%,transparent 50%);}
+.bg::after{content:'';position:absolute;inset:0;
+background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);
+background-size:40px 40px;}
+.bg-shapes{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+.stars{position:fixed;inset:0;z-index:0;pointer-events:none;}
+.star{position:absolute;border-radius:50%;background:white;animation:twinkle var(--d,3s) ease-in-out infinite var(--del,0s);}
+@keyframes twinkle{0%,100%{opacity:.1;transform:scale(1);}50%{opacity:.9;transform:scale(1.6);}}
+.app{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 16px;gap:10px;}
+.logo-tag{display:inline-block;background:var(--yellow);color:var(--dark);font-size:.6rem;font-weight:900;letter-spacing:2px;text-transform:uppercase;padding:3px 10px;border-radius:20px;}
+.logo-title{font-family:'Baloo 2',cursive;font-size:clamp(1.3rem,5vw,2rem);font-weight:800;line-height:1;color:white;letter-spacing:-1px;text-align:center;}
+.logo-sub{font-size:.7rem;color:rgba(255,255,255,.3);font-weight:700;letter-spacing:1px;}
+.avatar-card{width:100%;max-width:340px;background:rgba(18,8,42,.7);backdrop-filter:blur(20px);border:1.5px solid rgba(255,255,255,.12);border-radius:24px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:10px;box-shadow:0 20px 60px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08);}
+.viewer-wrap{width:140px;height:200px;flex-shrink:0;background:linear-gradient(160deg,#1a0838 0%,#0d1535 60%,#0a1f2e 100%);border-radius:18px;box-shadow:0 0 0 2px rgba(255,110,180,.7),0 0 20px rgba(255,110,180,.3);overflow:hidden;position:relative;align-self:center;}
+.viewer-wrap::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at 20% 5%,rgba(255,110,180,.2) 0%,transparent 50%);}
+.viewer-wrap::after{content:'✦ MW ✦';position:absolute;bottom:6px;left:50%;transform:translateX(-50%);font-family:'Baloo 2',cursive;font-size:.45rem;font-weight:800;letter-spacing:2px;color:rgba(255,255,255,.25);z-index:2;pointer-events:none;white-space:nowrap;}
+.viewer-placeholder{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:rgba(255,255,255,.25);font-size:.7rem;font-weight:700;}
+.viewer-placeholder .icon{font-size:2rem;opacity:.4;}
+.pseudo-wrap{width:100%;}
+.pseudo-label{font-size:.58rem;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.3);display:block;margin-bottom:5px;}
+.pseudo-input{width:100%;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.12);border-radius:12px;padding:9px 12px;font-family:'Nunito',sans-serif;font-size:16px;font-weight:700;color:white;outline:none;transition:all .2s;}
+.pseudo-input::placeholder{color:rgba(255,255,255,.2);}
+.pseudo-input:focus{border-color:var(--pink);background:rgba(255,110,180,.08);}
+.btn-create{width:100%;background:linear-gradient(135deg,var(--pink),var(--lav));border:none;border-radius:12px;padding:12px;font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:white;cursor:pointer;box-shadow:0 4px 16px rgba(255,110,180,.4);transition:transform .15s;}
+.btn-create:active{transform:scale(.97);}
+.btn-save{width:100%;background:rgba(61,219,184,.12);border:1.5px solid var(--mint);border-radius:12px;padding:10px;font-family:'Nunito',sans-serif;font-size:.88rem;font-weight:800;color:var(--mint);cursor:pointer;transition:all .2s;display:none;}
+.btn-save.visible{display:block;}
+.btn-play{width:100%;background:linear-gradient(135deg,var(--mint),var(--sky));border:none;border-radius:12px;padding:13px;font-family:'Baloo 2',cursive;font-size:1rem;font-weight:700;color:var(--dark);cursor:pointer;box-shadow:0 4px 16px rgba(61,219,184,.4);transition:transform .15s;display:none;animation:glow 2s ease-in-out infinite;}
+.btn-play.visible{display:block;}
+.btn-play:active{transform:scale(.97);}
+@keyframes glow{0%,100%{box-shadow:0 4px 16px rgba(61,219,184,.4);}50%{box-shadow:0 4px 28px rgba(61,219,184,.7);}}
+.avatar-badge{display:none;align-items:center;gap:6px;background:rgba(61,219,184,.1);border:1px solid rgba(61,219,184,.3);border-radius:10px;padding:6px 12px;width:100%;}
+.avatar-badge.visible{display:flex;}
+.avatar-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--mint);flex-shrink:0;animation:pulse 1.5s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.3);}}
+.avatar-badge span{font-size:.72rem;font-weight:800;color:var(--mint);}
+.modal-overlay{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.95);display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .3s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0;}
+.modal-title{font-size:.85rem;font-weight:800;color:rgba(255,255,255,.6);letter-spacing:1px;}
+.btn-close{background:rgba(255,255,255,.1);border:none;border-radius:10px;width:36px;height:36px;cursor:pointer;font-size:1.1rem;color:white;display:flex;align-items:center;justify-content:center;}
+#avaturn-sdk-container{flex:1;width:100%;overflow:hidden;}
+#avaturn-sdk-container iframe{width:100%!important;height:100%!important;border:none!important;}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--mint);color:var(--dark);padding:10px 22px;border-radius:14px;font-size:.88rem;font-weight:800;box-shadow:0 8px 24px rgba(61,219,184,.4);transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:999;pointer-events:none;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+#transition-screen{position:fixed;inset:0;z-index:200;background:#0e0620;opacity:0;pointer-events:none;transition:opacity .5s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
+#transition-screen.show{opacity:1;pointer-events:all;}
+.transition-logo{font-family:'Baloo 2',cursive;font-size:2rem;font-weight:800;color:white;}
+.transition-txt{font-size:.8rem;color:rgba(255,255,255,.5);font-weight:700;letter-spacing:1px;}
+.transition-spinner{width:36px;height:36px;border:3px solid rgba(255,110,180,.2);border-top-color:var(--pink);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.save-progress{font-size:.7rem;color:rgba(255,255,255,.4);font-weight:700;text-align:center;display:none;}
+.save-progress.visible{display:block;}
 </style>
 </head>
 <body>
-
-<div id="canvas-container"></div>
-
-<div id="loading-screen">
-  <div class="load-logo">
-    <span class="c1">M</span><span class="c2">A</span><span class="c3">C</span><span class="c4">A</span><span class="c1">D</span><span class="c2">A</span><span class="c3">M</span>
-  </div>
-  <div class="load-bar-wrap"><div class="load-bar" id="load-bar"></div></div>
-  <div class="load-txt" id="load-txt">Chargement de Place Pastel…</div>
+<div class="bg"></div>
+<div class="bg-shapes">
+<svg width="100%" height="100%" viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="340" cy="80" r="90" fill="#FF6EB4" opacity=".07"/>
+  <circle cx="50" cy="200" r="60" fill="#B388FF" opacity=".09"/>
+  <circle cx="360" cy="700" r="110" fill="#3DDBB8" opacity=".06"/>
+  <circle cx="30" cy="750" r="70" fill="#FFD747" opacity=".07"/>
+  <polygon points="320,150 360,200 320,250 280,200" fill="#FFD747" opacity=".06"/>
+  <polygon points="60,550 100,600 60,650 20,600" fill="#FF6EB4" opacity=".07"/>
+  <line x1="0" y1="300" x2="150" y2="0" stroke="#B388FF" stroke-width="1" opacity=".12"/>
+  <line x1="390" y1="500" x2="240" y2="844" stroke="#FF6EB4" stroke-width="1" opacity=".12"/>
+  <text x="20" y="400" font-size="18" fill="#FFD747" opacity=".15">✦</text>
+  <text x="350" y="300" font-size="14" fill="#FF6EB4" opacity=".15">✦</text>
+</svg>
 </div>
-
-<div id="hud">
-  <div class="hud-top">
-    <div class="hud-logo">✦ <span>Macadam</span> World</div>
-    <div class="hud-location"><div class="loc-dot"></div><span>Place Pastel</span></div>
-    <div class="hud-info">
-      <div class="hud-pic" id="hud-pic">?</div>
-      <span class="hud-pseudo" id="hud-pseudo">Joueur</span>
-    </div>
+<div class="stars" id="stars"></div>
+<div class="app">
+  <div class="logo-tag">✦ Créateur d'avatar ✦</div>
+  <div class="logo-title">
+    <span style="color:var(--pink)">M</span><span style="color:var(--yellow)">A</span><span style="color:var(--mint)">C</span><span style="color:var(--sky)">A</span><span style="color:var(--lav)">D</span><span style="color:var(--peach)">A</span><span style="color:var(--pink)">M</span>
+    <span style="color:rgba(255,255,255,.2);font-size:.7em;margin:0 6px;">✦</span>
+    <span style="color:var(--yellow)">W</span><span style="color:var(--mint)">O</span><span style="color:var(--sky)">R</span><span style="color:var(--lav)">L</span><span style="color:var(--peach)">D</span>
   </div>
-  <div class="hud-chat">
-    <div class="chat-messages" id="chat-messages"></div>
-    <div class="chat-input-wrap">
-      <input class="chat-input" id="chat-input" type="text" placeholder="Dis quelque chose…" maxlength="80" autocomplete="off"/>
-      <button class="chat-send" id="chat-send">➤</button>
+  <div class="logo-sub">Avatar 3D — Powered by Avaturn</div>
+  <div class="avatar-card">
+    <div class="viewer-wrap" id="viewer-wrap">
+      <div class="viewer-placeholder" id="viewer-placeholder">
+        <div class="icon">🧍</div>
+        <span>Avatar ici</span>
+      </div>
     </div>
-  </div>
-  <div id="btn-emote">🌸</div>
-  <div id="joystick-zone">
-    <div class="joy-base" id="joy-base">
-      <div class="joy-knob" id="joy-knob"></div>
+    <div class="avatar-badge" id="avatar-badge">
+      <div class="dot"></div>
+      <span>Avatar 3D prêt ✨</span>
     </div>
+    <div class="pseudo-wrap">
+      <label class="pseudo-label" for="pseudo">Ton pseudo</label>
+      <input class="pseudo-input" id="pseudo" type="text" maxlength="16" placeholder="StarMochi…" autocomplete="off"/>
+    </div>
+    <button class="btn-create" onclick="openAvaturn()">🧬 Créer / Modifier mon avatar 3D</button>
+    <div class="save-progress" id="save-progress">⏳ Sauvegarde en cours…</div>
+    <button class="btn-save" id="btn-save" onclick="saveAndPlay()">✨ Sauvegarder</button>
+    <button class="btn-play" id="btn-play" onclick="goToWorld()">🌍 Entrer dans Macadam World →</button>
   </div>
 </div>
-
-<div id="speech-bubble"></div>
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-header">
+    <span class="modal-title">✦ CRÉATEUR D'AVATAR</span>
+    <button class="btn-close" onclick="closeAvaturn()">✕</button>
+  </div>
+  <div id="avaturn-sdk-container"></div>
+</div>
+<div id="transition-screen">
+  <div class="transition-logo">
+    <span style="color:var(--pink)">M</span><span style="color:var(--yellow)">A</span><span style="color:var(--mint)">C</span><span style="color:var(--sky)">A</span><span style="color:var(--lav)">D</span><span style="color:var(--peach)">A</span><span style="color:var(--pink)">M</span>
+  </div>
+  <div class="transition-spinner"></div>
+  <div class="transition-txt">Chargement de Place Pastel…</div>
+</div>
 <div class="toast" id="toast"></div>
-
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
-  }
-}
-</script>
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
 
 <script type="module">
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { AvaturnSDK } from 'https://cdn.jsdelivr.net/npm/@avaturn/sdk/dist/index.js';
 
-// ===== PROFIL =====
-function loadProfile() {
-  try {
-    const uid = localStorage.getItem('macadam_user_id') || ('p_' + Math.random().toString(36).slice(2,8));
-    localStorage.setItem('macadam_user_id', uid);
-    const saved = JSON.parse(localStorage.getItem('macadam_avatar_' + uid) || 'null');
-    return { pseudo: saved?.pseudo || 'Joueur', glbUrl: saved?.glbUrl || null };
-  } catch(e) { return { pseudo: 'Joueur', glbUrl: null }; }
-}
-const profile = loadProfile();
-document.getElementById('hud-pseudo').textContent = profile.pseudo;
-document.getElementById('hud-pic').textContent = profile.pseudo.slice(0,2).toUpperCase();
-
-// ===== LOADING BAR =====
-let loadPct = 0;
-const loadBar = document.getElementById('load-bar');
-const loadTxt = document.getElementById('load-txt');
-const loadMsgs = ['Chargement de Place Pastel…','Plantation des arbres…','Remplissage de la fontaine…','Presque prêt…'];
-let loadMsgIdx = 0;
-const loadInterval = setInterval(() => {
-  loadPct += Math.random() * 14;
-  if (loadPct > 90) { loadPct = 90; clearInterval(loadInterval); }
-  loadBar.style.width = loadPct + '%';
-  const idx = Math.min(Math.floor(loadPct / 25), loadMsgs.length - 1);
-  if (idx > loadMsgIdx) { loadMsgIdx = idx; loadTxt.textContent = loadMsgs[loadMsgIdx]; }
-}, 200);
-
-function finishLoading() {
-  clearInterval(loadInterval);
-  loadBar.style.width = '100%';
-  loadTxt.textContent = 'Bienvenue à Place Pastel !';
-  setTimeout(() => {
-    const ls = document.getElementById('loading-screen');
-    ls.classList.add('hidden');
-    setTimeout(() => ls.style.display = 'none', 700);
-  }, 400);
-  addChat('🌸 Bienvenue, ' + profile.pseudo + ' !', 'Macadam');
-  addChat('💬 Joystick pour te déplacer', 'Système');
+// ÉTOILES
+const starsEl = document.getElementById('stars');
+for(let i=0;i<60;i++){
+  const s=document.createElement('div');s.className='star';
+  const sz=Math.random()*2.5+.8;
+  s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${2+Math.random()*4}s;--del:-${Math.random()*5}s;`;
+  starsEl.appendChild(s);
 }
 
-// ===== RENDERER =====
-const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.2;
-renderer.outputColorSpace = THREE.SRGBColorSpace;
-document.getElementById('canvas-container').appendChild(renderer.domElement);
-
-// ===== SCENE =====
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xC8E8FF);
-scene.fog = new THREE.FogExp2(0xD0EDFF, 0.015);
-
-// ===== CAMERA =====
-const camera = new THREE.PerspectiveCamera(58, window.innerWidth / window.innerHeight, 0.1, 300);
-
-// ===== LUMIERES =====
-scene.add(new THREE.AmbientLight(0xfff0e8, 0.75));
-const sun = new THREE.DirectionalLight(0xfff4d0, 2.5);
-sun.position.set(20, 40, 15);
-sun.castShadow = true;
-sun.shadow.mapSize.set(1024, 1024);
-sun.shadow.camera.near = 1; sun.shadow.camera.far = 120;
-sun.shadow.camera.left = sun.shadow.camera.bottom = -40;
-sun.shadow.camera.right = sun.shadow.camera.top = 40;
-scene.add(sun);
-scene.add(new THREE.HemisphereLight(0xB8E8FF, 0x88C880, 0.9));
-const fillLight = new THREE.DirectionalLight(0xe8f0ff, 0.6);
-fillLight.position.set(-10, 15, -10);
-scene.add(fillLight);
-
-// ===== HELPERS =====
-function mkBox(w, h, d, color) {
-  const m = new THREE.Mesh(
-    new THREE.BoxGeometry(w, h, d),
-    new THREE.MeshStandardMaterial({ color })
-  );
-  m.castShadow = true; m.receiveShadow = true;
-  return m;
+// PROFIL
+function getUserId(){
+  let uid=localStorage.getItem('macadam_user_id');
+  if(!uid){uid=crypto.randomUUID();localStorage.setItem('macadam_user_id',uid);}
+  return uid;
 }
-function mkCyl(rt, rb, h, seg, color) {
-  const m = new THREE.Mesh(
-    new THREE.CylinderGeometry(rt, rb, h, seg),
-    new THREE.MeshStandardMaterial({ color })
-  );
-  m.castShadow = true;
-  return m;
-}
-function mkSph(r, color, emissive = false) {
-  const mat = new THREE.MeshStandardMaterial({ color });
-  if (emissive) { mat.emissive = new THREE.Color(color); mat.emissiveIntensity = 0.5; }
-  const m = new THREE.Mesh(new THREE.SphereGeometry(r, 12, 12), mat);
-  m.castShadow = true;
-  return m;
-}
-function addAt(obj, x, y, z) { obj.position.set(x, y, z); scene.add(obj); return obj; }
+function storageKey(){return 'macadam_avatar_'+getUserId();}
 
-// ===== SOL =====
-const ground = mkBox(80, 0.1, 80, 0xF0E8D8);
-ground.position.y = -0.05;
-scene.add(ground);
+let avatarGlbData=null; // stocke la data URI base64
+let sdk=null;
 
-const pave = new THREE.Mesh(
-  new THREE.CylinderGeometry(8, 8, 0.06, 32),
-  new THREE.MeshStandardMaterial({ color: 0xE8D8C8, roughness: 0.8 })
-);
-pave.position.y = 0.03;
-scene.add(pave);
-
-const paveIn = new THREE.Mesh(
-  new THREE.CylinderGeometry(4, 4, 0.07, 32),
-  new THREE.MeshStandardMaterial({ color: 0xF8E8D8, roughness: 0.7 })
-);
-paveIn.position.y = 0.035;
-scene.add(paveIn);
-
-// Allées croisées
-[0, Math.PI / 2].forEach(ry => {
-  const ally = new THREE.Mesh(
-    new THREE.PlaneGeometry(40, 1.4),
-    new THREE.MeshStandardMaterial({ color: 0xD8C8B8 })
-  );
-  ally.rotation.x = -Math.PI / 2;
-  ally.rotation.z = ry;
-  ally.position.y = 0.04;
-  scene.add(ally);
-});
-
-// ===== FONTAINE =====
-(function() {
-  const basin = mkCyl(2.5, 2.8, 0.62, 24, 0xD4C4F0);
-  basin.position.y = 0.31;
-  scene.add(basin);
-
-  const water = new THREE.Mesh(
-    new THREE.CylinderGeometry(2.2, 2.2, 0.06, 24),
-    new THREE.MeshStandardMaterial({ color: 0xA8D8FF, roughness: 0.05, metalness: 0.4, transparent: true, opacity: 0.88 })
-  );
-  water.position.y = 0.6;
-  scene.add(water);
-
-  const col = mkCyl(0.18, 0.22, 2.2, 12, 0xC8B8E8);
-  col.position.y = 1.72;
-  scene.add(col);
-
-  const topBowl = mkCyl(0.85, 0.6, 0.18, 20, 0xD4C4F0);
-  topBowl.position.y = 2.92;
-  scene.add(topBowl);
-
-  const ball = new THREE.Mesh(
-    new THREE.SphereGeometry(0.22, 12, 12),
-    new THREE.MeshStandardMaterial({ color: 0xB8E8FF, roughness: 0.1, metalness: 0.5 })
-  );
-  ball.position.y = 3.22;
-  scene.add(ball);
-})();
-
-// ===== BATIMENTS =====
-[
-  { p: [-18, -14], w: 8, h: 8, d: 6, wall: 0xA8E6CF, roof: 0x7DD4B2 },
-  { p: [ 18, -14], w: 7, h: 9, d: 6, wall: 0xD4C5F9, roof: 0xB8A8F0 },
-  { p: [-12, -23], w: 5, h: 6, d: 5, wall: 0xFFBFA8, roof: 0xF0A898 },
-  { p: [ 12, -23], w: 6, h: 8, d: 5, wall: 0xB8E8D8, roof: 0x88D0B8 },
-  { p: [-22,  -4], w: 6, h: 7, d: 5, wall: 0xFFE0B2, roof: 0xFFB74D },
-  { p: [ 22,  -4], w: 6, h: 7, d: 5, wall: 0xF8BBD9, roof: 0xE887B8 },
-].forEach(b => {
-  const wall = mkBox(b.w, b.h, b.d, b.wall);
-  wall.position.set(b.p[0], b.h / 2, b.p[1]);
-  scene.add(wall);
-
-  const roof = new THREE.Mesh(
-    new THREE.ConeGeometry(Math.max(b.w, b.d) * 0.72, b.h * 0.42, 4),
-    new THREE.MeshStandardMaterial({ color: b.roof })
-  );
-  roof.position.set(b.p[0], b.h + b.h * 0.21, b.p[1]);
-  roof.rotation.y = Math.PI / 4;
-  roof.castShadow = true;
-  scene.add(roof);
-
-  // Auvent
-  const aw = mkBox(b.w + 1.4, 0.15, 1.8, b.roof);
-  aw.position.set(b.p[0], b.h * 0.48, b.p[1] + b.d / 2 + 0.75);
-  aw.rotation.x = 0.15;
-  scene.add(aw);
-
-  // Fenêtres
-  [[b.p[0] - b.w * 0.22, b.h * 0.55, b.p[1] + b.d / 2 + 0.01],
-   [b.p[0] + b.w * 0.22, b.h * 0.55, b.p[1] + b.d / 2 + 0.01]].forEach(wp => {
-    const win = mkBox(1.2, 1.6, 0.08, 0xFFE87A);
-    win.position.set(...wp);
-    scene.add(win);
-  });
-});
-
-// ===== ARBRES =====
-[[-6,-8,2.2,2],[6,-8,2.0,1.8],[-14,-5,2.5,2.2],[14,-5,2.2,2],
- [-8,5,1.9,1.7],[8,5,1.8,1.6],[-18,5,2.0,1.9],[18,5,2.0,1.9],
- [-4,12,1.7,1.5],[4,12,1.7,1.5]
-].forEach(t => {
-  const [x, z, h, r] = t;
-  const trunk = mkCyl(0.18, 0.24, h, 8, 0x8B6914);
-  trunk.position.set(x, h / 2, z);
-  scene.add(trunk);
-  [[0, r, 0],[r * -.7, r * .7, 0],[r * .7, r * .7, 0]].forEach((off, i) => {
-    const leaf = mkSph(r * (.55 + i * .07), [0x5CC87A, 0x48B868, 0x7DD87A][i]);
-    leaf.position.set(x + off[0], h + off[1], z + off[2]);
-    scene.add(leaf);
-  });
-});
-
-// ===== BANCS =====
-[[5,0,0],[-5,0,0],[0,5,Math.PI/2],[0,-5,Math.PI/2]].forEach(b => {
-  const g = new THREE.Group();
-  const seat = mkBox(2.5, 0.15, 0.62, 0xC8A878); seat.position.y = 0.5; g.add(seat);
-  [-1,1].forEach(s => { const leg = mkBox(0.14, 0.5, 0.5, 0xA88858); leg.position.set(s, 0.25, 0); g.add(leg); });
-  g.position.set(b[0], 0, b[1]); g.rotation.y = b[2];
-  scene.add(g);
-});
-
-// ===== LAMPADAIRES =====
-[[4,4],[-4,4],[4,-4],[-4,-4],[10,1],[-10,1],[0,11]].forEach(p => {
-  const pole = mkCyl(0.07, 0.09, 5.2, 8, 0xC0A8F0);
-  pole.position.set(p[0], 2.6, p[1]);
-  scene.add(pole);
-  const lamp = mkSph(0.28, 0xFFE87A, true);
-  lamp.position.set(p[0], 5.3, p[1]);
-  scene.add(lamp);
-  const pl = new THREE.PointLight(0xFFE87A, 0.7, 9);
-  pl.position.set(p[0], 5.3, p[1]);
-  scene.add(pl);
-});
-
-// ===== FLEURS =====
-[[3.5,0],[-3.5,0],[0,3.5],[0,-3.5],[5,3],[-5,3],[3,-5],[-3,-5],
- [7,-2],[-7,-2],[2,7],[-2,7]].forEach((p, i) => {
-  const colors = [0xFF9EBB, 0xFFD6EC, 0xC5B5FF, 0xA8E6CF, 0xFFE87A];
-  const f = mkSph(0.18, colors[i % colors.length]);
-  f.material.emissive = new THREE.Color(colors[i % colors.length]);
-  f.material.emissiveIntensity = 0.12;
-  f.position.set(p[0], 0.18, p[1]);
-  scene.add(f);
-  // Tige
-  const stem = mkCyl(0.03, 0.03, 0.2, 6, 0x5CC87A);
-  stem.position.set(p[0], 0.08, p[1]);
-  scene.add(stem);
-});
-
-// ===== NUAGES =====
-const clouds = [];
-[[18,14,-18,4],[-12,16,-22,5],[5,12,-30,3.5],[-25,15,-10,4.5],[30,18,-5,3]].forEach(c => {
-  const g = new THREE.Group();
-  [[0,0,0,c[3]],[c[3]*1.1,.3,0,c[3]*.75],[-c[3]*.9,.2,0,c[3]*.7],[c[3]*.4,-.2,c[3]*.6,c[3]*.6]].forEach(p => {
-    const cloud = new THREE.Mesh(
-      new THREE.SphereGeometry(p[3], 8, 8),
-      new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.88 })
-    );
-    cloud.position.set(p[0], p[1], p[2]);
-    g.add(cloud);
-  });
-  g.position.set(c[0], c[1], c[2]);
-  scene.add(g);
-  clouds.push({ mesh: g, speed: 0.8 + Math.random() * 0.6 });
-});
-
-// ===== AVATAR GROUPE =====
-const avatarGroup = new THREE.Group();
-avatarGroup.position.set(0, 0, 6);
-scene.add(avatarGroup);
-let avatarMixer = null;
-
-function makeFallbackAvatar() {
-  const g = new THREE.Group();
-  const body = mkBox(0.5, 0.7, 0.3, 0xFF9EBB); body.position.y = 0.95; g.add(body);
-  const head = mkSph(0.28, 0xFFDFC4); head.position.y = 1.65; g.add(head);
-  const hair = mkSph(0.3, 0x3D1800); hair.position.y = 1.83; g.add(hair);
-  [[0.1,1.68,0.26],[-0.1,1.68,0.26]].forEach(p => { const e = mkSph(0.05,0x1A1A2E); e.position.set(...p); g.add(e); });
-  const legMat = new THREE.MeshStandardMaterial({ color: 0xD4C5F9 });
-  [[0.12,0.35,0],[-0.12,0.35,0]].forEach(p => { const l = new THREE.Mesh(new THREE.CylinderGeometry(.1,.1,.68,8),legMat); l.position.set(...p); g.add(l); });
-  [[0.12,0.04,0.06],[-0.12,0.04,0.06]].forEach(p => { const f = mkSph(.12,0xAA88FF); f.position.set(...p); g.add(f); });
-  const armMat = new THREE.MeshStandardMaterial({ color: 0xFF9EBB });
-  const armR = new THREE.Mesh(new THREE.CylinderGeometry(.08,.08,.5,8),armMat); armR.position.set(.33,.95,0); armR.rotation.z = -.35; g.add(armR);
-  const armL = new THREE.Mesh(new THREE.CylinderGeometry(.08,.08,.5,8),armMat); armL.position.set(-.33,.95,0); armL.rotation.z = .35; g.add(armL);
-  const shadow = new THREE.Mesh(new THREE.CircleGeometry(.38,16),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.14}));
-  shadow.rotation.x = -Math.PI/2; shadow.position.y = 0.01; g.add(shadow);
-  avatarGroup.add(g);
+// TOAST
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3500);
 }
 
-const gltfLoader = new GLTFLoader();
-if (profile.glbUrl) {
-  gltfLoader.load(profile.glbUrl, gltf => {
-    const model = gltf.scene;
-    model.traverse(n => { if (n.isMesh) { n.castShadow = true; n.receiveShadow = true; } });
-    // Auto-scale à ~1.75m
-    const bb = new THREE.Box3().setFromObject(model);
-    const size = new THREE.Vector3(); bb.getSize(size);
-    if (size.y > 0) model.scale.setScalar(1.75 / size.y);
-    // Coller au sol
-    const bb2 = new THREE.Box3().setFromObject(model);
-    model.position.y = -bb2.min.y;
-    avatarGroup.add(model);
-    if (gltf.animations?.length) {
-      avatarMixer = new THREE.AnimationMixer(model);
-      const clip = gltf.animations.find(a => /idle/i.test(a.name)) || gltf.animations[0];
-      avatarMixer.clipAction(clip).play();
-    }
-    showToast('✨ Avatar chargé !');
-  }, undefined, err => {
-    console.warn('GLB error:', err);
-    makeFallbackAvatar();
-  });
-} else {
-  makeFallbackAvatar();
-}
-
-// ===== MOUVEMENT =====
-const SPEED = 4.5, BOUNDARY = 24;
-const playerPos = new THREE.Vector3(0, 0, 6);
-let playerRotY = 0, cameraRotY = 0;
-
-// Joystick
-const joyBase = document.getElementById('joy-base');
-const joyKnob = document.getElementById('joy-knob');
-const JR = 42;
-const joy = { active: false, x: 0, y: 0, id: null };
-function getJoyCenter() { const r = joyBase.getBoundingClientRect(); return { x: r.left+r.width/2, y: r.top+r.height/2 }; }
-function updateJoy(cx, cy) {
-  const c = getJoyCenter(); let dx = cx-c.x, dy = cy-c.y;
-  const d = Math.sqrt(dx*dx+dy*dy);
-  if (d > JR) { dx=dx/d*JR; dy=dy/d*JR; }
-  joy.x = dx/JR; joy.y = dy/JR;
-  joyKnob.style.transform = `translate(${dx}px,${dy}px)`;
-}
-joyBase.addEventListener('touchstart', e => { e.preventDefault(); const t=e.changedTouches[0]; joy.active=true; joy.id=t.identifier; updateJoy(t.clientX,t.clientY); }, { passive: false });
-document.addEventListener('touchmove', e => { if (!joy.active) return; for (const t of e.changedTouches) if (t.identifier===joy.id) { e.preventDefault(); updateJoy(t.clientX,t.clientY); } }, { passive: false });
-document.addEventListener('touchend', e => { for (const t of e.changedTouches) if (t.identifier===joy.id) { joy.active=false; joy.x=0; joy.y=0; joyKnob.style.transform='translate(0,0)'; } });
-
-// Camera drag touch
-let camTouch = { active: false, lastX: 0, id: null };
-document.addEventListener('touchstart', e => { for (const t of e.touches) { const el=document.elementFromPoint(t.clientX,t.clientY); if (el?.closest('#joystick-zone')||el?.closest('#hud')) continue; if (!camTouch.active) { camTouch.active=true; camTouch.id=t.identifier; camTouch.lastX=t.clientX; } } }, { passive: true });
-document.addEventListener('touchmove', e => { for (const t of e.changedTouches) if (t.identifier===camTouch.id) { cameraRotY-=(t.clientX-camTouch.lastX)*.35; camTouch.lastX=t.clientX; } }, { passive: true });
-document.addEventListener('touchend', e => { for (const t of e.changedTouches) if (t.identifier===camTouch.id) camTouch.active=false; });
-
-// Camera drag mouse
-let mDrag = { active: false, lastX: 0 };
-renderer.domElement.addEventListener('mousedown', e => { mDrag.active=true; mDrag.lastX=e.clientX; });
-document.addEventListener('mousemove', e => { if (!mDrag.active) return; cameraRotY-=(e.clientX-mDrag.lastX)*.35; mDrag.lastX=e.clientX; });
-document.addEventListener('mouseup', () => mDrag.active=false);
-
-// Clavier
-const keys = {};
-document.addEventListener('keydown', e => keys[e.key]=true);
-document.addEventListener('keyup', e => keys[e.key]=false);
-
-// ===== BULLE =====
-const bubbleEl = document.getElementById('speech-bubble');
-let bubbleTimer = null;
-function showBubble(text) { bubbleEl.textContent=text; bubbleEl.style.opacity='1'; clearTimeout(bubbleTimer); bubbleTimer=setTimeout(()=>bubbleEl.style.opacity='0',4000); }
-function updateBubblePos() {
-  if (bubbleEl.style.opacity==='0') return;
-  const pos = new THREE.Vector3(playerPos.x, playerPos.y+2.3, playerPos.z).project(camera);
-  bubbleEl.style.left=((pos.x+1)/2*window.innerWidth)+'px';
-  bubbleEl.style.top=((1-pos.y)/2*window.innerHeight-44)+'px';
-}
-
-// ===== CHAT =====
-function addChat(text, from) {
-  const msgs = document.getElementById('chat-messages');
-  const div = document.createElement('div'); div.className='chat-msg';
-  div.innerHTML=`<span class="name">${from}</span>${text}`;
-  msgs.appendChild(div); msgs.scrollTop=msgs.scrollHeight;
-  while (msgs.children.length>20) msgs.removeChild(msgs.firstChild);
-}
-function sendChat() {
-  const inp=document.getElementById('chat-input'); const msg=inp.value.trim();
-  if (!msg) return; inp.value=''; addChat(msg,profile.pseudo); showBubble(msg);
-}
-document.getElementById('chat-send').addEventListener('click', sendChat);
-document.getElementById('chat-input').addEventListener('keydown', e => { if (e.key==='Enter') { e.preventDefault(); sendChat(); }});
-
-// ===== EMOTES =====
-const emotes=['🌸','💫','✨','🎉','👋','💕','🌈','🦋'];
-let emoteIdx=0;
-document.getElementById('btn-emote').addEventListener('click',()=>{ const em=emotes[emoteIdx++%emotes.length]; addChat(em,profile.pseudo); showBubble(em); showToast(em); });
-
-// ===== TOAST =====
-function showToast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
-
-// ===== BOUCLE =====
-const clock = new THREE.Clock();
-// Scène prête immédiatement, avatar charge en parallèle
-finishLoading();
-const ready = true;
-
-function animate() {
-  requestAnimationFrame(animate);
-  const dt = Math.min(clock.getDelta(), 0.1);
-  if (avatarMixer) avatarMixer.update(dt);
-
-  // Nuages
-  clouds.forEach(c => {
-    c.mesh.position.x -= c.speed * dt;
-    if (c.mesh.position.x < -35) c.mesh.position.x = 35;
-  });
-
-  // Mouvement
-  let mx = joy.x, mz = joy.y;
-  if (keys['ArrowUp']||keys['w']||keys['W']) mz=-1;
-  if (keys['ArrowDown']||keys['s']||keys['S']) mz=1;
-  if (keys['ArrowLeft']||keys['a']||keys['A']) mx=-1;
-  if (keys['ArrowRight']||keys['d']||keys['D']) mx=1;
-
-  const moving = Math.abs(mx)>.05||Math.abs(mz)>.05;
-  if (moving) {
-    const cr = cameraRotY * Math.PI/180;
-    const dx = (Math.sin(cr)*(-mz)+Math.cos(cr)*mx)*SPEED*dt;
-    const dz = (Math.cos(cr)*(-mz)-Math.sin(cr)*mx)*SPEED*dt;
-    playerPos.x = Math.max(-BOUNDARY, Math.min(BOUNDARY, playerPos.x+dx));
-    playerPos.z = Math.max(-BOUNDARY, Math.min(BOUNDARY, playerPos.z+dz));
-    playerRotY = Math.atan2(dx,dz)*180/Math.PI;
+// TÉLÉCHARGER ET STOCKER LE GLB EN BASE64
+async function downloadAndStoreGLB(url, pseudo){
+  const progress = document.getElementById('save-progress');
+  progress.classList.add('visible');
+  progress.textContent = '⏳ Téléchargement avatar…';
+  try{
+    const response = await fetch(url);
+    if(!response.ok) throw new Error('fetch failed');
+    const blob = await response.blob();
+    progress.textContent = '⏳ Sauvegarde locale…';
+    return new Promise((resolve)=>{
+      const reader = new FileReader();
+      reader.onload = ()=>{
+        avatarGlbData = reader.result; // data URI base64
+        const pseudo_final = pseudo || document.getElementById('pseudo').value.trim() || 'Joueur';
+        localStorage.setItem(storageKey(), JSON.stringify({
+          glbUrl: avatarGlbData,
+          pseudo: pseudo_final,
+          savedAt: Date.now()
+        }));
+        if(pseudo_final) document.getElementById('pseudo').value = pseudo_final;
+        progress.textContent = '✅ Avatar sauvegardé !';
+        setTimeout(()=>progress.classList.remove('visible'), 2000);
+        showToast('✅ Avatar sauvegardé en local !');
+        document.getElementById('btn-save').classList.add('visible');
+        document.getElementById('btn-play').classList.add('visible');
+        resolve(avatarGlbData);
+      };
+      reader.onerror = ()=>{
+        // Fallback : stocker URL directe
+        avatarGlbData = url;
+        const pseudo_final = pseudo || document.getElementById('pseudo').value.trim() || 'Joueur';
+        localStorage.setItem(storageKey(), JSON.stringify({
+          glbUrl: url,
+          pseudo: pseudo_final,
+          savedAt: Date.now()
+        }));
+        progress.classList.remove('visible');
+        showToast('✨ Avatar prêt !');
+        document.getElementById('btn-save').classList.add('visible');
+        document.getElementById('btn-play').classList.add('visible');
+        resolve(url);
+      };
+      reader.readAsDataURL(blob);
+    });
+  } catch(e){
+    // CORS ou réseau — stocker URL directe comme fallback
+    console.warn('Download failed, storing URL:', e);
+    avatarGlbData = url;
+    const pseudo_final = pseudo || document.getElementById('pseudo').value.trim() || 'Joueur';
+    localStorage.setItem(storageKey(), JSON.stringify({
+      glbUrl: url,
+      pseudo: pseudo_final,
+      savedAt: Date.now()
+    }));
+    progress.classList.remove('visible');
+    showToast('✨ Avatar prêt !');
+    document.getElementById('btn-save').classList.add('visible');
+    document.getElementById('btn-play').classList.add('visible');
+    return url;
   }
-
-  avatarGroup.position.set(playerPos.x, playerPos.y, playerPos.z);
-  avatarGroup.rotation.y = playerRotY * Math.PI/180;
-
-  // Caméra TPS
-  const cr2 = cameraRotY * Math.PI/180;
-  camera.position.set(
-    playerPos.x + Math.sin(cr2)*5.5,
-    playerPos.y + 2.8,
-    playerPos.z + Math.cos(cr2)*5.5
-  );
-  camera.lookAt(playerPos.x, playerPos.y+1.2, playerPos.z);
-
-  updateBubblePos();
-  renderer.render(scene, camera);
 }
-animate();
 
-window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth/window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+// OUVRIR AVATURN
+async function openAvaturn(){
+  document.getElementById('modal-overlay').classList.add('open');
+  const container=document.getElementById('avaturn-sdk-container');
+  container.innerHTML='';
+  try{
+    sdk=new AvaturnSDK();
+    await sdk.init(container,{url:'https://demo.avaturn.dev'});
+    sdk.on('export', async (data)=>{
+      const glb=data?.url||data?.avatarUrl||data?.glbUrl||data?.modelUrl;
+      if(glb){
+        closeAvaturn();
+        showAvatar(glb);
+        const pseudo = document.getElementById('pseudo').value.trim();
+        await downloadAndStoreGLB(glb, pseudo);
+      } else {
+        console.log('Export data:', JSON.stringify(data));
+        showToast('❓ Export reçu — voir console');
+      }
+    });
+  } catch(e){
+    console.error(e);
+    showToast('❌ Erreur Avaturn — réessaie');
+  }
+}
+
+// FERMER AVATURN
+function closeAvaturn(){
+  document.getElementById('modal-overlay').classList.remove('open');
+  try{if(sdk)sdk.destroy?.();}catch(e){}
+  sdk=null;
+  setTimeout(()=>{document.getElementById('avaturn-sdk-container').innerHTML='';},300);
+}
+
+// AFFICHER AVATAR DANS LE VIEWER
+function showAvatar(glbUrl){
+  const wrap=document.getElementById('viewer-wrap');
+  const ph=document.getElementById('viewer-placeholder');
+  if(ph)ph.remove();
+  const old=wrap.querySelector('model-viewer');
+  if(old)old.remove();
+  const mv=document.createElement('model-viewer');
+  mv.setAttribute('src', glbUrl);
+  mv.setAttribute('camera-controls','');
+  mv.setAttribute('auto-rotate','');
+  mv.setAttribute('auto-rotate-delay','1000');
+  mv.setAttribute('rotation-per-second','30deg');
+  mv.setAttribute('camera-orbit','0deg 88deg auto');
+  mv.setAttribute('field-of-view','45deg');
+  mv.setAttribute('shadow-intensity','1');
+  mv.setAttribute('environment-image','neutral');
+  mv.setAttribute('exposure','1');
+  mv.style.cssText='width:100%;height:100%;background:transparent;--progress-bar-color:var(--pink);position:relative;z-index:1;';
+  wrap.appendChild(mv);
+  document.getElementById('avatar-badge').classList.add('visible');
+}
+
+// SAUVEGARDER + JOUER
+window.saveAndPlay = function(){
+  const pseudo=document.getElementById('pseudo').value.trim();
+  if(!pseudo){showToast('✏️ Entre ton pseudo !');return;}
+  if(!avatarGlbData){showToast('👆 Crée d\'abord ton avatar !');return;}
+  // Mettre à jour le pseudo dans le stockage
+  try{
+    const existing = JSON.parse(localStorage.getItem(storageKey())||'{}');
+    existing.pseudo = pseudo;
+    localStorage.setItem(storageKey(), JSON.stringify(existing));
+  }catch(e){}
+  showToast('✨ Sauvegardé !');
+  document.getElementById('btn-play').classList.add('visible');
+};
+
+// ALLER DANS LE MONDE
+window.goToWorld = function(){
+  const pseudo=document.getElementById('pseudo').value.trim();
+  if(!pseudo){showToast('✏️ Entre ton pseudo d\'abord !');return;}
+  // Mettre à jour le pseudo
+  try{
+    const existing = JSON.parse(localStorage.getItem(storageKey())||'{}');
+    existing.pseudo = pseudo;
+    localStorage.setItem(storageKey(), JSON.stringify(existing));
+  }catch(e){}
+  // Transition
+  const ts=document.getElementById('transition-screen');
+  ts.classList.add('show');
+  setTimeout(()=>{ window.location.href='world-place-pastel.html'; },1200);
+};
+
+// CHARGER AVATAR SAUVEGARDÉ AU DÉMARRAGE
+function loadSaved(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(storageKey())||'null');
+    if(saved?.glbUrl){
+      avatarGlbData=saved.glbUrl;
+      if(saved.pseudo) document.getElementById('pseudo').value=saved.pseudo;
+      showAvatar(saved.glbUrl);
+      document.getElementById('btn-save').classList.add('visible');
+      document.getElementById('btn-play').classList.add('visible');
+    }
+  }catch(e){}
+}
+loadSaved();
+
+// EXPOSER GLOBALEMENT
+window.openAvaturn=openAvaturn;
+window.closeAvaturn=closeAvaturn;
+
+// CLIC OVERLAY POUR FERMER
+document.getElementById('modal-overlay').addEventListener('click',(e)=>{
+  if(e.target===e.currentTarget) closeAvaturn();
 });
 </script>
-
 </body>
 </html>
