@@ -34,31 +34,24 @@ canvas{display:block;width:100%!important;height:100%!important;}
 .chat-input::placeholder{color:rgba(255,255,255,.25);}
 .chat-input:focus{border-color:var(--pink);}
 .chat-send{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--pink),var(--lav));border:none;color:white;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;pointer-events:all;flex-shrink:0;}
-
-/* ── JOYSTICK DROIT (déplacement) ── */
 #joystick-zone{position:absolute;bottom:24px;right:24px;width:110px;height:110px;pointer-events:all;}
 .joy-base{width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.14);backdrop-filter:blur(8px);position:relative;display:flex;align-items:center;justify-content:center;}
-.joy-knob{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(–pink),var(–lav));box-shadow:0 4px 16px rgba(255,110,180,.45);position:absolute;}
-
-/* ── JOYSTICK GAUCHE (caméra) — INVISIBLE ── */
+.joy-knob{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--lav));box-shadow:0 4px 16px rgba(255,110,180,.45);position:absolute;}
 #cam-joystick-zone{position:absolute;bottom:24px;left:24px;width:110px;height:110px;pointer-events:all;}
-/* Pas de visuel — zone tactile transparente uniquement */
-
-#btn-emote{position:absolute;bottom:44px;right:148px;width:50px;height:50px;border-radius:50%;background:rgba(61,219,184,.12);border:2px solid var(–mint);color:var(–mint);font-size:1.2rem;display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:all;backdrop-filter:blur(8px);}
+#btn-emote{position:absolute;bottom:44px;right:148px;width:50px;height:50px;border-radius:50%;background:rgba(61,219,184,.12);border:2px solid var(--mint);color:var(--mint);font-size:1.2rem;display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:all;backdrop-filter:blur(8px);}
 #btn-emote:active{transform:scale(.9);}
 .toast{position:fixed;bottom:170px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(18,8,42,.92);border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(12px);color:white;padding:8px 18px;border-radius:20px;font-size:.78rem;font-weight:800;opacity:0;transition:all .3s;z-index:50;pointer-events:none;white-space:nowrap;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 #speech-bubble{position:fixed;z-index:20;background:white;color:#12082A;border-radius:12px;padding:5px 11px;font-size:.72rem;font-weight:800;pointer-events:none;box-shadow:0 4px 14px rgba(0,0,0,.3);max-width:150px;text-align:center;transform:translateX(-50%);opacity:0;transition:opacity .3s;white-space:nowrap;}
-#speech-bubble::after{content:’’;position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:white;border-bottom:none;}
+#speech-bubble::after{content:'';position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:white;border-bottom:none;}
 #loading-screen{position:fixed;inset:0;z-index:100;background:#0e0620;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .6s;}
 #loading-screen.hidden{opacity:0;pointer-events:none;}
-.load-logo{font-family:‘Baloo 2’,cursive;font-size:2.5rem;font-weight:800;color:white;}
-.load-logo .c1{color:var(–pink);}.load-logo .c2{color:var(–yellow);}.load-logo .c3{color:var(–mint);}.load-logo .c4{color:var(–sky);}
+.load-logo{font-family:'Baloo 2',cursive;font-size:2.5rem;font-weight:800;color:white;}
+.load-logo .c1{color:var(--pink);}.load-logo .c2{color:var(--yellow);}.load-logo .c3{color:var(--mint);}.load-logo .c4{color:var(--sky);}
 .load-bar-wrap{width:200px;height:4px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;}
-.load-bar{height:100%;width:0%;background:linear-gradient(90deg,var(–pink),var(–lav));border-radius:2px;transition:width .25s;}
+.load-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--pink),var(--lav));border-radius:2px;transition:width .25s;}
 .load-txt{font-size:.76rem;color:rgba(255,255,255,.4);font-weight:700;}
 </style>
-
 </head>
 <body>
 
@@ -89,13 +82,11 @@ canvas{display:block;width:100%!important;height:100%!important;}
     </div>
   </div>
   <div id="btn-emote">🌸</div>
-  <!-- Joystick droit : déplacement -->
   <div id="joystick-zone">
     <div class="joy-base" id="joy-base">
       <div class="joy-knob" id="joy-knob"></div>
     </div>
   </div>
-  <!-- Joystick gauche : rotation caméra (invisible) -->
   <div id="cam-joystick-zone"></div>
 </div>
 
@@ -114,6 +105,10 @@ canvas{display:block;width:100%!important;height:100%!important;}
 <script type="module">
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+// ===== URLS GLB =====
+const GLB_IDLE   = 'https://raw.githubusercontent.com/hoobasurf/chili/main/Idle.glb';
+const GLB_WALK   = 'https://raw.githubusercontent.com/hoobasurf/chili/main/Walking.glb';
 
 // ===== PROFIL =====
 function loadProfile() {
@@ -152,7 +147,7 @@ function finishLoading() {
     setTimeout(() => ls.style.display = 'none', 700);
   }, 400);
   addChat('🌸 Bienvenue, ' + profile.pseudo + ' !', 'Macadam');
-  addChat('💬 Joystick droit = marcher | Joystick gauche = tourner caméra', 'Système');
+  addChat('💬 Joystick droit = marcher | Joystick gauche = caméra', 'Système');
 }
 
 // ===== RENDERER =====
@@ -166,15 +161,13 @@ renderer.toneMappingExposure = 1.2;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-// ===== SCENE =====
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xC8E8FF);
 scene.fog = new THREE.FogExp2(0xD0EDFF, 0.015);
 
-// ===== CAMERA =====
 const camera = new THREE.PerspectiveCamera(58, window.innerWidth / window.innerHeight, 0.1, 300);
 
-// ===== LUMIERES =====
+// ===== LUMIÈRES =====
 scene.add(new THREE.AmbientLight(0xfff0e8, 0.75));
 const sun = new THREE.DirectionalLight(0xfff4d0, 2.5);
 sun.position.set(20, 40, 15);
@@ -210,7 +203,7 @@ const paveIn=new THREE.Mesh(new THREE.CylinderGeometry(4,4,0.07,32),new THREE.Me
   const fl=new THREE.PointLight(0xA8D8FF,1.2,8);fl.position.y=1.5;scene.add(fl);
 })();
 
-// ===== BATIMENTS =====
+// ===== BÂTIMENTS =====
 [
   {p:[-18,-14],w:8,h:8,d:6,wall:0xA8E6CF,roof:0x7DD4B2},
   {p:[18,-14],w:7,h:9,d:6,wall:0xD4C5F9,roof:0xB8A8F0},
@@ -279,22 +272,21 @@ const clouds=[];
 const avatarGroup = new THREE.Group();
 avatarGroup.position.set(0, 0, 6);
 scene.add(avatarGroup);
+
 let avatarMixer = null;
-let idleAction = null;
-let walkAction = null;
+let idleAction  = null;
+let walkAction  = null;
 let currentAction = null;
 let isWalking = false;
 
-// ── Transition douce entre deux clips ──
 function crossFadeTo(toAction, duration = 0.25) {
   if (!toAction || toAction === currentAction) return;
+  toAction.reset();
+  toAction.setEffectiveTimeScale(1);
+  toAction.setEffectiveWeight(1);
   if (currentAction) {
-    toAction.reset();
-    toAction.setEffectiveTimeScale(1);
-    toAction.setEffectiveWeight(1);
     currentAction.crossFadeTo(toAction, duration, true);
   } else {
-    toAction.reset();
     toAction.play();
   }
   currentAction = toAction;
@@ -304,11 +296,50 @@ function setWalk(walking) {
   if (walking === isWalking) return;
   isWalking = walking;
   if (!avatarMixer) return;
-  if (walking && walkAction) {
-    crossFadeTo(walkAction, 0.2);
-  } else if (!walking && idleAction) {
-    crossFadeTo(idleAction, 0.3);
-  }
+  if (walking && walkAction) crossFadeTo(walkAction, 0.2);
+  else if (!walking && idleAction) crossFadeTo(idleAction, 0.3);
+}
+
+const gltfLoader = new GLTFLoader();
+
+// Charge le mesh depuis l'avatar Avaturn (ou fallback) + les 2 clips GLB externes
+function loadAvatarAndAnims(meshUrl) {
+  gltfLoader.load(meshUrl, gltfMesh => {
+    const model = gltfMesh.scene;
+    model.traverse(n => { if (n.isMesh) { n.castShadow=true; n.receiveShadow=true; }});
+    // Normalise la taille à ~1.75m
+    const bb = new THREE.Box3().setFromObject(model);
+    const size = new THREE.Vector3(); bb.getSize(size);
+    if (size.y > 0) model.scale.setScalar(1.75 / size.y);
+    const bb2 = new THREE.Box3().setFromObject(model);
+    model.position.y = -bb2.min.y;
+    avatarGroup.add(model);
+
+    avatarMixer = new THREE.AnimationMixer(model);
+
+    // Charge Idle.glb
+    gltfLoader.load(GLB_IDLE, gltfIdle => {
+      if (gltfIdle.animations?.length) {
+        const clip = gltfIdle.animations[0];
+        idleAction = avatarMixer.clipAction(clip);
+        idleAction.play();
+        currentAction = idleAction;
+      }
+      // Charge Walking.glb
+      gltfLoader.load(GLB_WALK, gltfWalk => {
+        if (gltfWalk.animations?.length) {
+          const clip = gltfWalk.animations[0];
+          walkAction = avatarMixer.clipAction(clip);
+        }
+        showToast('✨ Avatar chargé !');
+      }, undefined, () => showToast('⚠️ Walking.glb non trouvé'));
+    }, undefined, () => showToast('⚠️ Idle.glb non trouvé'));
+
+  }, undefined, () => {
+    // Fallback mesh si GLB Avaturn échoue
+    makeFallbackAvatar();
+    // Charge quand même les anims (elles ne s'appliqueront pas mais ne bloquent pas)
+  });
 }
 
 function makeFallbackAvatar() {
@@ -321,106 +352,57 @@ function makeFallbackAvatar() {
   [[0.12,0.35,0],[-0.12,0.35,0]].forEach(p=>{const l=new THREE.Mesh(new THREE.CylinderGeometry(.1,.1,.68,8),legMat);l.position.set(...p);g.add(l);});
   [[0.12,0.04,0.06],[-0.12,0.04,0.06]].forEach(p=>{const f=mkSph(.12,0xAA88FF);f.position.set(...p);g.add(f);});
   const armMat=new THREE.MeshStandardMaterial({color:0xFF9EBB});
-  const armR=new THREE.Mesh(new THREE.CylinderGeometry(.08,.08,.5,8),armMat);armR.position.set(.33,.95,0);armR.rotation.z=-.35;g.add(armR);
-  const armL=new THREE.Mesh(new THREE.CylinderGeometry(.08,.08,.5,8),armMat);armL.position.set(-.33,.95,0);armL.rotation.z=.35;g.add(armL);
+  const aR=new THREE.Mesh(new THREE.CylinderGeometry(.08,.08,.5,8),armMat);aR.position.set(.33,.95,0);aR.rotation.z=-.35;g.add(aR);
+  const aL=new THREE.Mesh(new THREE.CylinderGeometry(.08,.08,.5,8),armMat);aL.position.set(-.33,.95,0);aL.rotation.z=.35;g.add(aL);
   const shadow=new THREE.Mesh(new THREE.CircleGeometry(.38,16),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.14}));
   shadow.rotation.x=-Math.PI/2;shadow.position.y=0.01;g.add(shadow);
   avatarGroup.add(g);
 }
 
-// ── Noms d'animations Avaturn (+ fallbacks génériques) ──
-const IDLE_NAMES  = /idle|stand|neutral|breathe|t.pose/i;
-const WALK_NAMES  = /walk|run|move|jog|stride/i;
-
-const gltfLoader = new GLTFLoader();
 if (profile.glbUrl) {
-  gltfLoader.load(profile.glbUrl, gltf => {
-    const model = gltf.scene;
-    model.traverse(n => { if (n.isMesh) { n.castShadow=true; n.receiveShadow=true; }});
-    const bb = new THREE.Box3().setFromObject(model);
-    const size = new THREE.Vector3(); bb.getSize(size);
-    if (size.y > 0) model.scale.setScalar(1.75 / size.y);
-    const bb2 = new THREE.Box3().setFromObject(model);
-    model.position.y = -bb2.min.y;
-    avatarGroup.add(model);
-
-    if (gltf.animations?.length) {
-      avatarMixer = new THREE.AnimationMixer(model);
-      console.log('🎬 Animations dispo:', gltf.animations.map(a => a.name));
-
-      const idleClip = gltf.animations.find(a => IDLE_NAMES.test(a.name))
-                    || gltf.animations[0];
-      const walkClip = gltf.animations.find(a => WALK_NAMES.test(a.name))
-                    || (gltf.animations.length > 1 ? gltf.animations[1] : null);
-
-      if (idleClip) {
-        idleAction = avatarMixer.clipAction(idleClip);
-        idleAction.play();
-        currentAction = idleAction;
-      }
-      if (walkClip && walkClip !== idleClip) {
-        walkAction = avatarMixer.clipAction(walkClip);
-      }
-    }
-    showToast('✨ Avatar chargé !');
-  }, undefined, err => { console.warn('GLB error:', err); makeFallbackAvatar(); });
+  loadAvatarAndAnims(profile.glbUrl);
 } else {
   makeFallbackAvatar();
+  // Charge quand même les anims sur un mixer "vide" — pas d'effet visible mais pas d'erreur
 }
 
 // ===== MOUVEMENT =====
 const SPEED = 4.5, BOUNDARY = 24;
 const playerPos = new THREE.Vector3(0, 0, 6);
-let playerRotY = 0;       // rotation du personnage (radians)
-let cameraYaw  = Math.PI; // décalage horizontal caméra (0 = derrière)
+let playerRotY = 0;
+let cameraYaw  = Math.PI;
 
 // ── Joystick droit (déplacement) ──
-const joyBase  = document.getElementById('joy-base');
-const joyKnob  = document.getElementById('joy-knob');
+const joyBase = document.getElementById('joy-base');
+const joyKnob = document.getElementById('joy-knob');
 const JR = 42;
 const joy = { active:false, x:0, y:0, id:null };
-function getJoyCenter() { const r=joyBase.getBoundingClientRect(); return {x:r.left+r.width/2,y:r.top+r.height/2}; }
-function updateJoy(cx,cy) {
+function getJoyCenter(){ const r=joyBase.getBoundingClientRect(); return {x:r.left+r.width/2,y:r.top+r.height/2}; }
+function updateJoy(cx,cy){
   const c=getJoyCenter(); let dx=cx-c.x, dy=cy-c.y;
   const d=Math.sqrt(dx*dx+dy*dy); if(d>JR){dx=dx/d*JR;dy=dy/d*JR;}
   joy.x=dx/JR; joy.y=dy/JR;
   joyKnob.style.transform=`translate(${dx}px,${dy}px)`;
 }
 joyBase.addEventListener('touchstart',e=>{e.preventDefault();const t=e.changedTouches[0];joy.active=true;joy.id=t.identifier;updateJoy(t.clientX,t.clientY);},{passive:false});
-document.addEventListener('touchmove',e=>{
-  if(!joy.active)return;
-  for(const t of e.changedTouches)if(t.identifier===joy.id){e.preventDefault();updateJoy(t.clientX,t.clientY);}
-},{passive:false});
-document.addEventListener('touchend',e=>{
-  for(const t of e.changedTouches)if(t.identifier===joy.id){
-    joy.active=false;joy.x=0;joy.y=0;joyKnob.style.transform='translate(0,0)';
-  }
-});
+document.addEventListener('touchmove',e=>{if(!joy.active)return;for(const t of e.changedTouches)if(t.identifier===joy.id){e.preventDefault();updateJoy(t.clientX,t.clientY);}},{passive:false});
+document.addEventListener('touchend',e=>{for(const t of e.changedTouches)if(t.identifier===joy.id){joy.active=false;joy.x=0;joy.y=0;joyKnob.style.transform='translate(0,0)';}});
 
 // ── Joystick gauche invisible (rotation caméra) ──
 const camZone = document.getElementById('cam-joystick-zone');
-const CAM_JR  = 55; // rayon logique (px) — zone 110px/2
-const camJoy  = { active:false, x:0, y:0, id:null };
-function getCamCenter() { const r=camZone.getBoundingClientRect(); return {x:r.left+r.width/2,y:r.top+r.height/2}; }
-function updateCamJoy(cx,cy) {
+const CAM_JR = 55;
+const camJoy = { active:false, x:0, y:0, id:null };
+function getCamCenter(){ const r=camZone.getBoundingClientRect(); return {x:r.left+r.width/2,y:r.top+r.height/2}; }
+function updateCamJoy(cx,cy){
   const c=getCamCenter(); let dx=cx-c.x, dy=cy-c.y;
   const d=Math.sqrt(dx*dx+dy*dy); if(d>CAM_JR){dx=dx/d*CAM_JR;dy=dy/d*CAM_JR;}
   camJoy.x=dx/CAM_JR; camJoy.y=dy/CAM_JR;
 }
-camZone.addEventListener('touchstart',e=>{
-  e.preventDefault();const t=e.changedTouches[0];camJoy.active=true;camJoy.id=t.identifier;updateCamJoy(t.clientX,t.clientY);
-},{passive:false});
-document.addEventListener('touchmove',e=>{
-  if(!camJoy.active)return;
-  for(const t of e.changedTouches)if(t.identifier===camJoy.id){e.preventDefault();updateCamJoy(t.clientX,t.clientY);}
-},{passive:false});
-document.addEventListener('touchend',e=>{
-  for(const t of e.changedTouches)if(t.identifier===camJoy.id){
-    camJoy.active=false;camJoy.x=0;camJoy.y=0;
-  }
-});
+camZone.addEventListener('touchstart',e=>{e.preventDefault();const t=e.changedTouches[0];camJoy.active=true;camJoy.id=t.identifier;updateCamJoy(t.clientX,t.clientY);},{passive:false});
+document.addEventListener('touchmove',e=>{if(!camJoy.active)return;for(const t of e.changedTouches)if(t.identifier===camJoy.id){e.preventDefault();updateCamJoy(t.clientX,t.clientY);}},{passive:false});
+document.addEventListener('touchend',e=>{for(const t of e.changedTouches)if(t.identifier===camJoy.id){camJoy.active=false;camJoy.x=0;camJoy.y=0;}});
 
-// ── Souris (desktop) — rotation caméra sur clic-glissé ──
+// ── Souris desktop ──
 let mDrag={active:false,lastX:0};
 renderer.domElement.addEventListener('mousedown',e=>{mDrag.active=true;mDrag.lastX=e.clientX;});
 document.addEventListener('mousemove',e=>{if(!mDrag.active)return;cameraYaw-=(e.clientX-mDrag.lastX)*0.005;mDrag.lastX=e.clientX;});
@@ -454,7 +436,6 @@ function sendChat(){const inp=document.getElementById('chat-input');const msg=in
 document.getElementById('chat-send').addEventListener('click',sendChat);
 document.getElementById('chat-input').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();sendChat();}});
 
-// ===== EMOTES =====
 const emotes=['🌸','💫','✨','🎉','👋','💕','🌈','🦋'];
 let emoteIdx=0;
 document.getElementById('btn-emote').addEventListener('click',()=>{
@@ -462,40 +443,31 @@ document.getElementById('btn-emote').addEventListener('click',()=>{
   addChat(em,profile.pseudo);showBubble(em);showToast(em);
 });
 
-// ===== TOAST =====
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 
 // ===== BOUCLE =====
 const clock = new THREE.Clock();
+const CAM_DIST = 5.5, CAM_HEIGHT = 2.8, CAM_LOOK_Y = 1.2;
+const CAM_LERP_SPEED = 3.5;
+
 finishLoading();
-
-// Distance et hauteur caméra
-const CAM_DIST   = 5.5;
-const CAM_HEIGHT = 2.8;
-const CAM_LOOK_Y = 1.2; // hauteur du point visé sur l'avatar
-
-// Lissage caméra (lerp vers rotation du personnage quand on marche)
-const CAM_LERP_SPEED = 3.5; // plus grand = suit plus vite
 
 function animate(){
   requestAnimationFrame(animate);
   const dt = Math.min(clock.getDelta(), 0.1);
   if (avatarMixer) avatarMixer.update(dt);
 
-  // Nuages
-  clouds.forEach(c => { c.mesh.position.x -= c.speed * dt; if(c.mesh.position.x < -35) c.mesh.position.x = 35; });
+  clouds.forEach(c=>{ c.mesh.position.x -= c.speed*dt; if(c.mesh.position.x<-35)c.mesh.position.x=35; });
 
-  // ── Lecture joystick droit ──
+  // Inputs joystick droit
   let mx = joy.x, mz = joy.y;
-  if (keys['ArrowUp']  || keys['w'] || keys['W']) mz = -1;
+  if (keys['ArrowUp']   || keys['w'] || keys['W']) mz = -1;
   if (keys['ArrowDown'] || keys['s'] || keys['S']) mz =  1;
   if (keys['ArrowLeft'] || keys['a'] || keys['A']) mx = -1;
   if (keys['ArrowRight']|| keys['d'] || keys['D']) mx =  1;
 
-  // ── Rotation caméra via joystick gauche ou clavier Q/E ──
-  if (camJoy.active && Math.abs(camJoy.x) > 0.05) {
-    cameraYaw -= camJoy.x * 2.0 * dt;
-  }
+  // Rotation caméra via joystick gauche
+  if (camJoy.active && Math.abs(camJoy.x) > 0.05) cameraYaw -= camJoy.x * 2.0 * dt;
   if (keys['q'] || keys['Q']) cameraYaw += 1.8 * dt;
   if (keys['e'] || keys['E']) cameraYaw -= 1.8 * dt;
 
@@ -503,33 +475,28 @@ function animate(){
   setWalk(moving);
 
   if (moving) {
-    // Direction de déplacement = relative à la caméra actuelle
     const sinC = Math.sin(cameraYaw);
     const cosC = Math.cos(cameraYaw);
+    // ── CORRECTION : joystick Y vers le haut (mz<0) = avancer ──
+    // mz du joystick : -1 = haut physique = avancer = -Z monde
     const dx = (sinC * (-mz) + cosC * mx) * SPEED * dt;
     const dz = (cosC * (-mz) - sinC * mx) * SPEED * dt;
 
     playerPos.x = Math.max(-BOUNDARY, Math.min(BOUNDARY, playerPos.x + dx));
     playerPos.z = Math.max(-BOUNDARY, Math.min(BOUNDARY, playerPos.z + dz));
-
-    // Le personnage tourne vers la direction de marche
     playerRotY = Math.atan2(dx, dz);
 
-    // ── COMPORTEMENT GTA : caméra suit lentement derrière le dos ──
-    // On cible la direction opposée à la marche (dos du personnage)
+    // Caméra suit le dos (lerp GTA)
     const targetYaw = playerRotY + Math.PI;
-    // Lerp angulaire (court chemin)
     let diff = targetYaw - cameraYaw;
-    while (diff >  Math.PI) diff -= 2 * Math.PI;
-    while (diff < -Math.PI) diff += 2 * Math.PI;
+    while (diff >  Math.PI) diff -= 2*Math.PI;
+    while (diff < -Math.PI) diff += 2*Math.PI;
     cameraYaw += diff * Math.min(CAM_LERP_SPEED * dt, 1.0);
   }
 
-  // Appliquer la rotation au groupe avatar
   avatarGroup.position.set(playerPos.x, playerPos.y, playerPos.z);
   avatarGroup.rotation.y = playerRotY;
 
-  // ── Position caméra TPS (derrière le dos) ──
   camera.position.set(
     playerPos.x + Math.sin(cameraYaw) * CAM_DIST,
     playerPos.y + CAM_HEIGHT,
@@ -543,7 +510,7 @@ function animate(){
 animate();
 
 window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.aspect = window.innerWidth/window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
