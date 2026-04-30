@@ -289,21 +289,31 @@ function loadAnimationsOnModel(model) {
   // Idle
   gltfLoader.load(IDLE_URL, gltf => {
     if (gltf.animations?.length) {
-      idleAction = avatarMixer.clipAction(gltf.animations[0]);
-      idleAction.play();
+      const clip = gltf.animations[0];
+      // Retarget sur le squelette du modèle
+      const action = avatarMixer.clipAction(
+        THREE.AnimationClip.parse(THREE.AnimationClip.toJSON(clip))
+      );
+      action.play();
+      idleAction = action;
       currentAction = idleAction;
       showToast('✅ Idle OK');
     }
-  }, undefined, e => showToast('❌ Idle erreur'));
+  }, undefined, () => showToast('❌ Idle erreur'));
 
   // Walking
   gltfLoader.load(WALKING_URL, gltf => {
     if (gltf.animations?.length) {
-      walkAction = avatarMixer.clipAction(gltf.animations[0]);
+      const clip = gltf.animations[0];
+      const action = avatarMixer.clipAction(
+        THREE.AnimationClip.parse(THREE.AnimationClip.toJSON(clip))
+      );
+      walkAction = action;
       showToast('✅ Walk OK');
     }
-  }, undefined, e => showToast('❌ Walk erreur'));
+  }, undefined, () => showToast('❌ Walk erreur'));
 }
+
 
 if (profile.glbUrl) {
   gltfLoader.load(profile.glbUrl, gltf => {
@@ -395,7 +405,8 @@ const SPEED=4.5, BOUNDARY=24;
 const playerPos=new THREE.Vector3(0,0,6);
 let playerRotY=0;
 let cameraYaw=Math.PI;
-const CAM_DIST=7.5, CAM_HEIGHT=1.8, CAM_LOOK_Y=0.8, CAM_LERP=3.5;
+const CAM_DIST=5.5, CAM_HEIGHT=2.2, CAM_LOOK_Y=1.2, CAM_LERP=3.5;
+
 const clock=new THREE.Clock();
 
 finishLoading();
