@@ -598,7 +598,9 @@ loadGLB(BASE+'model%2024.glb',gltf=>{
 
   if(gltf.animations?.length){
     avatarMixer=new THREE.AnimationMixer(model);
-    console.log('Clips model24:', gltf.animations.map(a => a.name));
+showToast('Clips: '+gltf.animations.map(a=>a.name).join(' | '));
+
+   console.log('Clips model24:', gltf.animations.map(a => a.name));
 
     if(idleClip){idleAction=avatarMixer.clipAction(idleClip);idleAction.play();currentAction=idleAction;}
     showToast('✨ Prêt !');
