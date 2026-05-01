@@ -92,8 +92,8 @@ canvas{display:block;width:100%!important;height:100%!important;}
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-const IDLE_URL    = 'https://raw.githubusercontent.com/hoobasurf/chili/main/Idle.glb';
-const WALKING_URL = 'https://raw.githubusercontent.com/hoobasurf/chili/main/Walking.glb';
+const AVATAR_URL = 'https://raw.githubusercontent.com/hoobasurf/chili/main/model%2024.glb';
+
 
 // PROFIL
 function loadProfile(){
@@ -282,50 +282,35 @@ function makeFallbackAvatar(){
 // CHARGEMENT AVATAR + ANIMATIONS
 const gltfLoader=new GLTFLoader();
 
-function loadAnimationsOnModel(model){
-  avatarMixer=new THREE.AnimationMixer(model);
+gltfLoader.load(AVATAR_URL, gltf => {
+  const model = gltf.scene;
+  model.traverse(n => { if(n.isMesh){ n.castShadow=true; n.receiveShadow=true; } });
 
-  // Log des bones dispo pour debug
-  model.traverse(n=>{
-    if(n.isBone||n.type==='Bone'){
-      console.log('Bone:',n.name);
-    }
-  });
+  // Auto-scale
+  const bb = new THREE.Box3().setFromObject(model);
+  const size = new THREE.Vector3(); bb.getSize(size);
+  if(size.y > 0) model.scale.setScalar(1.75 / size.y);
+  const bb2 = new THREE.Box3().setFromObject(model);
+  model.position.y = -bb2.min.y;
+  avatarGroup.add(model);
 
-  // IDLE
-  gltfLoader.load(IDLE_URL,gltf=>{
-    if(gltf.animations?.length){
-      // Retarget : on récupère le clip et on le joue sur le mixer du modèle
-      const clip=gltf.animations[0];
-      // Renommer les tracks si besoin pour matcher Avaturn
-      clip.tracks.forEach(track=>{
-        // Avaturn utilise parfois "mixamorig:" prefix
-        // On normalise vers les noms sans prefix
-        track.name=track.name
-          .replace('mixamorig:','')
-          .replace('mixamorig','');
-      });
-      idleAction=avatarMixer.clipAction(clip);
-      idleAction.play();
-      currentAction=idleAction;
-      showToast('✅ Idle chargé');
-    }
-  },undefined,()=>showToast('❌ Idle erreur'));
+  // Animations intégrées Avaturn
+  if(gltf.animations?.length){
+    avatarMixer = new THREE.AnimationMixer(model);
+    console.log('Clips:', gltf.animations.map(a=>a.name));
 
-  // WALK
-  gltfLoader.load(WALKING_URL,gltf=>{
-    if(gltf.animations?.length){
-      const clip=gltf.animations[0];
-      clip.tracks.forEach(track=>{
-        track.name=track.name
-          .replace('mixamorig:','')
-          .replace('mixamorig','');
-      });
-      walkAction=avatarMixer.clipAction(clip);
-      showToast('✅ Walk chargé');
-    }
-  },undefined,()=>showToast('❌ Walk erreur'));
-}
+    const idleClip = gltf.animations.find(a => /idle|stand/i.test(a.name)) || gltf.animations[0];
+    const walkClip = gltf.animations.find(a => /walk|run/i.test(a.name)) || gltf.animations[1];
+
+    if(idleClip){ idleAction = avatarMixer.clipAction(idleClip); idleAction.play(); currentAction = idleAction; }
+    if(walkClip && walkClip !== idleClip){ walkAction = avatarMixer.clipAction(walkClip); }
+
+    showToast('✨ Avatar + animations chargés !');
+  } else {
+    showToast('✨ Avatar chargé !');
+  }
+}, undefined, err => { console.warn(err); makeFallbackAvatar(); });
+
 
 if(profile.glbUrl){
   gltfLoader.load(profile.glbUrl,gltf=>{
