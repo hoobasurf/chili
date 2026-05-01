@@ -49,6 +49,7 @@ canvas{display:block;width:100%!important;height:100%!important;}
 .joy-knob{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#ff00aa,#00ffcc);box-shadow:0 0 16px rgba(0,255,200,.5);position:absolute;}
 #cam-joystick-zone{position:absolute;bottom:106px;left:16px;width:100px;height:100px;pointer-events:all;}
 #jump-btn{position:absolute;bottom:220px;right:22px;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#00ffcc,#0088ff);border:2px solid rgba(255,255,255,.3);color:white;font-size:1.3rem;font-weight:900;pointer-events:all;cursor:pointer;box-shadow:0 0 18px rgba(0,255,200,.5);display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;}
+#super-jump-btn{position:absolute;bottom:220px;left:22px;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#ff00aa,#ffaa00);border:2px solid rgba(255,255,255,.3);color:white;font-size:1.3rem;pointer-events:all;cursor:pointer;box-shadow:0 0 18px rgba(255,0,170,.5);display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;}
 .toast{position:fixed;bottom:200px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(5,8,20,.95);border:1px solid rgba(0,255,255,.2);backdrop-filter:blur(12px);color:#00ffcc;padding:8px 18px;border-radius:20px;font-size:.78rem;font-weight:800;opacity:0;transition:all .3s;z-index:50;pointer-events:none;white-space:nowrap;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 #speech-bubble{position:fixed;z-index:20;background:rgba(5,8,20,.95);color:#00ffcc;border:1px solid rgba(0,255,255,.3);border-radius:12px;padding:5px 11px;font-size:.72rem;font-weight:800;pointer-events:none;box-shadow:0 0 14px rgba(0,255,200,.3);max-width:160px;text-align:center;transform:translateX(-50%);opacity:0;transition:opacity .3s;white-space:nowrap;}
@@ -84,6 +85,7 @@ canvas{display:block;width:100%!important;height:100%!important;}
   <div id="joystick-zone"><div class="joy-base" id="joy-base"><div class="joy-knob" id="joy-knob"></div></div></div>
   <div id="cam-joystick-zone"><div class="joy-base" id="cam-joy-base"><div class="joy-knob" id="cam-joy-knob" style="background:linear-gradient(135deg,#3DDBB8,#5BC8F5);box-shadow:0 0 16px rgba(61,219,184,.5);"></div></div></div>
   <button id="jump-btn">↑</button>
+  <button id="super-jump-btn">🚀</button>
   <div id="anim-panel"><div id="anim-scroll"></div></div>
 </div>
 <div id="speech-bubble"></div>
@@ -209,40 +211,36 @@ renderer.outputColorSpace=THREE.SRGBColorSpace;
 document.getElementById('canvas-container').appendChild(renderer.domElement);
 
 const scene=new THREE.Scene();
-scene.background=new THREE.Color(0x030510);
-scene.fog=new THREE.FogExp2(0x050818,0.018);
+scene.background=new THREE.Color(0x87CEEB);
+scene.fog=new THREE.Fog(0x87CEEB,80,220);
 const camera=new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,0.1,280);
 
-// ===== LUMIÈRES =====
-scene.add(new THREE.AmbientLight(0x0a1428,0.8));
-const moon=new THREE.DirectionalLight(0x2040a0,0.6);
-moon.position.set(-30,60,20);moon.castShadow=true;
-moon.shadow.mapSize.set(1024,1024);
-moon.shadow.camera.left=moon.shadow.camera.bottom=-60;
-moon.shadow.camera.right=moon.shadow.camera.top=60;
-moon.shadow.camera.far=160;moon.shadow.bias=-0.001;
-scene.add(moon);
-const cityLights=[
-  {pos:[-30,-5,-30],col:0x00ffcc,intensity:3,distance:55},
-  {pos:[ 30,-5,-30],col:0xff00aa,intensity:3,distance:55},
-  {pos:[-30,-5, 30],col:0xffaa00,intensity:2.5,distance:55},
-  {pos:[ 30,-5, 30],col:0x0066ff,intensity:2.5,distance:55},
-];
-cityLights.forEach(l=>{
-  const pl=new THREE.PointLight(l.col,l.intensity,l.distance);
-  pl.position.set(...l.pos);scene.add(pl);
-});
+// ===== LUMIÈRES JOUR =====
+// Lumière ambiante forte — ciel bleu
+scene.add(new THREE.HemisphereLight(0x87CEEB, 0xc8b89a, 1.2));
+// Soleil
+const sun=new THREE.DirectionalLight(0xfff5e0, 2.2);
+sun.position.set(40,80,30);sun.castShadow=true;
+sun.shadow.mapSize.set(2048,2048);
+sun.shadow.camera.left=sun.shadow.camera.bottom=-80;
+sun.shadow.camera.right=sun.shadow.camera.top=80;
+sun.shadow.camera.far=200;sun.shadow.bias=-0.001;
+scene.add(sun);
+// Lumière de remplissage (ciel opposé)
+const fillLight=new THREE.DirectionalLight(0xaaddff,0.6);
+fillLight.position.set(-20,30,-20);scene.add(fillLight);
 
-// ===== LUMIÈRE PERSONNELLE DU JOUEUR — toujours visible de nuit =====
-// SpotLight doux qui suit le personnage, eclaire de haut
-const playerSpot = new THREE.SpotLight(0xffeedd, 2.8, 12, Math.PI/4, 0.7, 1.5);
+// ===== LUMIÈRE PERSONNELLE DU JOUEUR =====
+// SpotLight fort collé au personnage
+const playerSpot = new THREE.SpotLight(0xffffff, 5.0, 10, Math.PI/3, 0.5, 1.0);
 playerSpot.position.set(0, 8, 0);
 playerSpot.target.position.set(0, 0, 0);
+playerSpot.castShadow = false;
 scene.add(playerSpot);
 scene.add(playerSpot.target);
 
-// Halo au sol sous le joueur (emissive cyan doux)
-const playerGlowMat = new THREE.MeshBasicMaterial({color:0x00ffcc,transparent:true,opacity:0.18,depthWrite:false});
+// Halo au sol sous le joueur (léger en journée)
+const playerGlowMat = new THREE.MeshBasicMaterial({color:0xffffaa,transparent:true,opacity:0.10,depthWrite:false});
 const playerGlow = new THREE.Mesh(new THREE.CircleGeometry(1.1,16), playerGlowMat);
 playerGlow.rotation.x=-Math.PI/2;
 playerGlow.position.y=0.013;
@@ -850,32 +848,55 @@ document.addEventListener('keydown',e=>keys[e.key]=true);
 document.addEventListener('keyup',e=>keys[e.key]=false);
 
 // ===== SAUT AMÉLIORÉ =====
-// Saut simple  : ~1 étage (~2.5 unités)
-// Double tap   : ~4 étages (~12 unités) — passe par-dessus les voitures
+// Saut simple  : ~1 étage
+// Double tap   : ~4 étages — passe par-dessus les voitures
 const JUMP_V_NORMAL = 8;
-const JUMP_V_SUPER  = 19;   // 4 étages
+const JUMP_V_SUPER  = 19;
 const GRAVITY = 26;
 let jumpVel=0, isOnGround=true;
-let jumpLastTap=0;
+let jumpTapCount=0, jumpTapTimer=null;
 
 function doJump(){
   if(!isOnGround) return;
-  const now=Date.now();
-  const isDouble = (now - jumpLastTap) < 350;
-  jumpLastTap = now;
-  if(isDouble){
+  jumpTapCount++;
+  clearTimeout(jumpTapTimer);
+  if(jumpTapCount>=2){
+    // Double tap confirmé
+    jumpTapCount=0;
     jumpVel = JUMP_V_SUPER;
     isOnGround = false;
     showToast('🚀 SUPER SAUT ! (4 étages)');
   } else {
-    jumpVel = JUMP_V_NORMAL;
-    isOnGround = false;
+    // Attendre 300ms pour voir si double tap
+    jumpTapTimer = setTimeout(()=>{
+      if(jumpTapCount===1 && isOnGround){
+        jumpVel = JUMP_V_NORMAL;
+        isOnGround = false;
+      }
+      jumpTapCount=0;
+    }, 280);
   }
 }
 
 const jumpBtn=document.getElementById('jump-btn');
 jumpBtn.addEventListener('touchstart',e=>{e.preventDefault();doJump();},{passive:false});
 jumpBtn.addEventListener('click',()=>doJump());
+
+// Bouton super saut direct (🚀) — gauche au-dessus du joystick
+const superJumpBtn=document.getElementById('super-jump-btn');
+superJumpBtn.addEventListener('touchstart',e=>{
+  e.preventDefault();
+  if(!isOnGround) return;
+  jumpTapCount=0; clearTimeout(jumpTapTimer);
+  jumpVel=JUMP_V_SUPER; isOnGround=false;
+  showToast('🚀 SUPER SAUT ! (4 étages)');
+},{passive:false});
+superJumpBtn.addEventListener('click',()=>{
+  if(!isOnGround) return;
+  jumpTapCount=0; clearTimeout(jumpTapTimer);
+  jumpVel=JUMP_V_SUPER; isOnGround=false;
+  showToast('🚀 SUPER SAUT ! (4 étages)');
+});
 
 // ===== CHAT =====
 const bubbleEl=document.getElementById('speech-bubble');let bubbleTimer2=null;
@@ -952,13 +973,12 @@ function animate(){
   shadowBlob.position.x=playerPos.x;shadowBlob.position.z=playerPos.z;
 
   // Mise à jour lumière personnelle du joueur
-  playerSpot.position.set(playerPos.x, playerPos.y + 9, playerPos.z + 1);
+  playerSpot.position.set(playerPos.x, playerPos.y + 6, playerPos.z);
   playerSpot.target.position.set(playerPos.x, playerPos.y, playerPos.z);
   playerSpot.target.updateMatrixWorld();
   playerGlow.position.x = playerPos.x;
   playerGlow.position.z = playerPos.z;
-  // Halo s'intensifie légèrement en saut
-  playerGlowMat.opacity = isOnGround ? 0.18 : 0.08;
+  playerGlowMat.opacity = isOnGround ? 0.10 : 0.04;
 
   camera.position.set(playerPos.x+Math.sin(cameraYaw)*CAM_DIST,playerPos.y+CAM_HEIGHT,playerPos.z+Math.cos(cameraYaw)*CAM_DIST);
   camera.lookAt(playerPos.x,playerPos.y+CAM_LOOK_Y,playerPos.z);
