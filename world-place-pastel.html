@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-:root{--pink:#FF6EB4;--mint:#3DDBB8;--yellow:#FFD747;--lav:#B388FF;--sky:#5BC8F5;--dark:#12082A;}
+:root{--pink:#FF6EB4;--mint:#3DDBB8;--yellow:#FFD747;--lav:#B388FF;--sky:#5BC8F5;}
 html,body{width:100%;height:100%;overflow:hidden;background:#0a0618;font-family:'Nunito',sans-serif;user-select:none;-webkit-user-select:none;}
 #canvas-container{position:fixed;inset:0;}
 canvas{display:block;width:100%!important;height:100%!important;}
@@ -23,8 +23,8 @@ canvas{display:block;width:100%!important;height:100%!important;}
 .hud-info{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:5px 12px 5px 6px;}
 .hud-pic{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--lav));display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:900;color:white;border:2px solid rgba(255,255,255,.2);}
 .hud-pseudo{font-size:.75rem;font-weight:800;color:white;}
-.hud-chat{position:absolute;bottom:148px;left:12px;right:12px;max-width:300px;pointer-events:all;}
-.chat-messages{max-height:110px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;margin-bottom:6px;scrollbar-width:none;}
+.hud-chat{position:absolute;bottom:180px;left:12px;right:12px;max-width:300px;pointer-events:all;}
+.chat-messages{max-height:90px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;margin-bottom:6px;scrollbar-width:none;}
 .chat-messages::-webkit-scrollbar{display:none;}
 .chat-msg{background:rgba(18,8,42,.78);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:5px 10px;font-size:.7rem;color:white;animation:fadeup .3s ease;line-height:1.4;}
 @keyframes fadeup{from{opacity:0;transform:translateY(4px);}to{opacity:1;}}
@@ -34,31 +34,86 @@ canvas{display:block;width:100%!important;height:100%!important;}
 .chat-input::placeholder{color:rgba(255,255,255,.25);}
 .chat-input:focus{border-color:var(--pink);}
 .chat-send{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--pink),var(--lav));border:none;color:white;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;pointer-events:all;flex-shrink:0;}
-#joystick-zone{position:absolute;bottom:24px;right:24px;width:110px;height:110px;pointer-events:all;}
-.joy-base{width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.14);backdrop-filter:blur(8px);position:relative;display:flex;align-items:center;justify-content:center;}
-.joy-knob{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--lav));box-shadow:0 4px 16px rgba(255,110,180,.45);position:absolute;}
-#cam-joystick-zone{position:absolute;bottom:24px;left:24px;width:110px;height:110px;pointer-events:all;}
-#btn-emote{position:absolute;bottom:44px;right:148px;width:50px;height:50px;border-radius:50%;background:rgba(61,219,184,.12);border:2px solid var(--mint);color:var(--mint);font-size:1.2rem;display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:all;backdrop-filter:blur(8px);}
-#btn-emote:active{transform:scale(.9);}
-.toast{position:fixed;bottom:170px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(18,8,42,.92);border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(12px);color:white;padding:8px 18px;border-radius:20px;font-size:.78rem;font-weight:800;opacity:0;transition:all .3s;z-index:50;pointer-events:none;white-space:nowrap;}
+
+/* ── PANNEAU ANIMATIONS style Avaturn ── */
+#anim-panel{
+position:absolute;
+bottom:0;left:0;right:0;
+pointer-events:all;
+padding:8px 0 12px;
+background:linear-gradient(0deg,rgba(10,6,24,.95) 0%,rgba(10,6,24,.7) 100%);
+backdrop-filter:blur(12px);
+}
+#anim-scroll{
+display:flex;
+flex-direction:row;
+gap:8px;
+overflow-x:auto;
+padding:4px 12px 0;
+scrollbar-width:none;
+-webkit-overflow-scrolling:touch;
+}
+#anim-scroll::-webkit-scrollbar{display:none;}
+.anim-btn{
+flex-shrink:0;
+width:72px;
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:4px;
+cursor:pointer;
+pointer-events:all;
+-webkit-tap-highlight-color:transparent;
+}
+.anim-btn svg{
+width:64px;height:64px;
+border-radius:14px;
+background:rgba(255,255,255,.07);
+border:2px solid rgba(255,255,255,.1);
+transition:all .2s;
+padding:4px;
+}
+.anim-btn.active svg{
+background:rgba(255,110,180,.18);
+border-color:var(–pink);
+box-shadow:0 0 12px rgba(255,110,180,.4);
+}
+.anim-btn:active svg{transform:scale(.92);}
+.anim-label{
+font-size:.58rem;
+font-weight:800;
+color:rgba(255,255,255,.5);
+text-align:center;
+line-height:1.1;
+}
+.anim-btn.active .anim-label{color:var(–pink);}
+
+/* Joysticks */
+#joystick-zone{position:absolute;bottom:100px;right:16px;width:100px;height:100px;pointer-events:all;}
+.joy-base{width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.14);backdrop-filter:blur(8px);position:relative;display:flex;align-items:center;justify-content:center;}
+.joy-knob{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(–pink),var(–lav));box-shadow:0 4px 16px rgba(255,110,180,.45);position:absolute;}
+#cam-joystick-zone{position:absolute;bottom:100px;left:16px;width:100px;height:100px;pointer-events:all;}
+
+.toast{position:fixed;bottom:200px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(18,8,42,.92);border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(12px);color:white;padding:8px 18px;border-radius:20px;font-size:.78rem;font-weight:800;opacity:0;transition:all .3s;z-index:50;pointer-events:none;white-space:nowrap;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 #speech-bubble{position:fixed;z-index:20;background:white;color:#12082A;border-radius:12px;padding:5px 11px;font-size:.72rem;font-weight:800;pointer-events:none;box-shadow:0 4px 14px rgba(0,0,0,.3);max-width:150px;text-align:center;transform:translateX(-50%);opacity:0;transition:opacity .3s;white-space:nowrap;}
-#speech-bubble::after{content:'';position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:white;border-bottom:none;}
+#speech-bubble::after{content:’’;position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:white;border-bottom:none;}
 #loading-screen{position:fixed;inset:0;z-index:100;background:#0e0620;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .6s;}
 #loading-screen.hidden{opacity:0;pointer-events:none;}
-.load-logo{font-family:'Baloo 2',cursive;font-size:2.5rem;font-weight:800;color:white;}
-.load-logo .c1{color:var(--pink);}.load-logo .c2{color:var(--yellow);}.load-logo .c3{color:var(--mint);}.load-logo .c4{color:var(--sky);}
+.load-logo{font-family:‘Baloo 2’,cursive;font-size:2.5rem;font-weight:800;color:white;}
+.load-logo .c1{color:var(–pink);}.load-logo .c2{color:var(–yellow);}.load-logo .c3{color:var(–mint);}.load-logo .c4{color:var(–sky);}
 .load-bar-wrap{width:200px;height:4px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;}
-.load-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--pink),var(--lav));border-radius:2px;transition:width .25s;}
+.load-bar{height:100%;width:0%;background:linear-gradient(90deg,var(–pink),var(–lav));border-radius:2px;transition:width .25s;}
 .load-txt{font-size:.76rem;color:rgba(255,255,255,.4);font-weight:700;}
 </style>
+
 </head>
 <body>
 <div id="canvas-container"></div>
 <div id="loading-screen">
   <div class="load-logo"><span class="c1">M</span><span class="c2">A</span><span class="c3">C</span><span class="c4">A</span><span class="c1">D</span><span class="c2">A</span><span class="c3">M</span></div>
   <div class="load-bar-wrap"><div class="load-bar" id="load-bar"></div></div>
-  <div class="load-txt" id="load-txt">Chargement de Place Pastel…</div>
+  <div class="load-txt" id="load-txt">Chargement…</div>
 </div>
 <div id="hud">
   <div class="hud-top">
@@ -76,13 +131,18 @@ canvas{display:block;width:100%!important;height:100%!important;}
       <button class="chat-send" id="chat-send">➤</button>
     </div>
   </div>
-  <div id="btn-emote">🌸</div>
   <div id="joystick-zone">
     <div class="joy-base" id="joy-base">
       <div class="joy-knob" id="joy-knob"></div>
     </div>
   </div>
   <div id="cam-joystick-zone"></div>
+
+  <!-- PANNEAU ANIMATIONS style Avaturn -->
+
+  <div id="anim-panel">
+    <div id="anim-scroll"></div>
+  </div>
 </div>
 <div id="speech-bubble"></div>
 <div class="toast" id="toast"></div>
@@ -95,8 +155,239 @@ canvas{display:block;width:100%!important;height:100%!important;}
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-// ===== AVATAR AVATURN — model 24.glb avec animations intégrées =====
-const AVATAR_URL = 'https://raw.githubusercontent.com/hoobasurf/chili/main/model%2024.glb';
+// ===== LISTE DES ANIMATIONS =====
+// Silhouettes SVG dessinées à la main pour chaque type de mouvement
+const BASE = 'https://raw.githubusercontent.com/hoobasurf/chili/main/';
+
+const ANIMS = [
+  // file, label, svgPath (silhouette SVG viewBox 0 0 64 80)
+  { file:'model%2024.glb', label:'Marche',    type:'walk' },
+  { file:'model.glb',      label:'T-Pose',    type:'tpose' },
+  { file:'model%202.glb',  label:'Idle',      type:'idle' },
+  { file:'model%203.glb',  label:'Salut',     type:'wave' },
+  { file:'model%204.glb',  label:'Course',    type:'run' },
+  { file:'model%205.glb',  label:'Danse',     type:'dance1' },
+  { file:'model%206.glb',  label:'Danse 2',   type:'dance2' },
+  { file:'model%207.glb',  label:'Saut',      type:'jump' },
+  { file:'model%208.glb',  label:'Assis',     type:'sit' },
+  { file:'model%209.glb',  label:'Allongé',   type:'lay' },
+  { file:'model%2010.glb', label:'Combat',    type:'fight' },
+  { file:'model%2011.glb', label:'Coup',      type:'punch' },
+  { file:'model%2012.glb', label:'Kick',      type:'kick' },
+  { file:'model%2013.glb', label:'Pousse',    type:'push' },
+  { file:'model%2014.glb', label:'Tirer',     type:'pull' },
+  { file:'model%2015.glb', label:'Ramasser',  type:'pickup' },
+  { file:'model%2016.glb', label:'Regarder',  type:'look' },
+  { file:'model%2017.glb', label:'Parler',    type:'talk' },
+  { file:'model%2018.glb', label:'Rire',      type:'laugh' },
+  { file:'model%2019.glb', label:'Pleurer',   type:'sad' },
+  { file:'model%2020.glb', label:'Victoire',  type:'victory' },
+  { file:'model%2021.glb', label:'Défaite',   type:'defeat' },
+  { file:'model%2022.glb', label:'Yoga',      type:'yoga' },
+  { file:'model%2023.glb', label:'Stretch',   type:'stretch' },
+  { file:'model%2025.glb', label:'Anim 25',   type:'anim25' },
+  { file:'model%2026.glb', label:'Anim 26',   type:'anim26' },
+  { file:'model%2027.glb', label:'Anim 27',   type:'anim27' },
+];
+
+// ── Silhouettes SVG par type ──
+const SVG = {
+  tpose:   `<line x1="32" y1="18" x2="32" y2="52" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="32" cy="10" r="7" fill="none" stroke="white" stroke-width="2.5"/>
+            <line x1="32" y1="24" x2="10" y2="30" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="32" y1="24" x2="54" y2="30" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="28" y1="52" x2="22" y2="72" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="36" y1="52" x2="42" y2="72" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+
+  idle:    `<circle cx="32" cy="10" r="7" fill="none" stroke="white" stroke-width="2.5"/>
+            <line x1="32" y1="18" x2="32" y2="50" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="32" y1="26" x2="16" y2="38" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="32" y1="26" x2="48" y2="38" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="29" y1="50" x2="24" y2="70" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="35" y1="50" x2="40" y2="70" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+
+  walk:    `<circle cx="32" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
+            <line x1="32" y1="17" x2="30" y2="46" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="31" y1="24" x2="16" y2="34" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="31" y1="24" x2="44" y2="30" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="30" y1="46" x2="20" y2="66" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="30" y1="46" x2="42" y2="62" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+
+  run:     `<circle cx="32" cy="8" r="7" fill="none" stroke="white" stroke-width="2.5"/>
+            <line x1="34" y1="16" x2="30" y2="44" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="32" y1="22" x2="14" y2="28" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="32" y1="22" x2="48" y2="18" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="30" y1="44" x2="18" y2="58" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="30" y1="44" x2="46" y2="64" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+
+  dance1:  `<circle cx="32" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
+            <path d="M32 17 Q28 32 26 46" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <line x1="30" y1="22" x2="12" y2="16" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="30" y1="22" x2="48" y2="28" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="26" y1="46" x2="18" y2="64" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="26" y1="46" x2="38" y2="60" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+
+  dance2:  `<circle cx="32" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
+            <path d="M32 17 Q36 30 34 46" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <line x1="33" y1="22" x2="14" y2="30" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="33" y1="22" x2="50" y2="16" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="34" y1="46" x2="22" y2="62" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="34" y1="46" x2="44" y2="66" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+
+  jump:    `<circle cx="32" cy="7" r="7" fill="none" stroke="white" stroke-width="2.5"/>
+            <line x1="32" y1="15" x2="32" y2="42" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="32" y1="20" x2="14" y2="14" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="32" y1="20" x2="50" y2="14" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="29" y1="42" x2="20" y2="56" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="35" y1="42" x2="44" y2="56" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+
+  sit:     `<circle cx="24" cy="12" r="7" fill="none" stroke="white" stroke-width="2.5"/>
+            <line x1="24" y1="20" x2="24" y2="42" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="24" y1="28" x2="10" y2="36" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="24" y1="28" x2="40" y2="34" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="24" y1="42" x2="10" y2="42" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="24" y1="42" x2="38" y2="42" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="10" y1="42" x2="10" y2="62" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="38" y1="42" x2="48" y2="58" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+
+  lay:     `<circle cx="10" cy="36" r="6" fill="none" stroke="white" stroke-width="2.5"/>
+            <line x1="16" y1="36" x2="54" y2="36" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="28" y1="30" x2="22" y2="22" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="28" y1="30" x2="36" y2="20" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="44" y1="36" x2="40" y2="52" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="44" y1="36" x2="52" y2="50" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+
+  wave:    `<circle cx="32" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
+            <line x1="32" y1="17" x2="32" y2="50" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="32" y1="25" x2="18" y2="36" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <path d="M32 22 L50 10 L54 6" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <line x1="29" y1="50" x2="23" y2="70" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="35" y1="50" x2="41" y2="70" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+
+  fight:   `<circle cx="32" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
+            <line x1="32" y1="17" x2="30" y2="46" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="31" y1="24" x2="14" y2="20" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="31" y1="24" x2="48" y2="22" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="30" y1="46" x2="22" y2="60" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="30" y1="46" x2="40" y2="58" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+
+  punch:   `<circle cx="30" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
+            <line x1="30" y1="17" x2="28" y2="46" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="29" y1="23" x2="10" y2="26" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="29" y1="23" x2="56" y2="18" stroke="white" stroke-width="3.5" stroke-linecap="round"/>
+            <line x1="28" y1="46" x2="18" y2="62" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="28" y1="46" x2="38" y2="64" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+
+  kick:    `<circle cx="32" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
+            <line x1="32" y1="17" x2="30" y2="44" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="31" y1="24" x2="16" y2="32" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="31" y1="24" x2="46" y2="32" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="30" y1="44" x2="18" y2="58" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="30" y1="44" x2="54" y2="38" stroke="white" stroke-width="3.5" stroke-linecap="round"/>`,
+
+  push:    `<circle cx="24" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
+            <line x1="24" y1="17" x2="22" y2="46" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="23" y1="24" x2="10" y2="34" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="23" y1="24" x2="46" y2="24" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <rect x="48" y="14" width="8" height="30" rx="2" stroke="white" stroke-width="2" fill="none"/>
+            <line x1="22" y1="46" x2="14" y2="62" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="22" y1="46" x2="32" y2="64" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+
+  pull:    `<circle cx="40" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
+            <line x1="40" y1="17" x2="38" y2="46" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="39" y1="24" x2="16" y2="24" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="39" y1="24" x2="54" y2="34" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <rect x="6" y="14" width="8" height="30" rx="2" stroke="white" stroke-width="2" fill="none"/>
+            <line x1="38" y1="46" x2="28" y2="62" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="38" y1="46" x2="48" y2="64" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+
+  pickup:  `<circle cx="32" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
+            <path d="M32 17 Q28 34 26 50" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <line x1="30" y1="26" x2="16" y2="22" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="30" y1="26" x2="44" y2="46" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="50" cy="50" r="5" stroke="white" stroke-width="2" fill="none"/>
+            <line x1="26" y1="50" x2="20" y2="68" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="26" y1="50" x2="36" y2="66" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+
+  look:    `<circle cx="32" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
+            <line x1="32" y1="17" x2="32" y2="50" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="32" y1="26" x2="16" y2="36" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <path d="M32 22 L50 12 L56 8" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <line x1="29" y1="50" x2="23" y2="70" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="35" y1="50" x2="41" y2="70" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+
+  talk:    `<circle cx="32" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
+            <line x1="32" y1="17" x2="32" y2="50" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="32" y1="26" x2="18" y2="34" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <path d="M32 22 L46 28 L44 36 L38 32" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="29" y1="50" x2="23" y2="70" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="35" y1="50" x2="41" y2="70" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+
+  laugh:   `<circle cx="32" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
+            <path d="M32 17 Q36 32 34 50" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M33 24 L14 20 L12 14" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M33 24 L50 20 L52 14" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <line x1="34" y1="50" x2="26" y2="68" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="34" y1="50" x2="44" y2="66" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+
+  sad:     `<circle cx="32" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
+            <path d="M32 17 Q30 34 30 50" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M31 24 L16 30 L18 38" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M31 24 L46 30 L44 38" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <line x1="30" y1="50" x2="22" y2="68" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="30" y1="50" x2="38" y2="68" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+
+  victory: `<circle cx="32" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
+            <line x1="32" y1="17" x2="32" y2="48" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <path d="M32 22 L14 8 L12 4" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M32 22 L50 8 L52 4" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <line x1="29" y1="48" x2="22" y2="68" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="35" y1="48" x2="42" y2="68" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+
+  defeat:  `<circle cx="32" cy="12" r="7" fill="none" stroke="white" stroke-width="2.5"/>
+            <path d="M32 20 Q30 36 28 52" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M30 28 L16 38 L18 48" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M30 28 L44 36 L42 46" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <line x1="28" y1="52" x2="20" y2="68" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="28" y1="52" x2="36" y2="68" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+
+  yoga:    `<circle cx="32" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
+            <line x1="32" y1="17" x2="32" y2="44" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="32" y1="22" x2="12" y2="22" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="32" y1="22" x2="52" y2="22" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="32" y1="44" x2="20" y2="56" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="20" y1="56" x2="36" y2="56" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="32" y1="44" x2="44" y2="60" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+
+  stretch: `<circle cx="32" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
+            <path d="M32 17 Q34 30 32 46" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <line x1="32" y1="22" x2="14" y2="14" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="32" y1="22" x2="50" y2="14" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="32" y1="46" x2="20" y2="58" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="20" y1="58" x2="14" y2="70" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="32" y1="46" x2="44" y2="60" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+
+  anim25:  `<circle cx="32" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
+            <line x1="32" y1="17" x2="32" y2="50" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="32" y1="26" x2="16" y2="20" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="32" y1="26" x2="48" y2="20" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="29" y1="50" x2="23" y2="70" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="35" y1="50" x2="41" y2="70" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+
+  anim26:  `<circle cx="32" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
+            <line x1="32" y1="17" x2="34" y2="50" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <path d="M33 24 L14 28 L10 36" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M33 24 L50 22 L56 16" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <line x1="34" y1="50" x2="26" y2="68" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="34" y1="50" x2="44" y2="66" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+
+  anim27:  `<circle cx="32" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
+            <line x1="32" y1="17" x2="30" y2="50" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <path d="M31 24 L18 18 L16 10" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M31 24 L46 30 L48 38" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <line x1="30" y1="50" x2="22" y2="68" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="30" y1="50" x2="40" y2="64" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+};
 
 // ===== PROFIL =====
 function loadProfile(){
@@ -154,7 +445,6 @@ scene.background=new THREE.Color(0xC8E8FF);
 scene.fog=new THREE.FogExp2(0xD0EDFF,0.015);
 const camera=new THREE.PerspectiveCamera(58,window.innerWidth/window.innerHeight,0.1,300);
 
-// ===== LUMIÈRES =====
 scene.add(new THREE.AmbientLight(0xfff0e8,0.75));
 const sun=new THREE.DirectionalLight(0xfff4d0,2.5);
 sun.position.set(20,40,15);sun.castShadow=true;
@@ -171,13 +461,13 @@ function mkBox(w,h,d,color){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),
 function mkCyl(rt,rb,h,seg,color){const m=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,seg),new THREE.MeshStandardMaterial({color}));m.castShadow=true;return m;}
 function mkSph(r,color,emissive=false){const mat=new THREE.MeshStandardMaterial({color});if(emissive){mat.emissive=new THREE.Color(color);mat.emissiveIntensity=0.5;}const m=new THREE.Mesh(new THREE.SphereGeometry(r,12,12),mat);m.castShadow=true;return m;}
 
-// ===== SOL =====
+// SOL
 const ground=mkBox(80,0.1,80,0xF0E8D8);ground.position.y=-0.05;scene.add(ground);
 const pave=new THREE.Mesh(new THREE.CylinderGeometry(8,8,0.06,32),new THREE.MeshStandardMaterial({color:0xE8D8C8,roughness:0.8}));pave.position.y=0.03;scene.add(pave);
 const paveIn=new THREE.Mesh(new THREE.CylinderGeometry(4,4,0.07,32),new THREE.MeshStandardMaterial({color:0xF8E8D8,roughness:0.7}));paveIn.position.y=0.035;scene.add(paveIn);
 [0,Math.PI/2].forEach(ry=>{const a=new THREE.Mesh(new THREE.PlaneGeometry(40,1.4),new THREE.MeshStandardMaterial({color:0xD8C8B8}));a.rotation.x=-Math.PI/2;a.rotation.z=ry;a.position.y=0.04;scene.add(a);});
 
-// ===== FONTAINE =====
+// FONTAINE
 (function(){
   const basin=mkCyl(2.5,2.8,0.62,24,0xD4C4F0);basin.position.y=0.31;scene.add(basin);
   const water=new THREE.Mesh(new THREE.CylinderGeometry(2.2,2.2,0.06,24),new THREE.MeshStandardMaterial({color:0xA8D8FF,roughness:0.05,metalness:0.4,transparent:true,opacity:0.88}));water.position.y=0.6;scene.add(water);
@@ -187,7 +477,7 @@ const paveIn=new THREE.Mesh(new THREE.CylinderGeometry(4,4,0.07,32),new THREE.Me
   const fl=new THREE.PointLight(0xA8D8FF,1.2,8);fl.position.y=1.5;scene.add(fl);
 })();
 
-// ===== BÂTIMENTS =====
+// BATIMENTS
 [{p:[-18,-14],w:8,h:8,d:6,wall:0xA8E6CF,roof:0x7DD4B2},{p:[18,-14],w:7,h:9,d:6,wall:0xD4C5F9,roof:0xB8A8F0},{p:[-12,-23],w:5,h:6,d:5,wall:0xFFBFA8,roof:0xF0A898},{p:[12,-23],w:6,h:8,d:5,wall:0xB8E8D8,roof:0x88D0B8},{p:[-22,-4],w:6,h:7,d:5,wall:0xFFE0B2,roof:0xFFB74D},{p:[22,-4],w:6,h:7,d:5,wall:0xF8BBD9,roof:0xE887B8}].forEach(b=>{
   const wall=mkBox(b.w,b.h,b.d,b.wall);wall.position.set(b.p[0],b.h/2,b.p[1]);scene.add(wall);
   const roof=new THREE.Mesh(new THREE.ConeGeometry(Math.max(b.w,b.d)*0.72,b.h*0.42,4),new THREE.MeshStandardMaterial({color:b.roof}));
@@ -196,28 +486,23 @@ const paveIn=new THREE.Mesh(new THREE.CylinderGeometry(4,4,0.07,32),new THREE.Me
   [[b.p[0]-b.w*0.22,b.h*0.55,b.p[1]+b.d/2+0.01],[b.p[0]+b.w*0.22,b.h*0.55,b.p[1]+b.d/2+0.01]].forEach(wp=>{const win=mkBox(1.2,1.6,0.08,0xFFE87A);win.position.set(...wp);scene.add(win);});
 });
 
-// ===== ARBRES =====
+// ARBRES
 [[-6,-8,2.2,2],[6,-8,2.0,1.8],[-14,-5,2.5,2.2],[14,-5,2.2,2],[-8,5,1.9,1.7],[8,5,1.8,1.6],[-18,5,2.0,1.9],[18,5,2.0,1.9],[-4,12,1.7,1.5],[4,12,1.7,1.5]].forEach(t=>{
   const[x,z,h,r]=t;
   const trunk=mkCyl(0.18,0.24,h,8,0x8B6914);trunk.position.set(x,h/2,z);scene.add(trunk);
   [[0,r,0],[r*-.7,r*.7,0],[r*.7,r*.7,0]].forEach((off,i)=>{const leaf=mkSph(r*(.55+i*.07),[0x5CC87A,0x48B868,0x7DD87A][i]);leaf.position.set(x+off[0],h+off[1],z+off[2]);scene.add(leaf);});
 });
 
-// ===== BANCS =====
 [[5,0,0],[-5,0,0],[0,5,Math.PI/2],[0,-5,Math.PI/2]].forEach(b=>{
   const g=new THREE.Group();const seat=mkBox(2.5,0.15,0.62,0xC8A878);seat.position.y=0.5;g.add(seat);
   [-1,1].forEach(s=>{const leg=mkBox(0.14,0.5,0.5,0xA88858);leg.position.set(s,0.25,0);g.add(leg);});
   g.position.set(b[0],0,b[1]);g.rotation.y=b[2];scene.add(g);
 });
-
-// ===== LAMPADAIRES =====
 [[4,4],[-4,4],[4,-4],[-4,-4],[10,1],[-10,1],[0,11]].forEach(p=>{
   const pole=mkCyl(0.07,0.09,5.2,8,0xC0A8F0);pole.position.set(p[0],2.6,p[1]);scene.add(pole);
   const lamp=mkSph(0.28,0xFFE87A,true);lamp.position.set(p[0],5.3,p[1]);scene.add(lamp);
   const pl=new THREE.PointLight(0xFFE87A,0.7,9);pl.position.set(p[0],5.3,p[1]);scene.add(pl);
 });
-
-// ===== FLEURS =====
 [[3.5,0],[-3.5,0],[0,3.5],[0,-3.5],[5,3],[-5,3],[3,-5],[-3,-5],[7,-2],[-7,-2],[2,7],[-2,7]].forEach((p,i)=>{
   const colors=[0xFF9EBB,0xFFD6EC,0xC5B5FF,0xA8E6CF,0xFFE87A];
   const f=mkSph(0.18,colors[i%colors.length]);f.material.emissive=new THREE.Color(colors[i%colors.length]);f.material.emissiveIntensity=0.12;
@@ -225,13 +510,11 @@ const paveIn=new THREE.Mesh(new THREE.CylinderGeometry(4,4,0.07,32),new THREE.Me
   const stem=mkCyl(0.03,0.03,0.2,6,0x5CC87A);stem.position.set(p[0],0.08,p[1]);scene.add(stem);
 });
 
-// ===== NUAGES =====
 const clouds=[];
 [[18,14,-18,4],[-12,16,-22,5],[5,12,-30,3.5],[-25,15,-10,4.5],[30,18,-5,3]].forEach(c=>{
   const g=new THREE.Group();
   [[0,0,0,c[3]],[c[3]*1.1,.3,0,c[3]*.75],[-c[3]*.9,.2,0,c[3]*.7],[c[3]*.4,-.2,c[3]*.6,c[3]*.6]].forEach(p=>{
-    const cloud=new THREE.Mesh(new THREE.SphereGeometry(p[3],8,8),new THREE.MeshStandardMaterial({color:0xffffff,transparent:true,opacity:0.88}));
-    cloud.position.set(p[0],p[1],p[2]);g.add(cloud);
+    const cloud=new THREE.Mesh(new THREE.SphereGeometry(p[3],8,8),new THREE.MeshStandardMaterial({color:0xffffff,transparent:true,opacity:0.88}));cloud.position.set(p[0],p[1],p[2]);g.add(cloud);
   });
   g.position.set(c[0],c[1],c[2]);scene.add(g);clouds.push({mesh:g,speed:0.8+Math.random()*0.6});
 });
@@ -242,12 +525,17 @@ avatarGroup.position.set(0,0,6);
 scene.add(avatarGroup);
 
 let avatarMixer=null;
+let currentAction=null;
 let idleAction=null;
 let walkAction=null;
-let currentAction=null;
 let isWalking=false;
+let emoteAction=null; // animation emote en cours
+let emoteTimer=null;
 
-function crossFadeTo(toAction,duration){
+const gltfLoader=new GLTFLoader();
+const glbCache={}; // cache des GLB déjà chargés
+
+function crossFadeTo(toAction,duration=0.25){
   if(!toAction||toAction===currentAction)return;
   toAction.reset();
   toAction.setEffectiveTimeScale(1);
@@ -258,6 +546,7 @@ function crossFadeTo(toAction,duration){
 }
 
 function setWalk(walking){
+  if(emoteAction)return; // emote en cours → pas d'interruption
   if(walking===isWalking)return;
   isWalking=walking;
   if(!avatarMixer)return;
@@ -265,28 +554,40 @@ function setWalk(walking){
   else if(!walking&&idleAction)crossFadeTo(idleAction,0.3);
 }
 
-function makeFallbackAvatar(){
-  const g=new THREE.Group();
-  const body=mkBox(0.5,0.7,0.3,0xFF9EBB);body.position.y=0.95;g.add(body);
-  const head=mkSph(0.28,0xFFDFC4);head.position.y=1.65;g.add(head);
-  const hair=mkSph(0.3,0x3D1800);hair.position.y=1.83;g.add(hair);
-  const legMat=new THREE.MeshStandardMaterial({color:0xD4C5F9});
-  [[0.12,0.35,0],[-0.12,0.35,0]].forEach(p=>{const l=new THREE.Mesh(new THREE.CylinderGeometry(.1,.1,.68,8),legMat);l.position.set(...p);g.add(l);});
-  // Bras le long du corps (rotation.z petit = naturel)
-  const armMat=new THREE.MeshStandardMaterial({color:0xFF9EBB});
-  const armR=new THREE.Mesh(new THREE.CylinderGeometry(.08,.08,.5,8),armMat);armR.position.set(.28,.92,0);armR.rotation.z=-0.15;g.add(armR);
-  const armL=new THREE.Mesh(new THREE.CylinderGeometry(.08,.08,.5,8),armMat);armL.position.set(-.28,.92,0);armL.rotation.z=0.15;g.add(armL);
-  avatarGroup.add(g);
+// Charge un GLB et retourne son premier clip via callback
+function loadGLB(url, cb){
+  if(glbCache[url]){ cb(glbCache[url]); return; }
+  gltfLoader.load(url, gltf=>{
+    glbCache[url]=gltf;
+    cb(gltf);
+  }, undefined, err=>{ console.warn('GLB error',url,err); });
 }
 
-// ===== CHARGEMENT model 24.glb — animations intégrées Avaturn =====
-const gltfLoader=new GLTFLoader();
+// Joue une animation emote (durée puis retour idle)
+function playEmote(url, label){
+  if(!avatarMixer)return;
+  loadGLB(BASE+url, gltf=>{
+    if(!gltf.animations?.length)return;
+    const clip=gltf.animations[0];
+    const action=avatarMixer.clipAction(clip);
+    clearTimeout(emoteTimer);
+    emoteAction=action;
+    crossFadeTo(action,0.2);
+    action.setLoop(THREE.LoopOnce,1);
+    action.clampWhenFinished=true;
+    showToast('▶ '+label);
+    // Retour idle après la durée du clip
+    emoteTimer=setTimeout(()=>{
+      emoteAction=null;
+      if(idleAction)crossFadeTo(idleAction,0.4);
+    },(clip.duration*1000)+200);
+  });
+}
 
-gltfLoader.load(AVATAR_URL, gltf=>{
+// ── Charge model 24 (avatar principal) ──
+loadGLB(BASE+'model%2024.glb', gltf=>{
   const model=gltf.scene;
   model.traverse(n=>{if(n.isMesh){n.castShadow=true;n.receiveShadow=true;}});
-
-  // Auto-scale à 1.75m
   const bb=new THREE.Box3().setFromObject(model);
   const size=new THREE.Vector3();bb.getSize(size);
   if(size.y>0)model.scale.setScalar(1.75/size.y);
@@ -294,41 +595,47 @@ gltfLoader.load(AVATAR_URL, gltf=>{
   model.position.y=-bb2.min.y;
   avatarGroup.add(model);
 
-  // Animations intégrées dans le GLB Avaturn
   if(gltf.animations?.length){
     avatarMixer=new THREE.AnimationMixer(model);
-
-    // Log des clips pour debug
-    console.log('🎬 Clips Avaturn:', gltf.animations.map(a=>a.name));
-
-    // Idle = premier clip dont le nom contient idle/stand/neutral, sinon clip[0]
-    const idleClip=gltf.animations.find(a=>/idle|stand|neutral|tpose|t-pose/i.test(a.name))
-                  ||gltf.animations[0];
-
-    // Walk = clip dont le nom contient walk/run/march, sinon clip[1]
-    const walkClip=gltf.animations.find(a=>/walk|run|march|stride|jog/i.test(a.name))
-                  ||(gltf.animations.length>1?gltf.animations[1]:null);
-
-    if(idleClip){
-      idleAction=avatarMixer.clipAction(idleClip);
-      idleAction.play();
-      currentAction=idleAction;
-    }
-    if(walkClip&&walkClip!==idleClip){
-      walkAction=avatarMixer.clipAction(walkClip);
-    }
-
-    showToast('✨ Avatar + '+gltf.animations.length+' animations !');
-  } else {
-    showToast('✨ Avatar chargé (pas d\'animations)');
+    console.log('🎬 Clips model 24:', gltf.animations.map(a=>a.name));
+    const idleClip=gltf.animations.find(a=>/idle|stand|neutral/i.test(a.name))||gltf.animations[0];
+    const walkClip=gltf.animations.find(a=>/walk|run|march/i.test(a.name))||(gltf.animations.length>1?gltf.animations[1]:null);
+    if(idleClip){idleAction=avatarMixer.clipAction(idleClip);idleAction.play();currentAction=idleAction;}
+    if(walkClip&&walkClip!==idleClip){walkAction=avatarMixer.clipAction(walkClip);}
+    showToast('✨ Prêt ! '+gltf.animations.length+' animations');
   }
-}, undefined, err=>{
-  console.warn('Erreur GLB:', err);
-  makeFallbackAvatar();
-  showToast('⚠️ Avatar par défaut');
+  // Sélectionner le bouton walk par défaut
+  document.querySelectorAll('.anim-btn')[0]?.classList.add('active');
 });
 
-// ===== JOYSTICK DROIT (déplacement) =====
+// ===== PANNEAU ANIMATIONS =====
+const animScroll=document.getElementById('anim-scroll');
+ANIMS.forEach((anim,i)=>{
+  const svgContent=SVG[anim.type]||SVG.idle;
+  const btn=document.createElement('div');
+  btn.className='anim-btn';
+  btn.dataset.idx=i;
+  btn.innerHTML=`
+    <svg viewBox="0 0 64 80" xmlns="http://www.w3.org/2000/svg">${svgContent}</svg>
+    <span class="anim-label">${anim.label}</span>
+  `;
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.anim-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    // Les 2 premières sont walk+idle → intégrées dans model 24
+    if(i===0){
+      // Marche = géré par joystick, juste reset emote
+      clearTimeout(emoteTimer);emoteAction=null;
+      if(idleAction)crossFadeTo(idleAction,0.3);
+      showToast('🚶 Mode marche');
+    } else {
+      playEmote(anim.file, anim.label);
+    }
+  });
+  animScroll.appendChild(btn);
+});
+
+// ===== JOYSTICK DROIT =====
 const joyBase=document.getElementById('joy-base');
 const joyKnob=document.getElementById('joy-knob');
 const JR=42;
@@ -344,14 +651,14 @@ joyBase.addEventListener('touchstart',e=>{e.preventDefault();const t=e.changedTo
 document.addEventListener('touchmove',e=>{if(!joy.active)return;for(const t of e.changedTouches)if(t.identifier===joy.id){e.preventDefault();updateJoy(t.clientX,t.clientY);}},{passive:false});
 document.addEventListener('touchend',e=>{for(const t of e.changedTouches)if(t.identifier===joy.id){joy.active=false;joy.x=0;joy.y=0;joyKnob.style.transform='translate(0,0)';}});
 
-// ===== JOYSTICK GAUCHE INVISIBLE (caméra) =====
+// ===== JOYSTICK GAUCHE (caméra) =====
 const camZone=document.getElementById('cam-joystick-zone');
 const CAM_JR=55;
 const camJoy={active:false,x:0,id:null};
 function getCamCenter(){const r=camZone.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2};}
 function updateCamJoy(cx,cy){
   const c=getCamCenter();let dx=cx-c.x;
-  const d=Math.abs(dx);if(d>CAM_JR)dx=Math.sign(dx)*CAM_JR;
+  if(Math.abs(dx)>CAM_JR)dx=Math.sign(dx)*CAM_JR;
   camJoy.x=dx/CAM_JR;
 }
 camZone.addEventListener('touchstart',e=>{e.preventDefault();const t=e.changedTouches[0];camJoy.active=true;camJoy.id=t.identifier;updateCamJoy(t.clientX,t.clientY);},{passive:false});
@@ -362,15 +669,14 @@ let mDrag={active:false,lastX:0};
 renderer.domElement.addEventListener('mousedown',e=>{mDrag.active=true;mDrag.lastX=e.clientX;});
 document.addEventListener('mousemove',e=>{if(!mDrag.active)return;cameraYaw-=(e.clientX-mDrag.lastX)*0.005;mDrag.lastX=e.clientX;});
 document.addEventListener('mouseup',()=>mDrag.active=false);
-
 const keys={};
 document.addEventListener('keydown',e=>keys[e.key]=true);
 document.addEventListener('keyup',e=>keys[e.key]=false);
 
-// ===== BULLE + CHAT =====
+// ===== CHAT =====
 const bubbleEl=document.getElementById('speech-bubble');
-let bubbleTimer=null;
-function showBubble(text){bubbleEl.textContent=text;bubbleEl.style.opacity='1';clearTimeout(bubbleTimer);bubbleTimer=setTimeout(()=>bubbleEl.style.opacity='0',4000);}
+let bubbleTimer2=null;
+function showBubble(text){bubbleEl.textContent=text;bubbleEl.style.opacity='1';clearTimeout(bubbleTimer2);bubbleTimer2=setTimeout(()=>bubbleEl.style.opacity='0',4000);}
 function updateBubblePos(){
   if(bubbleEl.style.opacity==='0')return;
   const pos=new THREE.Vector3(playerPos.x,playerPos.y+2.3,playerPos.z).project(camera);
@@ -387,20 +693,13 @@ function addChat(text,from){
 function sendChat(){const inp=document.getElementById('chat-input');const msg=inp.value.trim();if(!msg)return;inp.value='';addChat(msg,profile.pseudo);showBubble(msg);}
 document.getElementById('chat-send').addEventListener('click',sendChat);
 document.getElementById('chat-input').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();sendChat();}});
-const emotes=['🌸','💫','✨','🎉','👋','💕','🌈','🦋'];
-let emoteIdx=0;
-document.getElementById('btn-emote').addEventListener('click',()=>{const em=emotes[emoteIdx++%emotes.length];addChat(em,profile.pseudo);showBubble(em);showToast(em);});
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 
 // ===== BOUCLE =====
 const SPEED=4.5,BOUNDARY=24;
 const playerPos=new THREE.Vector3(0,0,6);
-let playerRotY=0;
-let cameraYaw=Math.PI;
-
-// Caméra : assez loin + basse pour voir tout le corps
+let playerRotY=0,cameraYaw=Math.PI;
 const CAM_DIST=7.5,CAM_HEIGHT=1.8,CAM_LOOK_Y=0.8,CAM_LERP=3.5;
-
 const clock=new THREE.Clock();
 finishLoading();
 
@@ -408,22 +707,19 @@ function animate(){
   requestAnimationFrame(animate);
   const dt=Math.min(clock.getDelta(),0.1);
   if(avatarMixer)avatarMixer.update(dt);
-
   clouds.forEach(c=>{c.mesh.position.x-=c.speed*dt;if(c.mesh.position.x<-35)c.mesh.position.x=35;});
 
-  // Joystick droit — haut = avancer, bas = reculer ✅
   let mx=joy.x,mz=joy.y;
   if(keys['ArrowUp']  ||keys['w']||keys['W'])mz=-1;
   if(keys['ArrowDown']||keys['s']||keys['S'])mz= 1;
   if(keys['ArrowLeft']||keys['a']||keys['A'])mx=-1;
   if(keys['ArrowRight']||keys['d']||keys['D'])mx= 1;
-
-  // Caméra joystick gauche
   if(camJoy.active&&Math.abs(camJoy.x)>0.05)cameraYaw-=camJoy.x*2.0*dt;
   if(keys['q']||keys['Q'])cameraYaw+=1.8*dt;
   if(keys['e']||keys['E'])cameraYaw-=1.8*dt;
 
   const moving=Math.abs(mx)>0.05||Math.abs(mz)>0.05;
+  if(moving&&emoteAction){clearTimeout(emoteTimer);emoteAction=null;}
   setWalk(moving);
 
   if(moving){
@@ -433,7 +729,6 @@ function animate(){
     playerPos.x=Math.max(-BOUNDARY,Math.min(BOUNDARY,playerPos.x+dx));
     playerPos.z=Math.max(-BOUNDARY,Math.min(BOUNDARY,playerPos.z+dz));
     playerRotY=Math.atan2(dx,dz);
-    // Caméra suit le dos
     const targetYaw=playerRotY+Math.PI;
     let diff=targetYaw-cameraYaw;
     while(diff> Math.PI)diff-=2*Math.PI;
@@ -443,14 +738,12 @@ function animate(){
 
   avatarGroup.position.set(playerPos.x,playerPos.y,playerPos.z);
   avatarGroup.rotation.y=playerRotY;
-
   camera.position.set(
     playerPos.x+Math.sin(cameraYaw)*CAM_DIST,
     playerPos.y+CAM_HEIGHT,
     playerPos.z+Math.cos(cameraYaw)*CAM_DIST
   );
   camera.lookAt(playerPos.x,playerPos.y+CAM_LOOK_Y,playerPos.z);
-
   updateBubblePos();
   renderer.render(scene,camera);
 }
