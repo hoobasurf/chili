@@ -159,30 +159,39 @@ const BASE = 'https://raw.githubusercontent.com/hoobasurf/chili/main/';
 // model24 = idle principal
 // Puis ordre : 15,16,17,18,19,20,21,22,23,4,5,6,7,8,9,10,11,12,13,14,25,26
 const ANIMS = [
-  { file:'model%2027.glb', label:'Marche',     type:'walk' },
-  { file:'model%2024.glb', label:'Boxing',     type:'guard' },
-  { file:'model%204.glb',  label:'Breakdance', type:'dance1' },
-  { file:'model%205.glb',  label:'Cool',       type:'idle' },
-  { file:'model%206.glb',  label:'Idle',       type:'stand' },
-  { file:'model%207.glb',  label:'Relax',      type:'idle' },
-  { file:'model%208.glb',  label:'Danse',      type:'dance2' },
-  { file:'model%209.glb',  label:'Combat',     type:'fight' },
-  { file:'model%2010.glb', label:'Garde',      type:'guard' },
-  { file:'model%2011.glb', label:'Victoire',   type:'victory' },
-  { file:'model%2012.glb', label:'Coup pied',  type:'kick' },
-  { file:'model%2013.glb', label:'Accroupi',   type:'crouch' },
-  { file:'model%2014.glb', label:'Marche 2',   type:'walk2' },
-  { file:'model%2015.glb', label:'Course',     type:'run' },
-  { file:'model%2016.glb', label:'Neutre',     type:'idle' },
-  { file:'model%2017.glb', label:'Backflip',   type:'jump' },
-  { file:'model%2018.glb', label:'Stand',      type:'idle' },
-  { file:'model%2019.glb', label:'Stand 2',    type:'idle' },
-  { file:'model%2020.glb', label:'Kick sauté', type:'kick' },
-  { file:'model%2021.glb', label:'Danse 2',    type:'dance1' },
-  { file:'model%2022.glb', label:'Saut',       type:'jump' },
-  { file:'model%2023.glb', label:'Swag',       type:'idle' },
-  { file:'model%2025.glb', label:'Penché',     type:'stretch' },
-  { file:'model%2026.glb', label:'Hip-hop',    type:'dance2' },
+  { file:'marche%20discrete.glb', label:'Marche',        type:'walk' },
+  { file:'attend.glb',            label:'Attend',         type:'idle' },
+  { file:'attention.glb',         label:'Attention',      type:'stand' },
+  { file:'baisser.glb',           label:'Baisser',        type:'crouch' },
+  { file:'cigarette.glb',         label:'Cigarette',      type:'idle' },
+  { file:'costaud.glb',           label:'Costaud',        type:'guard' },
+  { file:'coup%20de%20poing.glb', label:'Coup poing',     type:'punch' },
+  { file:'course.glb',            label:'Course',         type:'run' },
+  { file:'cri%20ooooouh.glb',     label:'Cri',            type:'laugh' },
+  { file:'danse1.glb',            label:'Danse 1',        type:'dance1' },
+  { file:'danse2.glb',            label:'Danse 2',        type:'dance2' },
+  { file:'danse3.glb',            label:'Danse 3',        type:'dance1' },
+  { file:'danse4.glb',            label:'Danse 4',        type:'dance2' },
+  { file:'danse5.glb',            label:'Danse 5',        type:'dance1' },
+  { file:'danse6.glb',            label:'Danse 6',        type:'dance2' },
+  { file:'echauffement.glb',      label:'Échauff.',       type:'stretch' },
+  { file:'enerver.glb',           label:'Énerver',        type:'fight' },
+  { file:'esquive.glb',           label:'Esquive',        type:'dodge' },
+  { file:'foot.glb',              label:'Foot',           type:'kick' },
+  { file:'king%20kong.glb',       label:'King Kong',      type:'victory' },
+  { file:'lever%20de%20jambe.glb',label:'Lever jambe',    type:'kick' },
+  { file:'maestro.glb',           label:'Maestro',        type:'talk' },
+  { file:'mouvementbras.glb',     label:'Mvt bras',       type:'wave' },
+  { file:'plus%20fort.glb',       label:'Plus fort',      type:'punch' },
+  { file:'pointe%20des%20pieds.glb',label:'Pointe pieds', type:'stretch' },
+  { file:'pompe.glb',             label:'Pompe',          type:'pickup' },
+  { file:'pousser.glb',           label:'Pousser',        type:'push' },
+  { file:'prout%20prout.glb',     label:'Prout prout',    type:'laugh' },
+  { file:'roue.glb',              label:'Roue',           type:'jump' },
+  { file:'salto%20arriere.glb',   label:'Salto arr.',     type:'jump' },
+  { file:'salto%20avant.glb',     label:'Salto av.',      type:'jump' },
+  { file:'saut%20guerrier.glb',   label:'Saut guerrier',  type:'jump' },
+  { file:'tap%20front.glb',       label:'Tap front',      type:'kick' },
 ];
 
 // ── SVG silhouettes correctes par type ──
@@ -586,21 +595,21 @@ function swapAvatar(url, loop=true, onDone=null){
   });
 }
 
-// Idle de base = model24
-swapAvatar('model%2024.glb', true);
-// Walk = model27 préchargé en cache
-loadGLB(BASE+'model%2027.glb', ()=>{});
+// Idle de base = attend.glb
+swapAvatar('attend.glb', true);
+// Walk = course.glb préchargé en cache
+loadGLB(BASE+'course.glb', ()=>{});
 
 document.querySelectorAll('.anim-btn')[1]?.classList.add('active');
 
-// Quand on avance → swap model27, quand on s'arrête → swap model24
+// Quand on avance → course.glb, quand on s'arrête → attend.glb
 let lastWalking=false;
 function setWalkSwap(walking){
   if(walking===lastWalking)return;
   lastWalking=walking;
   clearTimeout(emoteTimer); emoteAction=null;
-  if(walking) swapAvatar('model%2027.glb', true);
-  else        swapAvatar('model%2024.glb', true);
+  if(walking) swapAvatar('course.glb', true);
+  else        swapAvatar('attend.glb', true);
 }
 
 function playEmote(url, label){
@@ -610,7 +619,7 @@ function playEmote(url, label){
     showToast('▶ '+label);
     emoteTimer=setTimeout(()=>{
       emoteAction=null;
-      swapAvatar('model%2024.glb', true);
+      swapAvatar('attend.glb', true);
     }, duration*1000+200);
   });
 }
