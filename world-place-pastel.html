@@ -566,11 +566,30 @@ function loadGLB(url,cb){
   gltfLoader.load(url,gltf=>{glbCache[url]=gltf;cb(gltf);},undefined,err=>{console.warn('GLB error',url,err);});
 }
 
+let mainBoneNames=[];
+function collectBones(model){
+  model.traverse(n=>{if(n.isBone||n.type==='Bone')mainBoneNames.push(n.name);});
+}
+
+function retargetClip(clip){
+  const newTracks=clip.tracks.map(track=>{
+    const t=track.clone();
+    const dotIdx=t.name.lastIndexOf('.');
+    const prop=dotIdx>=0?t.name.slice(dotIdx):'';
+    const rawBone=dotIdx>=0?t.name.slice(0,dotIdx):t.name;
+    const boneSuffix=rawBone.includes(':')?rawBone.split(':').pop():rawBone.split('|').pop();
+    const match=mainBoneNames.find(n=>n===boneSuffix||n.split(':').pop()===boneSuffix)||boneSuffix;
+    t.name=match+prop;
+    return t;
+  });
+  return new THREE.AnimationClip(clip.name,clip.duration,newTracks);
+}
+
 function playEmote(url,label){
   if(!avatarMixer)return;
   loadGLB(BASE+url,gltf=>{
     if(!gltf.animations?.length)return;
-    const clip=gltf.animations[0];
+    const clip=retargetClip(gltf.animations[0]);
     const action=avatarMixer.clipAction(clip);
     clearTimeout(emoteTimer);
     emoteAction=action;
@@ -595,23 +614,22 @@ loadGLB(BASE+'model%2024.glb',gltf=>{
   const bb2=new THREE.Box3().setFromObject(model);
   model.position.y=-bb2.min.y;
   avatarGroup.add(model);
+  collectBones(model);
 
   if(gltf.animations?.length){
     avatarMixer=new THREE.AnimationMixer(model);
-    const idleClip=gltf.animations.find(a=>/idle|stand|neutral/i.test(a.name))||gltf.animations[0];
-    if(idleClip){idleAction=avatarMixer.clipAction(idleClip);idleAction.play();currentAction=idleAction;}
+    idleAction=avatarMixer.clipAction(gltf.animations[0]);
+    idleAction.play();
+    currentAction=idleAction;
     showToast('✨ Prêt !');
   }
 
-  // Charge model27 = walk (joystick haut)
   loadGLB(BASE+'model%2027.glb',gltfW=>{
-    showToast('Walk clips: '+gltfW.animations.map(a=>a.name).join(' | '));
     if(!avatarMixer||!gltfW.animations?.length)return;
-    const walkClip=gltfW.animations[0];
-    walkAction=avatarMixer.clipAction(walkClip);
+    walkAction=avatarMixer.clipAction(retargetClip(gltfW.animations[0]));
   });
 
-  document.querySelectorAll('.anim-btn')[1]?.classList.add('active'); // idle = btn index 1
+  document.querySelectorAll('.anim-btn')[1]?.classList.add('active');
 });
 
 // ===== PANNEAU ANIMATIONS =====
