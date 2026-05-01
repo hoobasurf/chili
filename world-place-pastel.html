@@ -35,7 +35,7 @@ canvas{display:block;width:100%!important;height:100%!important;}
 .chat-input:focus{border-color:var(--pink);}
 .chat-send{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--pink),var(--lav));border:none;color:white;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;pointer-events:all;flex-shrink:0;}
 
-/* ── PANNEAU ANIMATIONS style Avaturn ── */
+/* ── PANNEAU ANIMATIONS ── */
 #anim-panel{
 position:absolute;
 bottom:0;left:0;right:0;
@@ -137,9 +137,6 @@ line-height:1.1;
     </div>
   </div>
   <div id="cam-joystick-zone"></div>
-
-  <!-- PANNEAU ANIMATIONS style Avaturn -->
-
   <div id="anim-panel">
     <div id="anim-scroll"></div>
   </div>
@@ -155,238 +152,248 @@ line-height:1.1;
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-// ===== LISTE DES ANIMATIONS =====
-// Silhouettes SVG dessinées à la main pour chaque type de mouvement
 const BASE = 'https://raw.githubusercontent.com/hoobasurf/chili/main/';
 
+// ===== ORDRE CORRECT D'APRÈS LA PHOTO =====
+// model27 = marche (joystick haut)
+// model24 = idle principal
+// Puis ordre : 15,16,17,18,19,20,21,22,23,4,5,6,7,8,9,10,11,12,13,14,25,26
 const ANIMS = [
-  // file, label, svgPath (silhouette SVG viewBox 0 0 64 80)
-  { file:'model%2024.glb', label:'Marche',    type:'walk' },
-  { file:'model.glb',      label:'T-Pose',    type:'tpose' },
-  { file:'model%202.glb',  label:'Idle',      type:'idle' },
-  { file:'model%203.glb',  label:'Salut',     type:'wave' },
-  { file:'model%204.glb',  label:'Course',    type:'run' },
-  { file:'model%205.glb',  label:'Danse',     type:'dance1' },
-  { file:'model%206.glb',  label:'Danse 2',   type:'dance2' },
-  { file:'model%207.glb',  label:'Saut',      type:'jump' },
-  { file:'model%208.glb',  label:'Assis',     type:'sit' },
-  { file:'model%209.glb',  label:'Allongé',   type:'lay' },
-  { file:'model%2010.glb', label:'Combat',    type:'fight' },
-  { file:'model%2011.glb', label:'Coup',      type:'punch' },
-  { file:'model%2012.glb', label:'Kick',      type:'kick' },
-  { file:'model%2013.glb', label:'Pousse',    type:'push' },
-  { file:'model%2014.glb', label:'Tirer',     type:'pull' },
-  { file:'model%2015.glb', label:'Ramasser',  type:'pickup' },
-  { file:'model%2016.glb', label:'Regarder',  type:'look' },
-  { file:'model%2017.glb', label:'Parler',    type:'talk' },
-  { file:'model%2018.glb', label:'Rire',      type:'laugh' },
-  { file:'model%2019.glb', label:'Pleurer',   type:'sad' },
-  { file:'model%2020.glb', label:'Victoire',  type:'victory' },
-  { file:'model%2021.glb', label:'Défaite',   type:'defeat' },
-  { file:'model%2022.glb', label:'Yoga',      type:'yoga' },
-  { file:'model%2023.glb', label:'Stretch',   type:'stretch' },
-  { file:'model%2025.glb', label:'Anim 25',   type:'anim25' },
-  { file:'model%2026.glb', label:'Anim 26',   type:'anim26' },
-  { file:'model%2027.glb', label:'Anim 27',   type:'anim27' },
+  // file,              label,        type,      SVG key
+  { file:'model%2027.glb', label:'Marche',     type:'walk' },
+  { file:'model%2024.glb', label:'Idle',       type:'idle' },
+  { file:'model%2015.glb', label:'Esquive',    type:'dodge' },
+  { file:'model%2016.glb', label:'Garde',      type:'guard' },
+  { file:'model%2017.glb', label:'Victoire',   type:'victory' },
+  { file:'model%2018.glb', label:'Coup poing', type:'punch' },
+  { file:'model%2019.glb', label:'Coup pied',  type:'kick' },
+  { file:'model%2020.glb', label:'Danse',      type:'dance1' },
+  { file:'model%2021.glb', label:'Salut',      type:'wave' },
+  { file:'model%2022.glb', label:'Yoga',       type:'yoga' },
+  { file:'model%2023.glb', label:'Accroupi',   type:'crouch' },
+  { file:'model%204.glb',  label:'Stand',      type:'stand' },
+  { file:'model%205.glb',  label:'Marche 2',   type:'walk2' },
+  { file:'model%206.glb',  label:'Course',     type:'run' },
+  { file:'model%207.glb',  label:'Saut',       type:'jump' },
+  { file:'model%208.glb',  label:'Assis',      type:'sit' },
+  { file:'model%209.glb',  label:'Allongé',    type:'lay' },
+  { file:'model%2010.glb', label:'Parler',     type:'talk' },
+  { file:'model%2011.glb', label:'Rire',       type:'laugh' },
+  { file:'model%2012.glb', label:'Pleurer',    type:'sad' },
+  { file:'model%2013.glb', label:'Ramasser',   type:'pickup' },
+  { file:'model%2014.glb', label:'Pousser',    type:'push' },
+  { file:'model%2025.glb', label:'Tirer',      type:'pull' },
+  { file:'model%2026.glb', label:'Étirement',  type:'stretch' },
 ];
 
-// ── Silhouettes SVG par type ──
+// ── SVG silhouettes correctes par type ──
 const SVG = {
-  tpose:   `<line x1="32" y1="18" x2="32" y2="52" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <circle cx="32" cy="10" r="7" fill="none" stroke="white" stroke-width="2.5"/>
-            <line x1="32" y1="24" x2="10" y2="30" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="32" y1="24" x2="54" y2="30" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="28" y1="52" x2="22" y2="72" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="36" y1="52" x2="42" y2="72" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
 
-  idle:    `<circle cx="32" cy="10" r="7" fill="none" stroke="white" stroke-width="2.5"/>
-            <line x1="32" y1="18" x2="32" y2="50" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="32" y1="26" x2="16" y2="38" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="32" y1="26" x2="48" y2="38" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="29" y1="50" x2="24" y2="70" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="35" y1="50" x2="40" y2="70" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+  // MARCHE — corps penché avant, jambes écartées, bras balancés
+  walk: `<circle cx="30" cy="9" r="6" fill="none" stroke="white" stroke-width="2.5"/>
+         <line x1="30" y1="15" x2="28" y2="42" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <line x1="29" y1="22" x2="14" y2="30" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <line x1="29" y1="22" x2="42" y2="18" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <line x1="28" y1="42" x2="16" y2="62" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <line x1="28" y1="42" x2="40" y2="58" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
 
-  walk:    `<circle cx="32" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
-            <line x1="32" y1="17" x2="30" y2="46" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="31" y1="24" x2="16" y2="34" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="31" y1="24" x2="44" y2="30" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="30" y1="46" x2="20" y2="66" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="30" y1="46" x2="42" y2="62" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+  // IDLE — debout droit, bras le long du corps
+  idle: `<circle cx="32" cy="9" r="6" fill="none" stroke="white" stroke-width="2.5"/>
+         <line x1="32" y1="15" x2="32" y2="46" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <line x1="32" y1="24" x2="20" y2="36" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <line x1="32" y1="24" x2="44" y2="36" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <line x1="30" y1="46" x2="24" y2="68" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <line x1="34" y1="46" x2="40" y2="68" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
 
-  run:     `<circle cx="32" cy="8" r="7" fill="none" stroke="white" stroke-width="2.5"/>
-            <line x1="34" y1="16" x2="30" y2="44" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="32" y1="22" x2="14" y2="28" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="32" y1="22" x2="48" y2="18" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="30" y1="44" x2="18" y2="58" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="30" y1="44" x2="46" y2="64" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+  // ESQUIVE — corps très penché de côté, jambe écartée
+  dodge: `<circle cx="38" cy="14" r="6" fill="none" stroke="white" stroke-width="2.5"/>
+          <line x1="36" y1="20" x2="28" y2="44" stroke="white" stroke-width="3" stroke-linecap="round"/>
+          <line x1="33" y1="28" x2="16" y2="22" stroke="white" stroke-width="3" stroke-linecap="round"/>
+          <line x1="33" y1="28" x2="50" y2="32" stroke="white" stroke-width="3" stroke-linecap="round"/>
+          <line x1="28" y1="44" x2="14" y2="56" stroke="white" stroke-width="3" stroke-linecap="round"/>
+          <line x1="28" y1="44" x2="38" y2="62" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
 
-  dance1:  `<circle cx="32" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
-            <path d="M32 17 Q28 32 26 46" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <line x1="30" y1="22" x2="12" y2="16" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="30" y1="22" x2="48" y2="28" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="26" y1="46" x2="18" y2="64" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="26" y1="46" x2="38" y2="60" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+  // GARDE — poings levés devant le visage, genoux fléchis
+  guard: `<circle cx="32" cy="11" r="6" fill="none" stroke="white" stroke-width="2.5"/>
+          <line x1="32" y1="17" x2="30" y2="44" stroke="white" stroke-width="3" stroke-linecap="round"/>
+          <line x1="31" y1="24" x2="18" y2="14" stroke="white" stroke-width="3" stroke-linecap="round"/>
+          <line x1="31" y1="24" x2="44" y2="14" stroke="white" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="16" cy="12" r="4" stroke="white" stroke-width="2" fill="none"/>
+          <circle cx="46" cy="12" r="4" stroke="white" stroke-width="2" fill="none"/>
+          <line x1="30" y1="44" x2="20" y2="62" stroke="white" stroke-width="3" stroke-linecap="round"/>
+          <line x1="30" y1="44" x2="40" y2="60" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
 
-  dance2:  `<circle cx="32" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
-            <path d="M32 17 Q36 30 34 46" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <line x1="33" y1="22" x2="14" y2="30" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="33" y1="22" x2="50" y2="16" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="34" y1="46" x2="22" y2="62" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="34" y1="46" x2="44" y2="66" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+  // VICTOIRE — bras levés en V au dessus de la tête
+  victory: `<circle cx="32" cy="9" r="6" fill="none" stroke="white" stroke-width="2.5"/>
+            <line x1="32" y1="15" x2="32" y2="46" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="32" y1="22" x2="14" y2="6" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="32" y1="22" x2="50" y2="6" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="30" y1="46" x2="24" y2="68" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="34" y1="46" x2="40" y2="68" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
 
-  jump:    `<circle cx="32" cy="7" r="7" fill="none" stroke="white" stroke-width="2.5"/>
-            <line x1="32" y1="15" x2="32" y2="42" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="32" y1="20" x2="14" y2="14" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="32" y1="20" x2="50" y2="14" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="29" y1="42" x2="20" y2="56" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="35" y1="42" x2="44" y2="56" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+  // COUP DE POING — bras droit tendu en avant
+  punch: `<circle cx="30" cy="9" r="6" fill="none" stroke="white" stroke-width="2.5"/>
+          <line x1="30" y1="15" x2="28" y2="44" stroke="white" stroke-width="3" stroke-linecap="round"/>
+          <line x1="29" y1="22" x2="12" y2="28" stroke="white" stroke-width="3" stroke-linecap="round"/>
+          <line x1="29" y1="22" x2="58" y2="16" stroke="white" stroke-width="3.5" stroke-linecap="round"/>
+          <circle cx="60" cy="15" r="4" stroke="white" stroke-width="2" fill="none"/>
+          <line x1="28" y1="44" x2="18" y2="64" stroke="white" stroke-width="3" stroke-linecap="round"/>
+          <line x1="28" y1="44" x2="38" y2="62" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
 
-  sit:     `<circle cx="24" cy="12" r="7" fill="none" stroke="white" stroke-width="2.5"/>
-            <line x1="24" y1="20" x2="24" y2="42" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="24" y1="28" x2="10" y2="36" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="24" y1="28" x2="40" y2="34" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="24" y1="42" x2="10" y2="42" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="24" y1="42" x2="38" y2="42" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="10" y1="42" x2="10" y2="62" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="38" y1="42" x2="48" y2="58" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+  // COUP DE PIED — jambe droite tendue sur le côté en hauteur
+  kick: `<circle cx="30" cy="9" r="6" fill="none" stroke="white" stroke-width="2.5"/>
+         <line x1="30" y1="15" x2="28" y2="42" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <line x1="29" y1="22" x2="14" y2="30" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <line x1="29" y1="22" x2="44" y2="30" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <line x1="28" y1="42" x2="14" y2="56" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <line x1="28" y1="42" x2="58" y2="34" stroke="white" stroke-width="3.5" stroke-linecap="round"/>`,
 
-  lay:     `<circle cx="10" cy="36" r="6" fill="none" stroke="white" stroke-width="2.5"/>
-            <line x1="16" y1="36" x2="54" y2="36" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="28" y1="30" x2="22" y2="22" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="28" y1="30" x2="36" y2="20" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="44" y1="36" x2="40" y2="52" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="44" y1="36" x2="52" y2="50" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+  // DANSE — corps ondulant, bras ouverts en rythme
+  dance1: `<circle cx="32" cy="9" r="6" fill="none" stroke="white" stroke-width="2.5"/>
+           <path d="M32 15 Q28 30 26 44" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+           <line x1="30" y1="20" x2="10" y2="14" stroke="white" stroke-width="3" stroke-linecap="round"/>
+           <line x1="30" y1="20" x2="50" y2="26" stroke="white" stroke-width="3" stroke-linecap="round"/>
+           <line x1="26" y1="44" x2="16" y2="62" stroke="white" stroke-width="3" stroke-linecap="round"/>
+           <line x1="26" y1="44" x2="40" y2="58" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
 
-  wave:    `<circle cx="32" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
-            <line x1="32" y1="17" x2="32" y2="50" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="32" y1="25" x2="18" y2="36" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <path d="M32 22 L50 10 L54 6" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <line x1="29" y1="50" x2="23" y2="70" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="35" y1="50" x2="41" y2="70" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+  // SALUT — un bras levé haut, main qui fait coucou
+  wave: `<circle cx="32" cy="9" r="6" fill="none" stroke="white" stroke-width="2.5"/>
+         <line x1="32" y1="15" x2="32" y2="48" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <line x1="32" y1="24" x2="18" y2="34" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <line x1="32" y1="20" x2="52" y2="6" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <line x1="52" y1="6" x2="54" y2="2" stroke="white" stroke-width="2" stroke-linecap="round"/>
+         <line x1="30" y1="48" x2="24" y2="68" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <line x1="34" y1="48" x2="40" y2="68" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
 
-  fight:   `<circle cx="32" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
-            <line x1="32" y1="17" x2="30" y2="46" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="31" y1="24" x2="14" y2="20" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="31" y1="24" x2="48" y2="22" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="30" y1="46" x2="22" y2="60" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="30" y1="46" x2="40" y2="58" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+  // YOGA — bras horizontaux parfaits, une jambe levée
+  yoga: `<circle cx="32" cy="9" r="6" fill="none" stroke="white" stroke-width="2.5"/>
+         <line x1="32" y1="15" x2="32" y2="44" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <line x1="32" y1="22" x2="10" y2="22" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <line x1="32" y1="22" x2="54" y2="22" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <line x1="32" y1="44" x2="22" y2="64" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <line x1="32" y1="44" x2="50" y2="38" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
 
-  punch:   `<circle cx="30" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
-            <line x1="30" y1="17" x2="28" y2="46" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="29" y1="23" x2="10" y2="26" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="29" y1="23" x2="56" y2="18" stroke="white" stroke-width="3.5" stroke-linecap="round"/>
-            <line x1="28" y1="46" x2="18" y2="62" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="28" y1="46" x2="38" y2="64" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+  // ACCROUPI — genoux très fléchis, corps bas
+  crouch: `<circle cx="32" cy="16" r="6" fill="none" stroke="white" stroke-width="2.5"/>
+           <line x1="32" y1="22" x2="32" y2="40" stroke="white" stroke-width="3" stroke-linecap="round"/>
+           <line x1="32" y1="28" x2="16" y2="36" stroke="white" stroke-width="3" stroke-linecap="round"/>
+           <line x1="32" y1="28" x2="48" y2="36" stroke="white" stroke-width="3" stroke-linecap="round"/>
+           <line x1="32" y1="40" x2="20" y2="50" stroke="white" stroke-width="3" stroke-linecap="round"/>
+           <line x1="20" y1="50" x2="14" y2="62" stroke="white" stroke-width="3" stroke-linecap="round"/>
+           <line x1="32" y1="40" x2="44" y2="50" stroke="white" stroke-width="3" stroke-linecap="round"/>
+           <line x1="44" y1="50" x2="50" y2="62" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
 
-  kick:    `<circle cx="32" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
-            <line x1="32" y1="17" x2="30" y2="44" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="31" y1="24" x2="16" y2="32" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="31" y1="24" x2="46" y2="32" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="30" y1="44" x2="18" y2="58" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="30" y1="44" x2="54" y2="38" stroke="white" stroke-width="3.5" stroke-linecap="round"/>`,
+  // STAND — T-pose neutre
+  stand: `<circle cx="32" cy="9" r="6" fill="none" stroke="white" stroke-width="2.5"/>
+          <line x1="32" y1="15" x2="32" y2="46" stroke="white" stroke-width="3" stroke-linecap="round"/>
+          <line x1="32" y1="22" x2="10" y2="28" stroke="white" stroke-width="3" stroke-linecap="round"/>
+          <line x1="32" y1="22" x2="54" y2="28" stroke="white" stroke-width="3" stroke-linecap="round"/>
+          <line x1="30" y1="46" x2="24" y2="68" stroke="white" stroke-width="3" stroke-linecap="round"/>
+          <line x1="34" y1="46" x2="40" y2="68" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
 
-  push:    `<circle cx="24" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
-            <line x1="24" y1="17" x2="22" y2="46" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="23" y1="24" x2="10" y2="34" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="23" y1="24" x2="46" y2="24" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <rect x="48" y="14" width="8" height="30" rx="2" stroke="white" stroke-width="2" fill="none"/>
-            <line x1="22" y1="46" x2="14" y2="62" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="22" y1="46" x2="32" y2="64" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+  // MARCHE 2 — variante, bras opposé à la jambe
+  walk2: `<circle cx="32" cy="9" r="6" fill="none" stroke="white" stroke-width="2.5"/>
+          <line x1="32" y1="15" x2="30" y2="44" stroke="white" stroke-width="3" stroke-linecap="round"/>
+          <line x1="31" y1="22" x2="46" y2="30" stroke="white" stroke-width="3" stroke-linecap="round"/>
+          <line x1="31" y1="22" x2="16" y2="18" stroke="white" stroke-width="3" stroke-linecap="round"/>
+          <line x1="30" y1="44" x2="42" y2="62" stroke="white" stroke-width="3" stroke-linecap="round"/>
+          <line x1="30" y1="44" x2="18" y2="60" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
 
-  pull:    `<circle cx="40" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
-            <line x1="40" y1="17" x2="38" y2="46" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="39" y1="24" x2="16" y2="24" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="39" y1="24" x2="54" y2="34" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <rect x="6" y="14" width="8" height="30" rx="2" stroke="white" stroke-width="2" fill="none"/>
-            <line x1="38" y1="46" x2="28" y2="62" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="38" y1="46" x2="48" y2="64" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+  // COURSE — corps penché fort, jambes très écartées
+  run: `<circle cx="34" cy="8" r="6" fill="none" stroke="white" stroke-width="2.5"/>
+        <line x1="33" y1="14" x2="30" y2="42" stroke="white" stroke-width="3" stroke-linecap="round"/>
+        <line x1="31" y1="20" x2="12" y2="24" stroke="white" stroke-width="3" stroke-linecap="round"/>
+        <line x1="31" y1="20" x2="50" y2="14" stroke="white" stroke-width="3" stroke-linecap="round"/>
+        <line x1="30" y1="42" x2="14" y2="54" stroke="white" stroke-width="3" stroke-linecap="round"/>
+        <line x1="30" y1="42" x2="48" y2="66" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
 
-  pickup:  `<circle cx="32" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
-            <path d="M32 17 Q28 34 26 50" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <line x1="30" y1="26" x2="16" y2="22" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="30" y1="26" x2="44" y2="46" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <circle cx="50" cy="50" r="5" stroke="white" stroke-width="2" fill="none"/>
-            <line x1="26" y1="50" x2="20" y2="68" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="26" y1="50" x2="36" y2="66" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+  // SAUT — bras vers le bas, jambes repliées sous le corps
+  jump: `<circle cx="32" cy="6" r="6" fill="none" stroke="white" stroke-width="2.5"/>
+         <line x1="32" y1="12" x2="32" y2="38" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <line x1="32" y1="18" x2="14" y2="12" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <line x1="32" y1="18" x2="50" y2="12" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <line x1="30" y1="38" x2="18" y2="52" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <line x1="34" y1="38" x2="46" y2="52" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
 
-  look:    `<circle cx="32" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
-            <line x1="32" y1="17" x2="32" y2="50" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="32" y1="26" x2="16" y2="36" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <path d="M32 22 L50 12 L56 8" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-            <line x1="29" y1="50" x2="23" y2="70" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="35" y1="50" x2="41" y2="70" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+  // ASSIS — jambes à 90° devant, dos droit
+  sit: `<circle cx="24" cy="12" r="6" fill="none" stroke="white" stroke-width="2.5"/>
+        <line x1="24" y1="18" x2="24" y2="40" stroke="white" stroke-width="3" stroke-linecap="round"/>
+        <line x1="24" y1="26" x2="10" y2="34" stroke="white" stroke-width="3" stroke-linecap="round"/>
+        <line x1="24" y1="26" x2="40" y2="32" stroke="white" stroke-width="3" stroke-linecap="round"/>
+        <line x1="24" y1="40" x2="8"  y2="40" stroke="white" stroke-width="3" stroke-linecap="round"/>
+        <line x1="8"  y1="40" x2="8"  y2="60" stroke="white" stroke-width="3" stroke-linecap="round"/>
+        <line x1="24" y1="40" x2="40" y2="40" stroke="white" stroke-width="3" stroke-linecap="round"/>
+        <line x1="40" y1="40" x2="50" y2="58" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
 
-  talk:    `<circle cx="32" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
-            <line x1="32" y1="17" x2="32" y2="50" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="32" y1="26" x2="18" y2="34" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <path d="M32 22 L46 28 L44 36 L38 32" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-            <line x1="29" y1="50" x2="23" y2="70" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="35" y1="50" x2="41" y2="70" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+  // ALLONGÉ — corps horizontal, tête à gauche
+  lay: `<circle cx="10" cy="36" r="6" fill="none" stroke="white" stroke-width="2.5"/>
+        <line x1="16" y1="36" x2="54" y2="36" stroke="white" stroke-width="3" stroke-linecap="round"/>
+        <line x1="28" y1="30" x2="22" y2="20" stroke="white" stroke-width="3" stroke-linecap="round"/>
+        <line x1="28" y1="30" x2="36" y2="18" stroke="white" stroke-width="3" stroke-linecap="round"/>
+        <line x1="44" y1="36" x2="40" y2="52" stroke="white" stroke-width="3" stroke-linecap="round"/>
+        <line x1="44" y1="36" x2="54" y2="50" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
 
-  laugh:   `<circle cx="32" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
-            <path d="M32 17 Q36 32 34 50" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <path d="M33 24 L14 20 L12 14" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <path d="M33 24 L50 20 L52 14" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <line x1="34" y1="50" x2="26" y2="68" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="34" y1="50" x2="44" y2="66" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+  // PARLER — main portée au visage / bouche
+  talk: `<circle cx="32" cy="9" r="6" fill="none" stroke="white" stroke-width="2.5"/>
+         <line x1="32" y1="15" x2="32" y2="48" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <line x1="32" y1="24" x2="18" y2="34" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <line x1="32" y1="20" x2="46" y2="14" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <line x1="46" y1="14" x2="42" y2="10" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+         <line x1="30" y1="48" x2="24" y2="68" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <line x1="34" y1="48" x2="40" y2="68" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
 
-  sad:     `<circle cx="32" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
-            <path d="M32 17 Q30 34 30 50" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <path d="M31 24 L16 30 L18 38" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <path d="M31 24 L46 30 L44 38" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <line x1="30" y1="50" x2="22" y2="68" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="30" y1="50" x2="38" y2="68" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+  // RIRE — corps légèrement plié, bras ouverts, tête rejetée en arrière
+  laugh: `<circle cx="32" cy="11" r="6" fill="none" stroke="white" stroke-width="2.5"/>
+          <path d="M32 17 Q36 30 34 48" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <line x1="33" y1="24" x2="12" y2="18" stroke="white" stroke-width="3" stroke-linecap="round"/>
+          <line x1="33" y1="24" x2="52" y2="18" stroke="white" stroke-width="3" stroke-linecap="round"/>
+          <line x1="34" y1="48" x2="26" y2="66" stroke="white" stroke-width="3" stroke-linecap="round"/>
+          <line x1="34" y1="48" x2="44" y2="64" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
 
-  victory: `<circle cx="32" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
-            <line x1="32" y1="17" x2="32" y2="48" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <path d="M32 22 L14 8 L12 4" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <path d="M32 22 L50 8 L52 4" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <line x1="29" y1="48" x2="22" y2="68" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="35" y1="48" x2="42" y2="68" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+  // PLEURER — tête baissée, épaules tombantes
+  sad: `<circle cx="32" cy="11" r="6" fill="none" stroke="white" stroke-width="2.5"/>
+        <path d="M32 17 Q30 32 30 48" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <line x1="31" y1="26" x2="18" y2="34" stroke="white" stroke-width="3" stroke-linecap="round"/>
+        <line x1="31" y1="26" x2="44" y2="34" stroke="white" stroke-width="3" stroke-linecap="round"/>
+        <line x1="30" y1="48" x2="22" y2="66" stroke="white" stroke-width="3" stroke-linecap="round"/>
+        <line x1="30" y1="48" x2="38" y2="66" stroke="white" stroke-width="3" stroke-linecap="round"/>
+        <line x1="30" y1="20" x2="28" y2="26" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="2 2"/>`,
 
-  defeat:  `<circle cx="32" cy="12" r="7" fill="none" stroke="white" stroke-width="2.5"/>
-            <path d="M32 20 Q30 36 28 52" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <path d="M30 28 L16 38 L18 48" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <path d="M30 28 L44 36 L42 46" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <line x1="28" y1="52" x2="20" y2="68" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="28" y1="52" x2="36" y2="68" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+  // RAMASSER — dos courbé, bras vers le bas vers un objet
+  pickup: `<circle cx="32" cy="11" r="6" fill="none" stroke="white" stroke-width="2.5"/>
+           <path d="M32 17 Q28 30 24 50" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+           <line x1="30" y1="24" x2="16" y2="20" stroke="white" stroke-width="3" stroke-linecap="round"/>
+           <line x1="30" y1="24" x2="46" y2="44" stroke="white" stroke-width="3" stroke-linecap="round"/>
+           <circle cx="50" cy="48" r="5" stroke="white" stroke-width="2" fill="none"/>
+           <line x1="24" y1="50" x2="16" y2="66" stroke="white" stroke-width="3" stroke-linecap="round"/>
+           <line x1="24" y1="50" x2="34" y2="64" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
 
-  yoga:    `<circle cx="32" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
-            <line x1="32" y1="17" x2="32" y2="44" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="32" y1="22" x2="12" y2="22" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="32" y1="22" x2="52" y2="22" stroke="white" stroke-width="3" stroke-linecap="round"/>
+  // POUSSER — bras tendus en avant contre un obstacle
+  push: `<circle cx="24" cy="11" r="6" fill="none" stroke="white" stroke-width="2.5"/>
+         <line x1="24" y1="17" x2="22" y2="44" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <line x1="23" y1="24" x2="10" y2="34" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <line x1="23" y1="24" x2="48" y2="22" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <rect x="50" y="12" width="8" height="32" rx="2" stroke="white" stroke-width="2" fill="none"/>
+         <line x1="22" y1="44" x2="12" y2="62" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <line x1="22" y1="44" x2="32" y2="62" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+
+  // TIRER — bras tendus en arrière, corps penché
+  pull: `<circle cx="40" cy="11" r="6" fill="none" stroke="white" stroke-width="2.5"/>
+         <line x1="40" y1="17" x2="38" y2="44" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <line x1="39" y1="24" x2="14" y2="22" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <line x1="39" y1="24" x2="54" y2="34" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <rect x="4" y="12" width="8" height="32" rx="2" stroke="white" stroke-width="2" fill="none"/>
+         <line x1="38" y1="44" x2="28" y2="62" stroke="white" stroke-width="3" stroke-linecap="round"/>
+         <line x1="38" y1="44" x2="48" y2="62" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+
+  // ÉTIREMENT — bras vers le ciel, dos arqué
+  stretch: `<circle cx="32" cy="9" r="6" fill="none" stroke="white" stroke-width="2.5"/>
+            <path d="M32 15 Q34 28 32 44" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <line x1="32" y1="20" x2="12" y2="10" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <line x1="32" y1="20" x2="52" y2="10" stroke="white" stroke-width="3" stroke-linecap="round"/>
             <line x1="32" y1="44" x2="20" y2="56" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="20" y1="56" x2="36" y2="56" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
-            <line x1="32" y1="44" x2="44" y2="60" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
-
-  stretch: `<circle cx="32" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
-            <path d="M32 17 Q34 30 32 46" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <line x1="32" y1="22" x2="14" y2="14" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="32" y1="22" x2="50" y2="14" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="32" y1="46" x2="20" y2="58" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="20" y1="58" x2="14" y2="70" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
-            <line x1="32" y1="46" x2="44" y2="60" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
-
-  anim25:  `<circle cx="32" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
-            <line x1="32" y1="17" x2="32" y2="50" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="32" y1="26" x2="16" y2="20" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="32" y1="26" x2="48" y2="20" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="29" y1="50" x2="23" y2="70" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="35" y1="50" x2="41" y2="70" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
-
-  anim26:  `<circle cx="32" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
-            <line x1="32" y1="17" x2="34" y2="50" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <path d="M33 24 L14 28 L10 36" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <path d="M33 24 L50 22 L56 16" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <line x1="34" y1="50" x2="26" y2="68" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="34" y1="50" x2="44" y2="66" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
-
-  anim27:  `<circle cx="32" cy="9" r="7" fill="none" stroke="white" stroke-width="2.5"/>
-            <line x1="32" y1="17" x2="30" y2="50" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <path d="M31 24 L18 18 L16 10" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <path d="M31 24 L46 30 L48 38" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <line x1="30" y1="50" x2="22" y2="68" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <line x1="30" y1="50" x2="40" y2="64" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
+            <line x1="20" y1="56" x2="14" y2="70" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="32" y1="44" x2="44" y2="58" stroke="white" stroke-width="3" stroke-linecap="round"/>`,
 };
 
 // ===== PROFIL =====
@@ -529,11 +536,11 @@ let currentAction=null;
 let idleAction=null;
 let walkAction=null;
 let isWalking=false;
-let emoteAction=null; // animation emote en cours
+let emoteAction=null;
 let emoteTimer=null;
 
 const gltfLoader=new GLTFLoader();
-const glbCache={}; // cache des GLB déjà chargés
+const glbCache={};
 
 function crossFadeTo(toAction,duration=0.25){
   if(!toAction||toAction===currentAction)return;
@@ -546,7 +553,7 @@ function crossFadeTo(toAction,duration=0.25){
 }
 
 function setWalk(walking){
-  if(emoteAction)return; // emote en cours → pas d'interruption
+  if(emoteAction)return;
   if(walking===isWalking)return;
   isWalking=walking;
   if(!avatarMixer)return;
@@ -554,19 +561,14 @@ function setWalk(walking){
   else if(!walking&&idleAction)crossFadeTo(idleAction,0.3);
 }
 
-// Charge un GLB et retourne son premier clip via callback
-function loadGLB(url, cb){
-  if(glbCache[url]){ cb(glbCache[url]); return; }
-  gltfLoader.load(url, gltf=>{
-    glbCache[url]=gltf;
-    cb(gltf);
-  }, undefined, err=>{ console.warn('GLB error',url,err); });
+function loadGLB(url,cb){
+  if(glbCache[url]){cb(glbCache[url]);return;}
+  gltfLoader.load(url,gltf=>{glbCache[url]=gltf;cb(gltf);},undefined,err=>{console.warn('GLB error',url,err);});
 }
 
-// Joue une animation emote (durée puis retour idle)
-function playEmote(url, label){
+function playEmote(url,label){
   if(!avatarMixer)return;
-  loadGLB(BASE+url, gltf=>{
+  loadGLB(BASE+url,gltf=>{
     if(!gltf.animations?.length)return;
     const clip=gltf.animations[0];
     const action=avatarMixer.clipAction(clip);
@@ -576,7 +578,6 @@ function playEmote(url, label){
     action.setLoop(THREE.LoopOnce,1);
     action.clampWhenFinished=true;
     showToast('▶ '+label);
-    // Retour idle après la durée du clip
     emoteTimer=setTimeout(()=>{
       emoteAction=null;
       if(idleAction)crossFadeTo(idleAction,0.4);
@@ -584,8 +585,8 @@ function playEmote(url, label){
   });
 }
 
-// ── Charge model 24 (avatar principal) ──
-loadGLB(BASE+'model%2024.glb', gltf=>{
+// Charge model24 = idle principal
+loadGLB(BASE+'model%2024.glb',gltf=>{
   const model=gltf.scene;
   model.traverse(n=>{if(n.isMesh){n.castShadow=true;n.receiveShadow=true;}});
   const bb=new THREE.Box3().setFromObject(model);
@@ -597,15 +598,19 @@ loadGLB(BASE+'model%2024.glb', gltf=>{
 
   if(gltf.animations?.length){
     avatarMixer=new THREE.AnimationMixer(model);
-    console.log('🎬 Clips model 24:', gltf.animations.map(a=>a.name));
     const idleClip=gltf.animations.find(a=>/idle|stand|neutral/i.test(a.name))||gltf.animations[0];
-    const walkClip=gltf.animations.find(a=>/walk|run|march/i.test(a.name))||(gltf.animations.length>1?gltf.animations[1]:null);
     if(idleClip){idleAction=avatarMixer.clipAction(idleClip);idleAction.play();currentAction=idleAction;}
-    if(walkClip&&walkClip!==idleClip){walkAction=avatarMixer.clipAction(walkClip);}
-    showToast('✨ Prêt ! '+gltf.animations.length+' animations');
+    showToast('✨ Prêt !');
   }
-  // Sélectionner le bouton walk par défaut
-  document.querySelectorAll('.anim-btn')[0]?.classList.add('active');
+
+  // Charge model27 = walk (joystick haut)
+  loadGLB(BASE+'model%2027.glb',gltfW=>{
+    if(!avatarMixer||!gltfW.animations?.length)return;
+    const walkClip=gltfW.animations[0];
+    walkAction=avatarMixer.clipAction(walkClip);
+  });
+
+  document.querySelectorAll('.anim-btn')[1]?.classList.add('active'); // idle = btn index 1
 });
 
 // ===== PANNEAU ANIMATIONS =====
@@ -622,14 +627,19 @@ ANIMS.forEach((anim,i)=>{
   btn.addEventListener('click',()=>{
     document.querySelectorAll('.anim-btn').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
-    // Les 2 premières sont walk+idle → intégrées dans model 24
+
     if(i===0){
-      // Marche = géré par joystick, juste reset emote
+      // Marche — juste activation walk manuelle
       clearTimeout(emoteTimer);emoteAction=null;
-      if(idleAction)crossFadeTo(idleAction,0.3);
-      showToast('🚶 Mode marche');
+      if(walkAction){crossFadeTo(walkAction,0.25);}
+      showToast('🚶 Marche');
+    } else if(i===1){
+      // Idle — reset vers idle
+      clearTimeout(emoteTimer);emoteAction=null;
+      if(idleAction){crossFadeTo(idleAction,0.3);}
+      showToast('🧍 Idle');
     } else {
-      playEmote(anim.file, anim.label);
+      playEmote(anim.file,anim.label);
     }
   });
   animScroll.appendChild(btn);
