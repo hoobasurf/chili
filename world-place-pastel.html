@@ -552,85 +552,69 @@ function crossFadeTo(toAction,duration=0.25){
   currentAction=toAction;
 }
 
-function setWalk(walking){
-  if(emoteAction)return;
-  if(walking===isWalking)return;
-  isWalking=walking;
-  if(!avatarMixer)return;
-  if(walking&&walkAction)crossFadeTo(walkAction,0.2);
-  else if(!walking&&idleAction)crossFadeTo(idleAction,0.3);
-}
-
 function loadGLB(url,cb){
   if(glbCache[url]){cb(glbCache[url]);return;}
   gltfLoader.load(url,gltf=>{glbCache[url]=gltf;cb(gltf);},undefined,err=>{console.warn('GLB error',url,err);});
 }
 
-let mainBoneNames=[];
-function collectBones(model){
-  model.traverse(n=>{if(n.isBone||n.type==='Bone')mainBoneNames.push(n.name);});
-}
+// Charge et joue un GLB complet — remplace le modèle entier
+function swapAvatar(url, loop=true, onDone=null){
+  loadGLB(BASE+url, gltf=>{
+    // Vide l'avatar actuel
+    while(avatarGroup.children.length) avatarGroup.remove(avatarGroup.children[0]);
+    if(avatarMixer){ avatarMixer.stopAllAction(); avatarMixer=null; }
+    currentAction=null; idleAction=null; walkAction=null; emoteAction=null;
 
-function retargetClip(clip){
-  const newTracks=clip.tracks.map(track=>{
-    const t=track.clone();
-    const dotIdx=t.name.lastIndexOf('.');
-    const prop=dotIdx>=0?t.name.slice(dotIdx):'';
-    const rawBone=dotIdx>=0?t.name.slice(0,dotIdx):t.name;
-    const boneSuffix=rawBone.includes(':')?rawBone.split(':').pop():rawBone.split('|').pop();
-    const match=mainBoneNames.find(n=>n===boneSuffix||n.split(':').pop()===boneSuffix)||boneSuffix;
-    t.name=match+prop;
-    return t;
+    const model=gltf.scene;
+    model.traverse(n=>{if(n.isMesh){n.castShadow=true;n.receiveShadow=true;}});
+    const bb=new THREE.Box3().setFromObject(model);
+    const size=new THREE.Vector3(); bb.getSize(size);
+    if(size.y>0) model.scale.setScalar(1.75/size.y);
+    const bb2=new THREE.Box3().setFromObject(model);
+    model.position.y=-bb2.min.y;
+    avatarGroup.add(model);
+
+    if(gltf.animations?.length){
+      avatarMixer=new THREE.AnimationMixer(model);
+      const action=avatarMixer.clipAction(gltf.animations[0]);
+      action.setLoop(loop ? THREE.LoopRepeat : THREE.LoopOnce, loop ? Infinity : 1);
+      action.clampWhenFinished=!loop;
+      action.play();
+      currentAction=action;
+      if(loop) idleAction=action;
+      if(onDone) onDone(action, gltf.animations[0].duration);
+    }
   });
-  return new THREE.AnimationClip(clip.name,clip.duration,newTracks);
 }
 
-function playEmote(url,label){
-  if(!avatarMixer)return;
-  loadGLB(BASE+url,gltf=>{
-    if(!gltf.animations?.length)return;
-    const clip=retargetClip(gltf.animations[0]);
-    const action=avatarMixer.clipAction(clip);
-    clearTimeout(emoteTimer);
+// Idle de base = model24
+swapAvatar('model%2024.glb', true);
+// Walk = model27 préchargé en cache
+loadGLB(BASE+'model%2027.glb', ()=>{});
+
+document.querySelectorAll('.anim-btn')[1]?.classList.add('active');
+
+// Quand on avance → swap model27, quand on s'arrête → swap model24
+let lastWalking=false;
+function setWalkSwap(walking){
+  if(walking===lastWalking)return;
+  lastWalking=walking;
+  clearTimeout(emoteTimer); emoteAction=null;
+  if(walking) swapAvatar('model%2027.glb', true);
+  else        swapAvatar('model%2024.glb', true);
+}
+
+function playEmote(url, label){
+  clearTimeout(emoteTimer); emoteAction=null;
+  swapAvatar(url, false, (action, duration)=>{
     emoteAction=action;
-    crossFadeTo(action,0.2);
-    action.setLoop(THREE.LoopOnce,1);
-    action.clampWhenFinished=true;
     showToast('▶ '+label);
     emoteTimer=setTimeout(()=>{
       emoteAction=null;
-      if(idleAction)crossFadeTo(idleAction,0.4);
-    },(clip.duration*1000)+200);
+      swapAvatar('model%2024.glb', true);
+    }, duration*1000+200);
   });
 }
-
-// Charge model24 = idle principal
-loadGLB(BASE+'model%2024.glb',gltf=>{
-  const model=gltf.scene;
-  model.traverse(n=>{if(n.isMesh){n.castShadow=true;n.receiveShadow=true;}});
-  const bb=new THREE.Box3().setFromObject(model);
-  const size=new THREE.Vector3();bb.getSize(size);
-  if(size.y>0)model.scale.setScalar(1.75/size.y);
-  const bb2=new THREE.Box3().setFromObject(model);
-  model.position.y=-bb2.min.y;
-  avatarGroup.add(model);
-  collectBones(model);
-
-  if(gltf.animations?.length){
-    avatarMixer=new THREE.AnimationMixer(model);
-    idleAction=avatarMixer.clipAction(gltf.animations[0]);
-    idleAction.play();
-    currentAction=idleAction;
-    showToast('✨ Prêt !');
-  }
-
-  loadGLB(BASE+'model%2027.glb',gltfW=>{
-    if(!avatarMixer||!gltfW.animations?.length)return;
-    walkAction=avatarMixer.clipAction(retargetClip(gltfW.animations[0]));
-  });
-
-  document.querySelectorAll('.anim-btn')[1]?.classList.add('active');
-});
 
 // ===== PANNEAU ANIMATIONS =====
 const animScroll=document.getElementById('anim-scroll');
@@ -749,7 +733,7 @@ function animate(){
 
   const moving=Math.abs(mx)>0.05||Math.abs(mz)>0.05;
   if(moving&&emoteAction){clearTimeout(emoteTimer);emoteAction=null;}
-  setWalk(moving);
+  setWalkSwap(moving);
 
   if(moving){
     const sinC=Math.sin(cameraYaw),cosC=Math.cos(cameraYaw);
