@@ -598,7 +598,8 @@ loadGLB(BASE+'model%2024.glb',gltf=>{
 
   if(gltf.animations?.length){
     avatarMixer=new THREE.AnimationMixer(model);
-    const idleClip=gltf.animations.find(a=>/idle|stand|neutral/i.test(a.name))||gltf.animations[0];
+    console.log('Clips model24:', gltf.animations.map(a => a.name));
+
     if(idleClip){idleAction=avatarMixer.clipAction(idleClip);idleAction.play();currentAction=idleAction;}
     showToast('✨ Prêt !');
   }
