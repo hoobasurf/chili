@@ -159,31 +159,30 @@ const BASE = 'https://raw.githubusercontent.com/hoobasurf/chili/main/';
 // model24 = idle principal
 // Puis ordre : 15,16,17,18,19,20,21,22,23,4,5,6,7,8,9,10,11,12,13,14,25,26
 const ANIMS = [
-  // file,              label,        type,      SVG key
   { file:'model%2027.glb', label:'Marche',     type:'walk' },
-  { file:'model%2024.glb', label:'Idle',       type:'idle' },
-  { file:'model%2015.glb', label:'Esquive',    type:'dodge' },
-  { file:'model%2016.glb', label:'Garde',      type:'guard' },
-  { file:'model%2017.glb', label:'Victoire',   type:'victory' },
-  { file:'model%2018.glb', label:'Coup poing', type:'punch' },
-  { file:'model%2019.glb', label:'Coup pied',  type:'kick' },
-  { file:'model%2020.glb', label:'Danse',      type:'dance1' },
-  { file:'model%2021.glb', label:'Salut',      type:'wave' },
-  { file:'model%2022.glb', label:'Yoga',       type:'yoga' },
-  { file:'model%2023.glb', label:'Accroupi',   type:'crouch' },
-  { file:'model%204.glb',  label:'Stand',      type:'stand' },
-  { file:'model%205.glb',  label:'Marche 2',   type:'walk2' },
-  { file:'model%206.glb',  label:'Course',     type:'run' },
-  { file:'model%207.glb',  label:'Saut',       type:'jump' },
-  { file:'model%208.glb',  label:'Assis',      type:'sit' },
-  { file:'model%209.glb',  label:'Allongé',    type:'lay' },
-  { file:'model%2010.glb', label:'Parler',     type:'talk' },
-  { file:'model%2011.glb', label:'Rire',       type:'laugh' },
-  { file:'model%2012.glb', label:'Pleurer',    type:'sad' },
-  { file:'model%2013.glb', label:'Ramasser',   type:'pickup' },
-  { file:'model%2014.glb', label:'Pousser',    type:'push' },
-  { file:'model%2025.glb', label:'Tirer',      type:'pull' },
-  { file:'model%2026.glb', label:'Étirement',  type:'stretch' },
+  { file:'model%2024.glb', label:'Boxing',     type:'guard' },
+  { file:'model%204.glb',  label:'Breakdance', type:'dance1' },
+  { file:'model%205.glb',  label:'Cool',       type:'idle' },
+  { file:'model%206.glb',  label:'Idle',       type:'stand' },
+  { file:'model%207.glb',  label:'Relax',      type:'idle' },
+  { file:'model%208.glb',  label:'Danse',      type:'dance2' },
+  { file:'model%209.glb',  label:'Combat',     type:'fight' },
+  { file:'model%2010.glb', label:'Garde',      type:'guard' },
+  { file:'model%2011.glb', label:'Victoire',   type:'victory' },
+  { file:'model%2012.glb', label:'Coup pied',  type:'kick' },
+  { file:'model%2013.glb', label:'Accroupi',   type:'crouch' },
+  { file:'model%2014.glb', label:'Marche 2',   type:'walk2' },
+  { file:'model%2015.glb', label:'Course',     type:'run' },
+  { file:'model%2016.glb', label:'Neutre',     type:'idle' },
+  { file:'model%2017.glb', label:'Backflip',   type:'jump' },
+  { file:'model%2018.glb', label:'Stand',      type:'idle' },
+  { file:'model%2019.glb', label:'Stand 2',    type:'idle' },
+  { file:'model%2020.glb', label:'Kick sauté', type:'kick' },
+  { file:'model%2021.glb', label:'Danse 2',    type:'dance1' },
+  { file:'model%2022.glb', label:'Saut',       type:'jump' },
+  { file:'model%2023.glb', label:'Swag',       type:'idle' },
+  { file:'model%2025.glb', label:'Penché',     type:'stretch' },
+  { file:'model%2026.glb', label:'Hip-hop',    type:'dance2' },
 ];
 
 // ── SVG silhouettes correctes par type ──
@@ -722,9 +721,9 @@ function animate(){
   if(avatarMixer)avatarMixer.update(dt);
   clouds.forEach(c=>{c.mesh.position.x-=c.speed*dt;if(c.mesh.position.x<-35)c.mesh.position.x=35;});
 
-  let mx=joy.x,mz=joy.y;
-  if(keys['ArrowUp']  ||keys['w']||keys['W'])mz=-1;
-  if(keys['ArrowDown']||keys['s']||keys['S'])mz= 1;
+  let mx=joy.x,mz=-joy.y;
+  if(keys['ArrowUp']  ||keys['w']||keys['W'])mz= 1;
+  if(keys['ArrowDown']||keys['s']||keys['S'])mz=-1;
   if(keys['ArrowLeft']||keys['a']||keys['A'])mx=-1;
   if(keys['ArrowRight']||keys['d']||keys['D'])mx= 1;
   if(camJoy.active&&Math.abs(camJoy.x)>0.05)cameraYaw-=camJoy.x*2.0*dt;
