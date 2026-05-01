@@ -137,7 +137,6 @@ const ANIMS = [
   { label:'Échauff.',     file:'echauffement.glb',        svg:'run',     col:'#FFD747' },
 ];
 
-// SVG silhouettes
 const C='#00ffcc';
 const SVG={
   idle:`<circle cx="28" cy="9" r="6" fill="none" stroke="${C}" stroke-width="2.5"/><line x1="28" y1="15" x2="28" y2="46" stroke="${C}" stroke-width="3" stroke-linecap="round"/><line x1="28" y1="24" x2="16" y2="36" stroke="${C}" stroke-width="3" stroke-linecap="round"/><line x1="28" y1="24" x2="40" y2="36" stroke="${C}" stroke-width="3" stroke-linecap="round"/><line x1="26" y1="46" x2="20" y2="66" stroke="${C}" stroke-width="3" stroke-linecap="round"/><line x1="30" y1="46" x2="36" y2="66" stroke="${C}" stroke-width="3" stroke-linecap="round"/>`,
@@ -195,7 +194,7 @@ function finishLoading(){
     ls.classList.add('hidden');setTimeout(()=>ls.style.display='none',700);
   },400);
   addChat('⬡ Bienvenue dans Neon City, '+profile.pseudo+' !','Système');
-  addChat('💬 Joystick droit = marcher | gauche = caméra | ↑ = saut','Info');
+  addChat('💬 Joystick droit = marcher | gauche = caméra | ↑ = saut | double ↑ = SUPER SAUT','Info');
 }
 
 // ===== RENDERER =====
@@ -214,20 +213,15 @@ scene.background=new THREE.Color(0x030510);
 scene.fog=new THREE.FogExp2(0x050818,0.018);
 const camera=new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,0.1,280);
 
-// ===== LUMIÈRES — MAX 6 DYNAMIQUES =====
-// 1. Ambiance générale
+// ===== LUMIÈRES =====
 scene.add(new THREE.AmbientLight(0x0a1428,0.8));
-// 2. Lune (directionnelle principale, une seule shadow map)
 const moon=new THREE.DirectionalLight(0x2040a0,0.6);
 moon.position.set(-30,60,20);moon.castShadow=true;
 moon.shadow.mapSize.set(1024,1024);
 moon.shadow.camera.left=moon.shadow.camera.bottom=-60;
 moon.shadow.camera.right=moon.shadow.camera.top=60;
-moon.shadow.camera.far=160;
-moon.shadow.bias=-0.001;
+moon.shadow.camera.far=160;moon.shadow.bias=-0.001;
 scene.add(moon);
-// 3-6. Quatre points lumineux fixes positionnés aux 4 coins de la ville
-// Ces 4 lumières éclairent tout via leur portée longue
 const cityLights=[
   {pos:[-30,-5,-30],col:0x00ffcc,intensity:3,distance:55},
   {pos:[ 30,-5,-30],col:0xff00aa,intensity:3,distance:55},
@@ -239,7 +233,22 @@ cityLights.forEach(l=>{
   pl.position.set(...l.pos);scene.add(pl);
 });
 
-// ===== HELPERS (emissive = zéro coût GPU) =====
+// ===== LUMIÈRE PERSONNELLE DU JOUEUR — toujours visible de nuit =====
+// SpotLight doux qui suit le personnage, eclaire de haut
+const playerSpot = new THREE.SpotLight(0xffeedd, 2.8, 12, Math.PI/4, 0.7, 1.5);
+playerSpot.position.set(0, 8, 0);
+playerSpot.target.position.set(0, 0, 0);
+scene.add(playerSpot);
+scene.add(playerSpot.target);
+
+// Halo au sol sous le joueur (emissive cyan doux)
+const playerGlowMat = new THREE.MeshBasicMaterial({color:0x00ffcc,transparent:true,opacity:0.18,depthWrite:false});
+const playerGlow = new THREE.Mesh(new THREE.CircleGeometry(1.1,16), playerGlowMat);
+playerGlow.rotation.x=-Math.PI/2;
+playerGlow.position.y=0.013;
+scene.add(playerGlow);
+
+// ===== HELPERS =====
 function mat(color,rough=0.8,metal=0,emissive=null,emissInt=1){
   const m=new THREE.MeshStandardMaterial({color,roughness:rough,metalness:metal});
   if(emissive!=null){m.emissive=new THREE.Color(emissive);m.emissiveIntensity=emissInt;}
@@ -259,53 +268,83 @@ function sph(r,color,emissive=null,emissInt=1){
 }
 function place(mesh,x,y,z){mesh.position.set(x,y,z);scene.add(mesh);return mesh;}
 
-// ===== SOL ASPHALTE CENTRAL =====
-// Sol principal
+// ===== SYSTÈME DE COLLISIONS =====
+// Chaque obstacle est un AABB (axis-aligned bounding box) au sol
+// Format: { minX, maxX, minZ, maxZ, height }
+// height = hauteur de l'obstacle en unités world (le joueur peut sauter par-dessus si playerPos.y > height)
+const colliders = [];
+
+function addCollider(cx, cz, hw, hd, height=100) {
+  // cx,cz = centre, hw=demi-largeur X, hd=demi-profondeur Z
+  colliders.push({ minX: cx-hw, maxX: cx+hw, minZ: cz-hd, maxZ: cz+hd, height });
+}
+
+// Rayon de collision du joueur
+const PLAYER_RADIUS = 0.55;
+
+function resolveCollision(newX, newZ, playerY) {
+  // Pour chaque collider, si le joueur est dessus (en saut suffisant) on ignore
+  for(const c of colliders) {
+    // Si le joueur est au-dessus de l'obstacle (en saut), pas de collision horizontale
+    if(playerY >= c.height) continue;
+
+    const px = Math.max(c.minX, Math.min(c.maxX, newX));
+    const pz = Math.max(c.minZ, Math.min(c.maxZ, newZ));
+    const dx = newX - px;
+    const dz = newZ - pz;
+    const dist = Math.sqrt(dx*dx + dz*dz);
+
+    if(dist < PLAYER_RADIUS) {
+      // Repousser le joueur hors du collider
+      if(dist < 0.001) {
+        // Chevauchement complet — repousser vers le centre du collider
+        newX += PLAYER_RADIUS;
+      } else {
+        const push = PLAYER_RADIUS - dist;
+        newX += (dx/dist)*push;
+        newZ += (dz/dist)*push;
+      }
+    }
+  }
+  return { x: newX, z: newZ };
+}
+
+// ===== SOL =====
 const ground=new THREE.Mesh(new THREE.PlaneGeometry(160,160),mat(0x0a0d14,0.97));
 ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
 
-// Avenues (emissive légère pour effet néon reflet)
 function road(x,z,w,d,col=0x14171e){
   const r=new THREE.Mesh(new THREE.PlaneGeometry(w,d),mat(col,0.95));
   r.rotation.x=-Math.PI/2;r.position.set(x,0.01,z);r.receiveShadow=true;scene.add(r);
 }
-// Avenues principales
-road(0,0,8,160); // N-S
-road(0,0,160,8); // E-W
-road(-30,0,8,120,0x131620); // avenue ouest
-road(30,0,8,120,0x131620);  // avenue est
-road(0,-30,120,8,0x131620); // avenue nord
-road(0,30,120,8,0x131620);  // avenue sud
+road(0,0,8,160);road(0,0,160,8);
+road(-30,0,8,120,0x131620);road(30,0,8,120,0x131620);
+road(0,-30,120,8,0x131620);road(0,30,120,8,0x131620);
 
-// Tirets de route (emissive blanc très doux)
 for(let i=-70;i<70;i+=10){
   const dash=new THREE.Mesh(new THREE.PlaneGeometry(0.2,5),mat(0xffffff,0.9,0,0xffffff,0.15));
   dash.rotation.x=-Math.PI/2;dash.position.set(0,0.015,i);scene.add(dash);
   const dash2=dash.clone();dash2.rotation.z=Math.PI/2;dash2.position.set(i,0.015,0);scene.add(dash2);
 }
 
-// Trottoirs légèrement surélevés
 function sidewalk(x,z,w,d){
   const s=new THREE.Mesh(new THREE.BoxGeometry(w,0.08,d),mat(0x1a1d28,0.9));
   s.position.set(x,0.04,z);s.receiveShadow=true;scene.add(s);
 }
-sidewalk(0,0,160,5.5); // trottoir E-W
-sidewalk(0,0,5.5,160); // trottoir N-S
+sidewalk(0,0,160,5.5);sidewalk(0,0,5.5,160);
 sidewalk(-30,0,5.5,100);sidewalk(30,0,5.5,100);
 sidewalk(0,-30,100,5.5);sidewalk(0,30,100,5.5);
 
 // ===== PARC CENTRAL =====
-// Herbe du parc
 const parkGrass=new THREE.Mesh(new THREE.PlaneGeometry(38,38),mat(0x0d1a0e,0.95));
 parkGrass.rotation.x=-Math.PI/2;parkGrass.position.set(0,0.015,0);parkGrass.receiveShadow=true;scene.add(parkGrass);
 
-// Allées du parc
 [[0,0,2,38],[0,0,38,2],[-9,0,2,19],[9,0,2,19],[0,-9,19,2],[0,9,19,2]].forEach(p=>{
   const path=new THREE.Mesh(new THREE.PlaneGeometry(p[2],p[3]),mat(0x1e2030,0.9));
   path.rotation.x=-Math.PI/2;path.position.set(p[0],0.02,p[1]);scene.add(path);
 });
 
-// Fontaine centrale du parc
+// Fontaine centrale — collider
 (function(){
   const base=cyl(3.2,3.5,0.7,24,0x1a2040,0.6,0x002244,0.3);base.position.set(0,0.35,0);scene.add(base);
   const water=new THREE.Mesh(new THREE.CylinderGeometry(2.8,2.8,0.08,24),mat(0x0044aa,0.05,0.6,0x0088ff,0.8));
@@ -313,16 +352,17 @@ parkGrass.rotation.x=-Math.PI/2;parkGrass.position.set(0,0.015,0);parkGrass.rece
   const col=cyl(0.2,0.24,2.5,10,0x2a3060,0.5,0x0044aa,0.4);col.position.set(0,1.95,0);scene.add(col);
   const top=cyl(1,0.7,0.2,20,0x2a3060,0.5,0x0066cc,0.5);top.position.set(0,3.3,0);scene.add(top);
   const ball=sph(0.28,0x3388ff,0x00aaff,1.2);ball.position.set(0,3.65,0);scene.add(ball);
-  // Jets d'eau (cylindres fins emissive)
   for(let a=0;a<6;a++){
     const angle=a/6*Math.PI*2;
     const jet=cyl(0.04,0.04,1.8,6,0x88ccff,0.1,0x99ddff,0.7);
     jet.position.set(Math.cos(angle)*0.6,2.4+0.9,Math.sin(angle)*0.6);
     jet.rotation.z=0.3;jet.rotation.y=angle;scene.add(jet);
   }
+  // Collider fontaine (cylindrique simulée par carré)
+  addCollider(0, 0, 3.5, 3.5, 4.0);
 })();
 
-// Bancs du parc (InstancedMesh pour perf)
+// Bancs
 const benchPos=[[-6,-6],[ 6,-6],[-6, 6],[ 6, 6],[-10,0],[10,0],[0,-10],[0,10],
                 [-6,-14],[6,-14],[-14,-6],[-14,6],[14,-6],[14,6],[-6,14],[6,14]];
 benchPos.forEach(p=>{
@@ -333,12 +373,13 @@ benchPos.forEach(p=>{
     const leg=box(0.1,0.5,0.45,0x334466,0.5,0.5);leg.position.set(s,0.25,0);g.add(leg);
   });
   g.position.set(p[0],0,p[1]);
-  // Orientation vers la fontaine
   g.rotation.y=Math.atan2(p[0],p[1]);
   scene.add(g);
+  // Collider banc (bas, peut sauter par-dessus facilement)
+  addCollider(p[0], p[1], 1.1, 0.4, 0.65);
 });
 
-// Arbres du parc — emissive légèrement violet/cyan pour ambiance nuit
+// Arbres du parc
 const treeParkPos=[[-8,-8],[8,-8],[-8,8],[8,8],[-12,-12],[12,-12],[-12,12],[12,12],
                    [-4,-13],[4,-13],[-13,-4],[-13,4],[13,-4],[13,4],[-4,13],[4,13]];
 treeParkPos.forEach(p=>{
@@ -351,9 +392,11 @@ treeParkPos.forEach(p=>{
     const leaf=sph(r*(0.55+i*0.07),leafCol,leafEmit,0.25+Math.random()*0.2);
     leaf.position.set(p[0]+off[0],h+off[1],p[1]+off[2]);scene.add(leaf);
   });
+  // Collider tronc
+  addCollider(p[0], p[1], 0.25, 0.25, 100);
 });
 
-// Fleurs dans le parc (petites sphères emissive colorées)
+// Fleurs (petites, sautables facilement)
 const flowerColors=[0xff00aa,0x00ffcc,0xffaa00,0xff6644,0xaa00ff,0x00aaff];
 const flowerParkPos=[
   [-3,4],[-2,5],[0,5],[2,5],[3,4],[-3,-4],[-2,-5],[0,-5],[2,-5],[3,-4],
@@ -364,32 +407,28 @@ flowerParkPos.forEach((p,i)=>{
   const col=flowerColors[i%flowerColors.length];
   const f=sph(0.16,col,col,0.8);f.position.set(p[0],0.18,p[1]);scene.add(f);
   const stem=cyl(0.025,0.025,0.18,5,0x112211,0.9);stem.position.set(p[0],0.09,p[1]);scene.add(stem);
+  // Collider fleur très bas — sautable avec un simple saut
+  addCollider(p[0], p[1], 0.18, 0.18, 0.35);
 });
 
-// Lampadaires du parc (emissive only, aucune PointLight)
+// Lampadaires du parc
 const lampParkPos=[[-11,0],[11,0],[0,-11],[0,11],[-8,-8],[8,-8],[-8,8],[8,8]];
 lampParkPos.forEach(p=>{
   const pole=cyl(0.07,0.09,5.5,7,0x1a2244,0.5,0x001133,0.2);pole.position.set(p[0],2.75,p[1]);scene.add(pole);
-  // Bras
   const arm=box(1.4,0.08,0.08,0x1a2244,0.5);arm.position.set(p[0]+0.7,5.6,p[1]);scene.add(arm);
-  // Ampoule emissive cyan
   const lamp=sph(0.22,0x00ffee,0x00ffee,2.5);lamp.position.set(p[0]+1.4,5.5,p[1]);scene.add(lamp);
-  // Halo au sol (disque emissive très faible)
   const halo=new THREE.Mesh(new THREE.CircleGeometry(1.5,10),mat(0x00ffcc,1,0,0x003322,0.15));
   halo.rotation.x=-Math.PI/2;halo.position.set(p[0]+1.4,0.02,p[1]);scene.add(halo);
+  // Collider poteau
+  addCollider(p[0], p[1], 0.15, 0.15, 100);
 });
 
-// ===== BÂTIMENTS — FONCTION UNIQUE OPTIMISÉE =====
-// Toutes les fenêtres = emissive, AUCUNE PointLight par bâtiment
+// ===== BÂTIMENTS =====
 function building(x,z,w,h,d,wallCol,glowCol,label=null){
   const b=new THREE.Group();
-  // Corps principal
   const wall=box(w,h,d,wallCol,0.85,0.15);wall.position.y=h/2;b.add(wall);
-  // Bande néon basse emissive
   const neonBot=box(w+0.1,0.18,d+0.1,glowCol,0.1,0,glowCol,1.5);neonBot.position.y=0.35;b.add(neonBot);
-  // Bande néon haute
   const neonTop=box(w+0.1,0.18,d+0.1,glowCol,0.1,0,glowCol,1.5);neonTop.position.y=h-0.1;b.add(neonTop);
-  // Fenêtres emissive (grille)
   const cols=Math.max(1,Math.floor(w/2.2));
   const rows=Math.max(1,Math.floor(h/3.2));
   const winColors=[glowCol,0xffffff,0xffffcc,glowCol];
@@ -399,23 +438,22 @@ function building(x,z,w,h,d,wallCol,glowCol,label=null){
         const wc=winColors[Math.floor(Math.random()*winColors.length)];
         const win=box(0.65,1.0,0.04,wc,0.1,0,wc,0.9+Math.random()*0.8);
         win.position.set(-w/2+0.8+c*(w-0.6)/(Math.max(cols-1,1)),1.5+r*3.2,d/2+0.02);b.add(win);
-        // Face arrière
         const winB=win.clone();winB.position.z=-d/2-0.02;b.add(winB);
       }
     }
   }
-  // Enseigne en façade si label
   if(label){
     const sign=box(w*0.6,0.7,0.12,glowCol,0.1,0,glowCol,2);sign.position.set(0,h*0.4,d/2+0.08);b.add(sign);
   }
-  // Antenne toit
   const ant=box(0.18,2.5,0.18,0x223344,0.5,0.3);ant.position.y=h+1.25;b.add(ant);
   const antL=sph(0.18,0xff2222,0xff0000,1.5);antL.position.y=h+2.7;b.add(antL);
   b.position.set(x,0,z);scene.add(b);
+  // Collider bâtiment (infranchissable)
+  addCollider(x, z, w/2+0.1, d/2+0.1, 100);
   return b;
 }
 
-// ===== QUARTIER TOKYO/AKIHABARA (NE) =====
+// Quartier Tokyo/Akihabara (NE)
 building( 22,-22, 9,38, 9,0x080c14,0x00ffcc);
 building( 33,-18,11,48,10,0x0a0e18,0xff00aa);
 building( 22,-35, 8,30, 8,0x0d1118,0xffaa00);
@@ -426,7 +464,7 @@ building( 14,-38, 7,22, 7,0x0d1118,0x00ff88);
 building( 50,-22, 8,25, 8,0x080c14,0xffff00);
 building( 50,-38,10,32,10,0x0a0e18,0x00ffcc);
 
-// ===== QUARTIER NEW YORK (NW) =====
+// Quartier New York (NW)
 building(-22,-22,10,45,10,0x0a0d16,0xff00aa);
 building(-34,-18, 9,35, 9,0x080c14,0x00ffcc);
 building(-22,-36, 8,28, 8,0x0d1118,0x0088ff);
@@ -436,7 +474,7 @@ building(-38,-45, 9,30, 9,0x080c14,0xff6600);
 building(-50,-22, 8,22, 8,0x0d1118,0xffff00);
 building(-50,-38,10,28,10,0x080c14,0xff00aa);
 
-// ===== QUARTIER SUD (zone résidentielle/commerciale) =====
+// Quartier Sud
 building( 22, 22, 8,20, 8,0x0d1118,0x00aaff,'HOTEL');
 building( 34, 20,10,26,10,0x080c14,0xff6600);
 building( 22, 35, 9,18, 9,0x0a0e18,0x00ff88,'SHOP');
@@ -446,8 +484,7 @@ building(-34, 20, 8,18, 8,0x080c14,0x00ffcc,'CAFÉ');
 building(-22, 35, 8,20, 8,0x0a0e18,0xffff00);
 building(-38, 34,10,26,10,0x080c14,0x0088ff);
 
-// ===== BÂTIMENTS SPÉCIAUX =====
-// Hôpital (NW, blanc/rouge)
+// Hôpital
 (function(){
   const g=new THREE.Group();
   const wall=box(14,18,12,0x0e1828,0.8,0.05);wall.position.y=9;g.add(wall);
@@ -455,7 +492,6 @@ building(-38, 34,10,26,10,0x080c14,0x0088ff);
   const cross2=box(6,1.5,0.15,0xff2222,0.2,0,0xff0000,2);cross2.position.set(0,14,6.1);g.add(cross2);
   const neon=box(14.1,0.2,12.1,0xffffff,0.1,0,0xffffff,1.5);neon.position.y=18;g.add(neon);
   const neon2=box(14.1,0.2,12.1,0xff2222,0.1,0,0xff2222,1.5);neon2.position.y=0.4;g.add(neon2);
-  // Fenêtres
   for(let r=0;r<4;r++)for(let c=0;c<5;c++){
     if(Math.random()<0.7){
       const w2=box(1.4,1.8,0.06,0xffffff,0.1,0,0xffffff,0.8);
@@ -463,30 +499,29 @@ building(-38, 34,10,26,10,0x080c14,0x0088ff);
     }
   }
   g.position.set(-48,-2,10);scene.add(g);
+  addCollider(-48, 10, 7.1, 6.1, 100);
 })();
 
-// Caserne de pompiers (SW, rouge/orange)
+// Caserne de pompiers
 (function(){
   const g=new THREE.Group();
   const wall=box(12,10,10,0x1a0810,0.85,0.05);wall.position.y=5;g.add(wall);
-  // Portes de garage emissive rouge
   [-3,0,3].forEach(x=>{
     const door=box(2.5,3.5,0.1,0xff3300,0.3,0,0xff2200,1.5);door.position.set(x,1.75,5.1);g.add(door);
   });
   const neon=box(12.1,0.2,10.1,0xff4400,0.1,0,0xff3300,2);neon.position.y=10;g.add(neon);
   const sign=box(5,1,0.12,0xff2200,0.1,0,0xff1100,2.5);sign.position.set(0,8,5.1);g.add(sign);
   g.position.set(-48,0,28);scene.add(g);
+  addCollider(-48, 28, 6.1, 5.1, 100);
 })();
 
-// Commissariat de police (SE, bleu)
+// Commissariat
 (function(){
   const g=new THREE.Group();
   const wall=box(12,12,10,0x080d1a,0.8,0.1);wall.position.y=6;g.add(wall);
   const sign=box(6,1.2,0.12,0x0044ff,0.1,0,0x0033ee,2.5);sign.position.set(0,10,5.1);g.add(sign);
   const neon=box(12.1,0.2,10.1,0x0055ff,0.1,0,0x0044ee,2);neon.position.y=12;g.add(neon);
-  // Étoile de shérif emissive
   const star=sph(0.5,0x0088ff,0x0066ff,3);star.position.set(0,6,5.15);g.add(star);
-  // Fenêtres bleues
   for(let r=0;r<3;r++)for(let c=0;c<4;c++){
     if(Math.random()<0.7){
       const w2=box(1.6,2,0.06,0x0066ff,0.1,0,0x0044ff,0.7);
@@ -494,9 +529,10 @@ building(-38, 34,10,26,10,0x080c14,0x0088ff);
     }
   }
   g.position.set(44,0,28);scene.add(g);
+  addCollider(44, 28, 6.1, 5.1, 100);
 })();
 
-// ===== PANNEAUX PUBLICITAIRES GÉANTS =====
+// Panneaux publicitaires
 const SIGNS=[
   {x:-9,z:-12,h:9,w:3.5,col:0xff0066,kanji:'ネオン',face:'N'},
   {x: 9,z:-14,h:7,w:3,  col:0x00ffcc,kanji:'CYBER',face:'N'},
@@ -515,12 +551,13 @@ SIGNS.forEach(s=>{
   pole.position.set(s.x,s.h*0.275,s.z);scene.add(pole);
   const board=box(s.w,s.h*0.45,0.18,s.col,0.1,0,s.col,1.8);
   board.position.set(s.x,s.h*0.78,s.z);scene.add(board);
-  // Cadre du panneau
   const frame=box(s.w+0.2,s.h*0.45+0.2,0.1,0x223344,0.5,0.4);
   frame.position.set(s.x,s.h*0.78,s.z-0.1);scene.add(frame);
+  // Collider poteau panneau
+  addCollider(s.x, s.z, 0.2, 0.2, 100);
 });
 
-// ===== MAGASINS EN RADE DE RUE =====
+// Magasins
 const SHOPS=[
   {x:-9,z:-7,w:5,h:4,d:3,col:0x0a1020,neon:0xff00aa,label:'RAMEN'},
   {x: 9,z:-7,w:5,h:4,d:3,col:0x0a1020,neon:0x00ffcc,label:'SUSHI'},
@@ -534,99 +571,92 @@ const SHOPS=[
 SHOPS.forEach(s=>{
   const g=new THREE.Group();
   const wall=box(s.w,s.h,s.d,s.col,0.85);wall.position.y=s.h/2;g.add(wall);
-  // Vitrine emissive
   const vitrine=box(s.w*0.7,s.h*0.45,0.06,s.neon,0.1,0,s.neon,0.9);vitrine.position.set(0,s.h*0.36,s.d/2+0.04);g.add(vitrine);
-  // Enseigne
   const sign=box(s.w*0.5,0.55,0.1,s.neon,0.1,0,s.neon,2.5);sign.position.set(0,s.h*0.88,s.d/2+0.07);g.add(sign);
-  // Auvent
   const aw=box(s.w+0.8,0.1,1.2,s.neon,0.2,0,s.neon,0.6);aw.position.set(0,s.h*0.65,s.d/2+0.5);aw.rotation.x=0.2;g.add(aw);
-  // Néon bas
   const neonB=box(s.w+0.1,0.12,s.d+0.1,s.neon,0.1,0,s.neon,2);neonB.position.y=0.08;g.add(neonB);
   g.position.set(s.x,0,s.z);scene.add(g);
+  addCollider(s.x, s.z, s.w/2+0.1, s.d/2+0.1, 100);
 });
 
-// ===== LAMPADAIRES DE RUE (emissive only, grille complète) =====
+// Lampadaires de rue
 const lampStreetPos=[
-  // Avenue principale
   [-4,-8],[ 4,-8],[-4,-16],[ 4,-16],[-4,-24],[ 4,-24],[-4,-32],[ 4,-32],[-4,-40],[ 4,-40],
   [-4, 8],[ 4, 8],[-4, 16],[ 4, 16],[-4, 24],[ 4, 24],[-4, 32],[ 4, 32],[-4, 40],[ 4, 40],
-  // Avenues secondaires
   [-26,-4],[-26,-12],[-26,-20],[-26,-28],[-26,-36],
   [ 26,-4],[ 26,-12],[ 26,-20],[ 26,-28],[ 26,-36],
   [-26, 4],[-26, 12],[-26, 20],[-26, 28],[-26, 36],
   [ 26, 4],[ 26, 12],[ 26, 20],[ 26, 28],[ 26, 36],
-  // E-W
   [-8,-26],[-16,-26],[-24,-26],[ 8,-26],[16,-26],[24,-26],
   [-8, 26],[-16, 26],[-24, 26],[ 8, 26],[16, 26],[24, 26],
 ];
-// Couleurs alternées des lampadaires pour ambiance
 const lampColors=[0xff60ff,0x00ffcc,0xff6600,0x4488ff,0xffcc00];
 lampStreetPos.forEach((p,i)=>{
   const col=lampColors[i%lampColors.length];
   const pole=box(0.16,7,0.16,0x1a2233,0.5,0.3);pole.position.set(p[0],3.5,p[1]);scene.add(pole);
-  // Bras courbé
   const arm=box(1.8,0.1,0.1,0x1a2233,0.5,0.3);arm.position.set(p[0]+0.85,7.1,p[1]);scene.add(arm);
   const lamp=sph(0.24,col,col,2.5);lamp.position.set(p[0]+1.7,7.0,p[1]);scene.add(lamp);
-  // Halo sol très discret
   const halo=new THREE.Mesh(new THREE.CircleGeometry(1.2,8),mat(col,1,0,col,0.08));
   halo.rotation.x=-Math.PI/2;halo.position.set(p[0]+1.7,0.02,p[1]);scene.add(halo);
+  // Collider poteau lampadaire
+  addCollider(p[0], p[1], 0.15, 0.15, 100);
 });
 
-// ===== MOBILIER URBAIN =====
-// Poubelles (cubes emissive très faible)
+// Mobilier urbain — poubelles
 [[  -7,-8],[ 7,-8],[ -7,8],[  7,8],
  [-16,-8],[16,-8],[-16,8],[ 16,8],
  [ -7,-18],[7,-18],[ -7,18],[ 7,18]].forEach(p=>{
   const bin=box(0.55,0.9,0.55,0x1a2233,0.7,0.4,0x001122,0.2);bin.position.set(p[0],0.45,p[1]);scene.add(bin);
   const lid=box(0.6,0.1,0.6,0x223344,0.6,0.4);lid.position.set(p[0],0.95,p[1]);scene.add(lid);
-  // Bande néon petite sur la poubelle
   const band=box(0.56,0.06,0.56,0x00ffcc,0.1,0,0x00ffcc,0.8);band.position.set(p[0],0.7,p[1]);scene.add(band);
+  // Collider poubelle (basse — sautable)
+  addCollider(p[0], p[1], 0.35, 0.35, 1.0);
 });
 
-// Vélos (appuyés contre les lampadaires)
+// Vélos
 [[-4.5,-8],[4.5,-8],[-4.5,8],[4.5,8],[-26,-4],[26,-4]].forEach(p=>{
   const g=new THREE.Group();
-  // Cadre
   const frame=box(1.1,0.06,0.06,0x334466,0.5,0.5);frame.rotation.y=0.3;frame.position.y=0.65;g.add(frame);
-  // Roues
   [-.4,.4].forEach(dx=>{
     const wheel=new THREE.Mesh(new THREE.TorusGeometry(0.3,0.06,6,12),mat(0x223344,0.5,0.5));
     wheel.rotation.y=Math.PI/2;wheel.position.set(dx,0.35,0);g.add(wheel);
   });
-  // Guidon emissive
   const handle=box(0.06,0.06,0.5,0x00ffcc,0.2,0,0x00ccaa,0.6);handle.position.set(-.4,0.9,0);g.add(handle);
   g.position.set(p[0],0,p[1]);g.rotation.y=Math.random()*0.4-0.2;scene.add(g);
+  // Collider vélo (petit)
+  addCollider(p[0], p[1], 0.6, 0.35, 1.0);
 });
 
-// Bornes de métro/kiosques
+// Kiosques de métro
 [[-8,-8],[8,-8],[-8,8],[8,8]].forEach(p=>{
   const g=new THREE.Group();
   const kiosk=box(1.2,2.2,1.2,0x0a1428,0.7,0.3);kiosk.position.y=1.1;g.add(kiosk);
   const screen=box(0.8,1.0,0.06,0x00ffcc,0.1,0,0x00ffcc,1.5);screen.position.set(0,1.4,0.64);g.add(screen);
   const topLight=sph(0.22,0x00ffcc,0x00ffcc,2);topLight.position.y=2.35;g.add(topLight);
   g.position.set(p[0],0,p[1]);scene.add(g);
+  addCollider(p[0], p[1], 0.7, 0.7, 2.3);
 });
 
-// Fontaines de quartier (plus petites)
+// Fontaines de quartier
 [[-26,-26],[26,-26],[-26,26],[26,26]].forEach(p=>{
   const base=cyl(1.5,1.7,0.5,16,0x1a2040,0.6,0x001144,0.3);base.position.set(p[0],0.25,p[1]);scene.add(base);
   const water=new THREE.Mesh(new THREE.CylinderGeometry(1.3,1.3,0.06,16),mat(0x0044aa,0.05,0.5,0x0088ff,0.9));
   water.position.set(p[0],0.52,p[1]);scene.add(water);
   const jet=cyl(0.07,0.07,1.2,6,0x88ccff,0.1,0x99ddff,0.8);jet.position.set(p[0],1.1,p[1]);scene.add(jet);
+  addCollider(p[0], p[1], 1.7, 1.7, 2.0);
 });
 
-// Squares / places secondaires (dallage emissive)
+// Squares
 [[-26,-26],[26,-26],[-26,26],[26,26]].forEach(p=>{
   const sq=new THREE.Mesh(new THREE.PlaneGeometry(12,12),mat(0x151825,0.9,0,0x001144,0.05));
   sq.rotation.x=-Math.PI/2;sq.position.set(p[0],0.015,p[1]);scene.add(sq);
-  // Bordure lumineuse
-  [[1,0],[- 1,0],[0,1],[0,-1]].forEach(dir=>{
+  [[1,0],[-1,0],[0,1],[0,-1]].forEach(dir=>{
     const border=new THREE.Mesh(new THREE.PlaneGeometry(12,0.15),mat(0x0044aa,0.2,0,0x0066cc,0.5));
     border.rotation.x=-Math.PI/2;border.position.set(p[0]+dir[0]*6,0.016,p[1]+dir[1]*6);scene.add(border);
   });
 });
 
-// Arbres de rue (avenue principale)
+// Arbres de rue
 [[-9,-10],[-9,-20],[-9,-30],[-9,-40],[9,-10],[9,-20],[9,-30],[9,-40],
  [-9,10],[-9,20],[-9,30],[-9,40],[9,10],[9,20],[9,30],[9,40],
  [-28,-10],[-28,-20],[-28,-30],[28,-10],[28,-20],[28,-30],
@@ -637,9 +667,10 @@ lampStreetPos.forEach((p,i)=>{
   const leafEmit=Math.random()<0.4?0x001a08:0x000a14;
   const r=0.9+Math.random()*0.4;
   const leaf=sph(r,leafCol,leafEmit,0.2);leaf.position.set(p[0],h+r*0.7,p[1]);scene.add(leaf);
+  addCollider(p[0], p[1], 0.22, 0.22, 100);
 });
 
-// ===== VOITURES FUTURISTES GARÉES =====
+// ===== VOITURES — sautables =====
 const CARS=[
   {x:-10,z:-10,rot:0,  col:0x0a0520,glow:0xff00aa},
   {x: 10,z:-10,rot:0,  col:0x050a18,glow:0x00ffcc},
@@ -658,40 +689,41 @@ CARS.forEach(car=>{
   const g=new THREE.Group();
   const body=box(2.1,0.7,4.2,car.col,0.2,0.6);body.position.y=0.45;g.add(body);
   const top=box(1.7,0.55,2.6,car.col,0.2,0.5);top.position.y=0.97;g.add(top);
-  // Phares emissive
   [-0.7,0.7].forEach(s=>{
     const light=box(0.25,0.12,0.08,car.glow,0.05,0,car.glow,2);light.position.set(s,0.5,2.14);g.add(light);
     const rear=box(0.25,0.12,0.08,0xff1111,0.05,0,0xff1111,1.5);rear.position.set(s,0.5,-2.14);g.add(rear);
   });
-  // Bande néon sous la voiture
   const underglow=box(2.2,0.04,4.4,car.glow,0.1,0,car.glow,0.8);underglow.position.y=0.08;g.add(underglow);
-  // Roues
   [[-0.95,2*0.65],[-0.95,-2*0.65],[0.95,2*0.65],[0.95,-2*0.65]].forEach(w=>{
     const wheel=cyl(0.3,0.3,0.22,10,0x111111,0.9);wheel.rotation.z=Math.PI/2;wheel.position.set(w[0],0.32,w[1]);g.add(wheel);
     const hub=cyl(0.15,0.15,0.24,8,0x334455,0.3,0.5);hub.rotation.z=Math.PI/2;hub.position.set(w[0],0.32,w[1]);g.add(hub);
   });
-  // Pare-brise emissive légère
   const glass=box(1.6,0.4,0.05,0x001122,0.05,0.8,0x0022aa,0.3);glass.position.set(0,0.95,1.31);g.add(glass);
   g.position.set(car.x,0,car.z);g.rotation.y=car.rot;scene.add(g);
+
+  // Collider voiture — hauteur 1.55 (carrosserie+toit), sautable avec un double saut
+  // On calcule les demi-dimensions en tenant compte de la rotation
+  const halfW = car.rot===0 ? 1.2 : 2.3;
+  const halfD = car.rot===0 ? 2.3 : 1.2;
+  addCollider(car.x, car.z, halfW, halfD, 1.55);
 });
 
-// ===== ÉCRAN GÉANT EN HAUTEUR =====
+// Écran géant
 (function(){
-  // Billboard géant au carrefour principal
   const post1=box(0.4,20,0.4,0x1a2233,0.5,0.4);post1.position.set(-5,10,-5);scene.add(post1);
   const post2=post1.clone();post2.position.set(5,10,-5);scene.add(post2);
   const screen=box(12,7,0.3,0x002244,0.1,0,0x0044aa,0.5);screen.position.set(0,17,-5);scene.add(screen);
-  // Contenu de l'écran (grille de pixels emissive)
   const colors2=[0xff00aa,0x00ffcc,0xffaa00,0x0088ff,0xffff00];
   for(let i=0;i<5;i++){for(let j=0;j<3;j++){
     const px=box(1.8,1.8,0.1,colors2[(i+j)%5],0.1,0,colors2[(i+j)%5],1.2+Math.random());
     px.position.set(-4+i*2,14.5+j*2,-5.1);scene.add(px);
   }}
-  // Cadre
   const frame=box(12.4,7.4,0.15,0x223344,0.5,0.5);frame.position.set(0,17,-5.15);scene.add(frame);
+  addCollider(-5, -5, 0.3, 0.3, 100);
+  addCollider( 5, -5, 0.3, 0.3, 100);
 })();
 
-// ===== NÉONS AU SOL (zébrures dans les rues) =====
+// Néons au sol
 const streetNeons=[
   {x:0,z:-10,w:6,d:0.15,col:0x00ffcc},{x:0,z:-20,w:6,d:0.15,col:0xff00aa},
   {x:0,z:-30,w:6,d:0.15,col:0xffaa00},{x:0,z: 10,w:6,d:0.15,col:0x00ffcc},
@@ -704,7 +736,7 @@ streetNeons.forEach(n=>{
   m.rotation.x=-Math.PI/2;m.position.set(n.x,0.025,n.z);scene.add(m);
 });
 
-// ===== HOLOGRAMMES DÉCO (cylindres transparents rotatifs) =====
+// Hologrammes
 const holoPos=[[-26,-26],[26,-26],[-26,26],[26,26],[0,-26]];
 const holoMeshes=[];
 holoPos.forEach(p=>{
@@ -717,7 +749,7 @@ holoPos.forEach(p=>{
   outer.material.transparent=true;outer.material.opacity=0.5;
 });
 
-// ===== OMBRE BLOB =====
+// Ombre blob
 const shadowBlob=new THREE.Mesh(new THREE.CircleGeometry(0.45,16),
   new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:0.22,depthWrite:false}));
 shadowBlob.rotation.x=-Math.PI/2;shadowBlob.position.y=0.012;scene.add(shadowBlob);
@@ -817,17 +849,33 @@ const keys={};
 document.addEventListener('keydown',e=>keys[e.key]=true);
 document.addEventListener('keyup',e=>keys[e.key]=false);
 
-// ===== SAUT =====
-const jumpBtn=document.getElementById('jump-btn');
-const JUMP_V=9,GRAVITY=26;
-let jumpVel=0,isOnGround=true;
+// ===== SAUT AMÉLIORÉ =====
+// Saut simple  : ~1 étage (~2.5 unités)
+// Double tap   : ~4 étages (~12 unités) — passe par-dessus les voitures
+const JUMP_V_NORMAL = 8;
+const JUMP_V_SUPER  = 19;   // 4 étages
+const GRAVITY = 26;
+let jumpVel=0, isOnGround=true;
 let jumpLastTap=0;
-jumpBtn.addEventListener('touchstart',e=>{
-  e.preventDefault();
-  const now=Date.now();const dbl=now-jumpLastTap<350;jumpLastTap=now;
-  if(isOnGround){jumpVel=dbl?JUMP_V*2.2:JUMP_V;isOnGround=false;if(dbl)showToast('🚀 SUPER SAUT !');}
-},{passive:false});
-jumpBtn.addEventListener('click',()=>{const now=Date.now();const dbl=now-jumpLastTap<350;jumpLastTap=now;if(isOnGround){jumpVel=dbl?JUMP_V*2.2:JUMP_V;isOnGround=false;}});
+
+function doJump(){
+  if(!isOnGround) return;
+  const now=Date.now();
+  const isDouble = (now - jumpLastTap) < 350;
+  jumpLastTap = now;
+  if(isDouble){
+    jumpVel = JUMP_V_SUPER;
+    isOnGround = false;
+    showToast('🚀 SUPER SAUT ! (4 étages)');
+  } else {
+    jumpVel = JUMP_V_NORMAL;
+    isOnGround = false;
+  }
+}
+
+const jumpBtn=document.getElementById('jump-btn');
+jumpBtn.addEventListener('touchstart',e=>{e.preventDefault();doJump();},{passive:false});
+jumpBtn.addEventListener('click',()=>doJump());
 
 // ===== CHAT =====
 const bubbleEl=document.getElementById('speech-bubble');let bubbleTimer2=null;
@@ -839,7 +887,7 @@ document.getElementById('chat-send').addEventListener('click',sendChat);
 document.getElementById('chat-input').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();sendChat();}});
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 
-// ===== BOUCLE =====
+// ===== BOUCLE PRINCIPALE =====
 const SPEED=5.5,BOUNDARY=54;
 const playerPos=new THREE.Vector3(0,0,6);
 let playerRotY=0,cameraYaw=Math.PI;
@@ -862,7 +910,7 @@ function animate(){
   if(keys['ArrowDown']||keys['s']||keys['S'])mz=-1;
   if(keys['ArrowLeft']||keys['a']||keys['A'])mx=-1;
   if(keys['ArrowRight']||keys['d']||keys['D'])mx= 1;
-  if(keys[' ']&&isOnGround){jumpVel=JUMP_V;isOnGround=false;}
+  if(keys[' ']&&isOnGround){doJump();}
   if(camJoy.active&&Math.abs(camJoy.x)>0.04)cameraYaw-=camJoy.x*2.2*dt;
   if(keys['q']||keys['Q'])cameraYaw+=1.8*dt;
   if(keys['e']||keys['E'])cameraYaw-=1.8*dt;
@@ -875,8 +923,18 @@ function animate(){
     const sinC=Math.sin(cameraYaw),cosC=Math.cos(cameraYaw);
     const dx=(sinC*(-mz)+cosC*mx)*SPEED*dt;
     const dz=(cosC*(-mz)-sinC*mx)*SPEED*dt;
-    playerPos.x=Math.max(-BOUNDARY,Math.min(BOUNDARY,playerPos.x+dx));
-    playerPos.z=Math.max(-BOUNDARY,Math.min(BOUNDARY,playerPos.z+dz));
+
+    // Appliquer déplacement et résoudre les collisions
+    let newX = playerPos.x + dx;
+    let newZ = playerPos.z + dz;
+
+    // Collision resolution — plusieurs passes pour coins
+    const resolved = resolveCollision(newX, newZ, playerPos.y);
+    newX = resolved.x;
+    newZ = resolved.z;
+
+    playerPos.x = Math.max(-BOUNDARY, Math.min(BOUNDARY, newX));
+    playerPos.z = Math.max(-BOUNDARY, Math.min(BOUNDARY, newZ));
     playerRotY=Math.atan2(dx,dz);
     const tY=playerRotY+Math.PI;let diff=tY-cameraYaw;
     while(diff>Math.PI)diff-=2*Math.PI;while(diff<-Math.PI)diff+=2*Math.PI;
@@ -892,6 +950,15 @@ function animate(){
   avatarGroup.position.set(playerPos.x,playerPos.y,playerPos.z);
   avatarGroup.rotation.y=playerRotY;
   shadowBlob.position.x=playerPos.x;shadowBlob.position.z=playerPos.z;
+
+  // Mise à jour lumière personnelle du joueur
+  playerSpot.position.set(playerPos.x, playerPos.y + 9, playerPos.z + 1);
+  playerSpot.target.position.set(playerPos.x, playerPos.y, playerPos.z);
+  playerSpot.target.updateMatrixWorld();
+  playerGlow.position.x = playerPos.x;
+  playerGlow.position.z = playerPos.z;
+  // Halo s'intensifie légèrement en saut
+  playerGlowMat.opacity = isOnGround ? 0.18 : 0.08;
 
   camera.position.set(playerPos.x+Math.sin(cameraYaw)*CAM_DIST,playerPos.y+CAM_HEIGHT,playerPos.z+Math.cos(cameraYaw)*CAM_DIST);
   camera.lookAt(playerPos.x,playerPos.y+CAM_LOOK_Y,playerPos.z);
