@@ -598,16 +598,14 @@ loadGLB(BASE+'model%2024.glb',gltf=>{
 
   if(gltf.animations?.length){
     avatarMixer=new THREE.AnimationMixer(model);
-showToast('Clips: '+gltf.animations.map(a=>a.name).join(' | '));
-
-   console.log('Clips model24:', gltf.animations.map(a => a.name));
-
+    const idleClip=gltf.animations.find(a=>/idle|stand|neutral/i.test(a.name))||gltf.animations[0];
     if(idleClip){idleAction=avatarMixer.clipAction(idleClip);idleAction.play();currentAction=idleAction;}
     showToast('✨ Prêt !');
   }
 
   // Charge model27 = walk (joystick haut)
   loadGLB(BASE+'model%2027.glb',gltfW=>{
+    showToast('Walk clips: '+gltfW.animations.map(a=>a.name).join(' | '));
     if(!avatarMixer||!gltfW.animations?.length)return;
     const walkClip=gltfW.animations[0];
     walkAction=avatarMixer.clipAction(walkClip);
