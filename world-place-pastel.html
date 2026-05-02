@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Macadam World — Tokyo</title>
 <link href="[fonts.googleapis.com](https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@700;900&family=M+PLUS+Rounded+1c:wght@700;800&display=swap)" rel="stylesheet">
-
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{width:100%;height:100%;overflow:hidden;background:#b0c8e8;font-family:'M PLUS Rounded 1c',sans-serif;user-select:none;-webkit-user-select:none;touch-action:none;}
@@ -13,36 +12,30 @@ html,body{width:100%;height:100%;overflow:hidden;background:#b0c8e8;font-family:
 #hud{position:fixed;inset:0;z-index:10;pointer-events:none;}
 .hud-top{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:linear-gradient(180deg,rgba(0,0,0,.45) 0%,transparent 100%);}
 .hud-logo{font-family:'Zen Kaku Gothic New',sans-serif;font-size:1rem;font-weight:900;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.5);}
-.hud-logo em{color:#f5c842;font-style:normal;}
-.hud-loc{display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.35);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:4px 10px;}
-.hud-loc span{font-size:.68rem;font-weight:700;color:#fff;}
-.loc-dot{width:6px;height:6px;border-radius:50%;background:#f5c842;}
-.hud-info{display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.35);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:4px 10px 4px 4px;}
+.hud-logo em{color:#f5c842;}
+.hud-info{display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.35);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:4px 10px;}
 .hud-pic{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#e85d26,#f5c842);display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:900;color:#fff;}
-.hud-name{font-size:.68rem;font-weight:700;color:#fff;}
+.hud-name{color:#fff;font-size:.7rem;font-weight:700;}
 .hud-chat{position:absolute;bottom:168px;left:10px;max-width:260px;pointer-events:all;}
-.chat-msgs{max-height:80px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;margin-bottom:4px;scrollbar-width:none;}
-.chat-msgs::-webkit-scrollbar{display:none;}
-.cmsg{background:rgba(0,0,0,.45);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.15);border-radius:7px;padding:3px 8px;font-size:.65rem;color:#fff;line-height:1.35;}
+.chat-msgs{max-height:80px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;margin-bottom:4px;}
+.cmsg{background:rgba(0,0,0,.45);backdrop-filter:blur(6px);border-radius:7px;padding:3px 8px;font-size:.65rem;color:#fff;}
 .cmsg .cn{font-weight:900;color:#f5c842;margin-right:3px;}
 .chat-row{display:flex;gap:4px;}
-.cinput{flex:1;background:rgba(0,0,0,.4);border:1.5px solid rgba(255,255,255,.25);border-radius:9px;padding:6px 10px;font-size:14px;font-weight:700;color:#fff;outline:none;font-family:'M PLUS Rounded 1c',sans-serif;}
-.cinput::placeholder{color:rgba(255,255,255,.4);}
-.csend{width:32px;height:32px;border-radius:8px;background:#e85d26;border:none;color:#fff;font-size:.85rem;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.cinput{flex:1;background:rgba(0,0,0,.4);border:1.5px solid rgba(255,255,255,.25);border-radius:9px;padding:6px 10px;font-size:14px;color:#fff;}
+.csend{width:32px;height:32px;border-radius:8px;background:#e85d26;border:none;color:#fff;}
 #joy-wrap{position:absolute;bottom:90px;right:16px;pointer-events:all;}
 #camjoy-wrap{position:absolute;bottom:90px;left:16px;pointer-events:all;}
 .joy-base{width:96px;height:96px;border-radius:50%;background:rgba(0,0,0,.25);border:1.5px solid rgba(255,255,255,.18);position:relative;display:flex;align-items:center;justify-content:center;}
-.joy-knob{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.7);box-shadow:0 2px 10px rgba(0,0,0,.4);position:absolute;}
+.joy-knob{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.7);position:absolute;}
 .camjoy-knob{background:rgba(245,200,66,.8);}
-#jump-btn{position:absolute;bottom:200px;right:22px;width:48px;height:48px;border-radius:50%;background:#2b6cb0;border:none;color:#fff;font-size:1.2rem;cursor:pointer;}
-#superjump-btn{position:absolute;bottom:200px;left:22px;width:48px;height:48px;border-radius:50%;background:#c05621;border:none;color:#fff;font-size:1.1rem;cursor:pointer;}
-#toast{position:fixed;bottom:188px;left:50%;transform:translateX(-50%) translateY(14px);background:rgba(0,0,0,.82);color:#f5c842;padding:6px 14px;border-radius:14px;font-size:.7rem;font-weight:700;opacity:0;transition:all .25s;}
+#jump-btn,#superjump-btn{position:absolute;bottom:200px;width:48px;height:48px;border-radius:50%;border:none;color:#fff;font-size:1.2rem;}
+#jump-btn{right:22px;background:#2b6cb0;}
+#superjump-btn{left:22px;background:#c05621;}
+#toast{position:fixed;bottom:188px;left:50%;transform:translateX(-50%) translateY(14px);background:rgba(0,0,0,.82);color:#f5c842;padding:6px 14px;border-radius:14px;font-size:.7rem;opacity:0;transition:all .25s;}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
-#sbubble{position:fixed;z-index:20;background:rgba(0,0,0,.85);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:3px 9px;font-size:.65rem;font-weight:700;pointer-events:none;max-width:130px;text-align:center;transform:translateX(-50%);opacity:0;transition:opacity .2s;}
 #loading{position:fixed;inset:0;z-index:200;background:#b0c8e8;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
 .ld-logo{font-family:'Zen Kaku Gothic New',sans-serif;font-size:2.2rem;font-weight:900;color:#1a2a40;}
-.ld-logo em{color:#e85d26;font-style:normal;}
-.ld-kanji{font-size:1rem;color:#1a2a40;opacity:.6;}
+.ld-logo em{color:#e85d26;}
 .ld-bar{width:180px;height:3px;background:rgba(0,0,0,.12);border-radius:2px;overflow:hidden;}
 .ld-fill{height:100%;width:0;background:linear-gradient(90deg,#e85d26,#f5c842);transition:width .2s;}
 .ld-txt{font-size:.7rem;color:rgba(26,42,64,.65);}
@@ -54,7 +47,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#b0c8e8;font-family:
 
 <div id="loading">
   <div class="ld-logo">TOKYO<em>東京</em></div>
-  <div class="ld-kanji">MACADAM WORLD</div>
   <div class="ld-bar"><div class="ld-fill" id="ld-fill"></div></div>
   <div class="ld-txt" id="ld-txt">Chargement…</div>
 </div>
@@ -62,28 +54,23 @@ html,body{width:100%;height:100%;overflow:hidden;background:#b0c8e8;font-family:
 <div id="hud">
   <div class="hud-top">
     <div class="hud-logo">⬡ <em>Macadam</em> World</div>
-    <div class="hud-loc"><div class="loc-dot"></div><span>東京 Shinjuku</span></div>
-    <div class="hud-info"><div class="hud-pic" id="hud-pic">?</div><span class="hud-name" id="hud-name">Joueur</span></div>
+    <div class="hud-info"><div class="hud-pic" id="hud-pic">MJ</div><span class="hud-name" id="hud-name">Joueur</span></div>
   </div>
-
   <div class="hud-chat">
     <div class="chat-msgs" id="chat-msgs"></div>
     <div class="chat-row">
-      <input class="cinput" id="cinput" type="text" placeholder="Dis quelque chose…" maxlength="80">
+      <input class="cinput" id="cinput" placeholder="Dis quelque chose…">
       <button class="csend" id="csend">➤</button>
     </div>
   </div>
-
   <div id="camjoy-wrap"><div class="joy-base" id="camjoy-base"><div class="joy-knob camjoy-knob" id="camjoy-knob"></div></div></div>
   <div id="joy-wrap"><div class="joy-base" id="joy-base"><div class="joy-knob" id="joy-knob"></div></div></div>
   <button id="jump-btn">↑</button>
   <button id="superjump-btn">🚀</button>
 </div>
 
-<div id="sbubble"></div>
 <div id="toast"></div>
 
-<!-- Importmap pour Three.js modules -->
 <script type="importmap">
 {
   "imports": {
@@ -93,135 +80,99 @@ html,body{width:100%;height:100%;overflow:hidden;background:#b0c8e8;font-family:
 }
 </script>
 
-<!-- SCRIPT PRINCIPAL -->
 <script type="module">
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-/* profil / loading minimal */
-document.getElementById('hud-pic').textContent='MJ';
+// loading
 document.getElementById('ld-fill').style.width='100%';
 setTimeout(()=>document.getElementById('loading').style.display='none',600);
 
-/* Chat */
-function addChat(t,f){const m=document.getElementById('chat-msgs');const d=document.createElement('div');d.className='cmsg';d.innerHTML='<span class="cn">'+f+'</span>'+t;m.appendChild(d);m.scrollTop=m.scrollHeight;}
-function showToast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('on');setTimeout(()=>el.classList.remove('on'),2000);}
-function showBubble(t){const b=document.getElementById('sbubble');b.textContent=t;b.style.opacity='1';setTimeout(()=>b.style.opacity='0',4000);}
+// chat
+function addChat(text,from){
+  const div=document.createElement('div');
+  div.className='cmsg';div.innerHTML='<span class="cn">'+from+'</span>'+text;
+  const msgs=document.getElementById('chat-msgs');msgs.appendChild(div);
+  msgs.scrollTop=msgs.scrollHeight;
+}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2000);}
 
-/* Three.js */
-const canvas=document.getElementById('c');
-const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+// Three.js
+const renderer=new THREE.WebGLRenderer({canvas:document.getElementById('c'),antialias:true});
 renderer.setSize(window.innerWidth,window.innerHeight);
 renderer.outputColorSpace=THREE.SRGBColorSpace;
-renderer.shadowMap.enabled=true;
 const scene=new THREE.Scene();
 scene.background=new THREE.Color(0x8ab4d4);
-const camera=new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,0.1,200);
+scene.add(new THREE.HemisphereLight(0xffffff,0x666666,1));
+const camera=new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,0.1,300);
 camera.position.set(0,3,8);
-scene.add(new THREE.HemisphereLight(0xffffff,0x555555,0.8));
-const sun=new THREE.DirectionalLight(0xffffff,1.5);
-sun.position.set(5,10,5);scene.add(sun);
-
-/* sol de base */
 const g=new THREE.Mesh(new THREE.PlaneGeometry(40,40),new THREE.MeshStandardMaterial({color:0x888888}));
 g.rotation.x=-Math.PI/2;scene.add(g);
 
-/* avatar */
+// avatar
 const loader=new GLTFLoader();
-const avatarGroup=new THREE.Group();scene.add(avatarGroup);
-avatarGroup.position.set(0,0,6);
-let avatarMixer=null,currentAction=null,lastWalking=false;
-function loadGLB(file,loop=true,onDone=null){
-  loader.load('[raw.githubusercontent.com](https://raw.githubusercontent.com/hoobasurf/chili/main/)'+file,gltf=>{
-    while(avatarGroup.children.length)avatarGroup.remove(avatarGroup.children[0]);
-    const model=gltf.scene;
-    model.traverse(m=>{if(m.isMesh){m.castShadow=true;}});
-    avatarGroup.add(model);
-    if(gltf.animations.length){avatarMixer=new THREE.AnimationMixer(model);
-      const a=avatarMixer.clipAction(gltf.animations[0]);
-      a.setLoop(loop?THREE.LoopRepeat:THREE.LoopOnce);a.play();currentAction=a;
-    }
-    if(onDone)onDone();
+const avatar=new THREE.Group();scene.add(avatar);
+avatar.position.set(0,0,6);
+let mixer=null,lastWalking=false;
+function loadGLB(file,loop=true){
+  loader.load('[raw.githubusercontent.com](https://raw.githubusercontent.com/hoobasurf/chili/main/)'+file,g=>{
+    avatar.clear();const m=g.scene;avatar.add(m);
+    const box=new THREE.Box3().setFromObject(m);const size=box.getSize(new THREE.Vector3());
+    m.scale.setScalar(1.75/size.y);m.position.y=-box.min.y*(1.75/size.y);
+    if(g.animations.length){mixer=new THREE.AnimationMixer(m);const a=mixer.clipAction(g.animations[0]);a.setLoop(loop?THREE.LoopRepeat:THREE.LoopOnce);a.play();}
   });
 }
 loadGLB('attend.glb');
+function setWalk(w){if(w===lastWalking)return;lastWalking=w;loadGLB(w?'course.glb':'attend.glb',true);}
 
-function setWalk(walking){
-  if(walking===lastWalking)return;
-  lastWalking=walking;
-  loadGLB(walking?'course.glb':'attend.glb',true);
-}
-
-/* joystick */
+// joystick
 const joyBase=document.getElementById('joy-base'),joyKnob=document.getElementById('joy-knob');
 const JR=38;const joy={x:0,y:0,active:false,id:null};
 function getJC(){const r=joyBase.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2};}
 function updateJoy(cx,cy){const c=getJC();let dx=cx-c.x,dy=cy-c.y;const d=Math.sqrt(dx*dx+dy*dy);if(d>JR){dx=dx/d*JR;dy=dy/d*JR;}joy.x=dx/JR;joy.y=dy/JR;joyKnob.style.transform=`translate(${dx}px,${dy}px)`;}
 joyBase.addEventListener('touchstart',e=>{const t=e.changedTouches[0];joy.active=true;joy.id=t.identifier;updateJoy(t.clientX,t.clientY);},{passive:false});
-document.addEventListener('touchmove',e=>{if(!joy.active)return;for(const t of e.changedTouches)if(t.identifier===joy.id){updateJoy(t.clientX,t.clientY);}}); 
+document.addEventListener('touchmove',e=>{if(!joy.active)return;for(const t of e.changedTouches)if(t.identifier===joy.id){updateJoy(t.clientX,t.clientY);}});
 document.addEventListener('touchend',e=>{for(const t of e.changedTouches)if(t.identifier===joy.id){joy.active=false;joy.x=0;joy.y=0;joyKnob.style.transform='translate(0,0)';}});
 
-/* mouvement */
+// mouvement
 const player={x:0,y:0,z:6,vy:0,onGround:true};
 let yaw=Math.PI,rotY=0;const clock=new THREE.Clock();
-function jump(v){if(player.onGround){player.onGround=false;player.vy=v;}}
-document.getElementById('jump-btn').onclick=()=>jump(8);
-document.getElementById('superjump-btn').onclick=()=>jump(19);
-
 function animate(){
   requestAnimationFrame(animate);
-  const dt=Math.min(clock.getDelta(),0.08);
-  if(avatarMixer)avatarMixer.update(dt);
+  const dt=clock.getDelta();
+  if(mixer)mixer.update(dt);
   let mx=joy.x,mz=-joy.y;
   const moving=Math.abs(mx)>0.05||Math.abs(mz)>0.05;
   setWalk(moving);
   if(moving){
     const dx=Math.sin(yaw)*-mz+Math.cos(yaw)*mx;
     const dz=Math.cos(yaw)*-mz-Math.sin(yaw)*mx;
-    player.x+=dx*dt*5;
-    player.z+=dz*dt*5;
+    player.x+=dx*dt*5;player.z+=dz*dt*5;
     rotY=Math.atan2(dx,dz);
   }
-  if(!player.onGround){player.vy-=25*dt;player.y+=player.vy*dt;if(player.y<=0){player.y=0;player.vy=0;player.onGround=true;}}
-  avatarGroup.position.set(player.x,player.y,player.z);
-  avatarGroup.rotation.y=rotY;
-  camera.position.set(player.x+Math.sin(yaw)*7,player.y+2.4,player.z+Math.cos(yaw)*7);
-  camera.lookAt(player.x,player.y+1.2,player.z);
+  avatar.position.set(player.x,player.y,player.z);
+  avatar.rotation.y=rotY;
+  camera.position.set(player.x+Math.sin(yaw)*7,2.4,player.z+Math.cos(yaw)*7);
+  camera.lookAt(player.x,1.1,player.z);
   renderer.render(scene,camera);
 }
 animate();
-// ========= LOGGER ERREURS ÉCRAN ========
-window.onerror = (msg, url, line, col, error) => {
-  const box = document.createElement('div');
-  box.style.cssText = `
-    position:fixed;bottom:0;left:0;right:0;
-    background:#ff4444;color:white;
-    font-size:13px;font-weight:700;
-    padding:6px 10px;z-index:9999;
-    font-family:monospace;white-space:pre-wrap;
-  `;
-  box.textContent = '⚠️ ' + msg +
-    (line ? ' (ligne ' + line + ')' : '') +
-    (error && error.stack ? '\n' + error.stack : '');
+
+// --- LOGGER D’ERREURS ---
+window.onerror = (msg,url,line,col,error)=>{
+  const box=document.createElement('div');
+  box.style.cssText='position:fixed;bottom:0;left:0;right:0;background:#d33;color:#fff;font:14px monospace;padding:6px;z-index:9999;white-space:pre-wrap;';
+  box.textContent='⚠️ '+msg+(line?' (ligne '+line+')':'')+(error&&error.stack?'\n'+error.stack:'');
   document.body.appendChild(box);
   setTimeout(()=>box.remove(),10000);
-  return false; // laisse aussi l’erreur dans la console si dispo
 };
-
-window.addEventListener('unhandledrejection', event => {
-  const box = document.createElement('div');
-  box.style.cssText = `
-    position:fixed;bottom:0;left:0;right:0;
-    background:#ff6600;color:white;
-    font-size:13px;font-weight:700;
-    padding:6px 10px;z-index:9999;
-    font-family:monospace;white-space:pre-wrap;
-  `;
-  box.textContent = '🚨 Promise rejetée: ' + event.reason;
+window.addEventListener('unhandledrejection',ev=>{
+  const box=document.createElement('div');
+  box.style.cssText='position:fixed;bottom:0;left:0;right:0;background:#e68b12;color:#fff;font:14px monospace;padding:6px;z-index:9999;white-space:pre-wrap;';
+  box.textContent='🚨 Rejet: '+ev.reason;
   document.body.appendChild(box);
   setTimeout(()=>box.remove(),10000);
 });
-
 </script>
 </body>
 </html>
