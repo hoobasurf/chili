@@ -3,18 +3,54 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Test WebGL simple</title>
+<title>Three.js Test — sans module</title>
+<style>
+html,body{margin:0;height:100%;background:#b0c8e8;}
+</style>
 </head>
-<body style="margin:0;background:#aac;color:#000;font-family:sans-serif;font-size:18px;display:flex;align-items:center;justify-content:center;height:100vh;">
-<canvas id="glcanvas" width="200" height="200"></canvas>
+<body>
+<canvas id="c"></canvas>
+
+<script src="[cdn.jsdelivr.net](https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.min.js)"></script>
 <script>
-const canvas=document.getElementById('glcanvas');
-const gl=canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-if(!gl){
-  document.body.innerHTML='❌ WebGL non pris en charge ou désactivé';
-}else{
-  document.body.innerHTML='✅ WebGL actif — ton navigateur peut afficher la 3D';
+const canvas=document.getElementById('c');
+const renderer=new THREE.WebGLRenderer({canvas});
+renderer.setSize(innerWidth,innerHeight);
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x8ab4d4);
+
+// caméra
+const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,0.1,100);
+camera.position.z=5;
+
+// lumière
+const light=new THREE.DirectionalLight(0xffffff,1);
+light.position.set(1,1,1);
+scene.add(light);
+
+// cube
+const cube=new THREE.Mesh(
+  new THREE.BoxGeometry(1,1,1),
+  new THREE.MeshStandardMaterial({color:0xff5533})
+);
+scene.add(cube);
+
+// animation
+function animate(){
+  requestAnimationFrame(animate);
+  cube.rotation.x+=0.01;
+  cube.rotation.y+=0.02;
+  renderer.render(scene,camera);
 }
+animate();
+
+// logger erreurs
+window.onerror=(m,u,l,c,e)=>{
+  const box=document.createElement('div');
+  box.style.cssText="position:fixed;bottom:0;left:0;right:0;background:#d33;color:#fff;padding:6px;font-size:13px;font-family:monospace;z-index:9999";
+  box.textContent="⚠️ "+m;
+  document.body.appendChild(box);
+};
 </script>
 </body>
 </html>
