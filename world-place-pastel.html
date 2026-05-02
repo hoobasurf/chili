@@ -190,6 +190,37 @@ function animate(){
   renderer.render(scene,camera);
 }
 animate();
+// ========= LOGGER ERREURS ÉCRAN ========
+window.onerror = (msg, url, line, col, error) => {
+  const box = document.createElement('div');
+  box.style.cssText = `
+    position:fixed;bottom:0;left:0;right:0;
+    background:#ff4444;color:white;
+    font-size:13px;font-weight:700;
+    padding:6px 10px;z-index:9999;
+    font-family:monospace;white-space:pre-wrap;
+  `;
+  box.textContent = '⚠️ ' + msg +
+    (line ? ' (ligne ' + line + ')' : '') +
+    (error && error.stack ? '\n' + error.stack : '');
+  document.body.appendChild(box);
+  setTimeout(()=>box.remove(),10000);
+  return false; // laisse aussi l’erreur dans la console si dispo
+};
+
+window.addEventListener('unhandledrejection', event => {
+  const box = document.createElement('div');
+  box.style.cssText = `
+    position:fixed;bottom:0;left:0;right:0;
+    background:#ff6600;color:white;
+    font-size:13px;font-weight:700;
+    padding:6px 10px;z-index:9999;
+    font-family:monospace;white-space:pre-wrap;
+  `;
+  box.textContent = '🚨 Promise rejetée: ' + event.reason;
+  document.body.appendChild(box);
+  setTimeout(()=>box.remove(),10000);
+});
 
 </script>
 </body>
