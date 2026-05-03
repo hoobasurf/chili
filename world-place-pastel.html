@@ -1256,9 +1256,16 @@ function playAnim(file){
 }
 function updatePlayerVisuals(){if(!playerModel)return;playerModel.position.set(playerState.x,playerState.y,playerState.z);playerModel.rotation.y=playerState.angle;}
 loadAnim(IDLE_FILE,(glb)=>{
-  playerModel=glb.scene;playerModel.traverse(c=>{if(c.isMesh){c.castShadow=true;c.receiveShadow=true;}});scene.add(playerModel);
-  playerMixer=new THREE.AnimationMixer(playerModel);if(glb.animations.length>0){currentAction=playerMixer.clipAction(glb.animations[0]);currentAction.play();}
-  updatePlayerVisuals();finishLoading();
+  playerModel=glb.scene;
+  playerModel.traverse(c=>{if(c.isMesh){c.castShadow=true;c.receiveShadow=true;}});
+  scene.add(playerModel);
+  playerMixer=new THREE.AnimationMixer(playerModel);
+  if(glb.animations.length>0){currentAction=playerMixer.clipAction(glb.animations[0]);currentAction.play();}
+  updatePlayerVisuals();
+  finishLoading();
+},(xhr)=>{},(err)=>{
+  // GLB échoue → on charge quand même
+  finishLoading();
 });
 
 // ── JOYSTICKS ─────────────────────────────────────────────
@@ -1518,7 +1525,15 @@ function animate(){
 
 // Spawn wagons
 makeMetroCar(fromX,fromZ,0);makeMetroCar(fromX,fromZ+30,0);
+// Failsafe : si le GLB ne charge pas en 5s, on lance quand même
+setTimeout(()=>{
+  const ls=document.getElementById('loading-screen');
+  if(!ls.classList.contains('hidden')) finishLoading();
+}, 5000);
+
 animate();
+
+  animate();
 </script>
 </body>
 </html>
