@@ -7,13 +7,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@700;900&family=M+PLUS+Rounded+1c:wght@700;800&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-:root{--gold:#f5c842;--orange:#e85d26;--green:#2ecc71;--red:#e74c3c;--blue:#3498db;--purple:#9b59b6;}
+:root{--gold:#f5c842;--orange:#e85d26;--green:#2ecc71;}
 html,body{width:100%;height:100%;overflow:hidden;background:#b0c8e8;font-family:'M PLUS Rounded 1c',sans-serif;user-select:none;-webkit-user-select:none;}
 #canvas-container{position:fixed;inset:0;}
 canvas{display:block;width:100%!important;height:100%!important;}
 #hud{position:fixed;inset:0;z-index:10;pointer-events:none;}
 .hud-top{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:linear-gradient(180deg,rgba(0,0,0,.55) 0%,transparent 100%);}
-.hud-logo{font-family:'Zen Kaku Gothic New',sans-serif;font-size:.9rem;font-weight:900;color:#fff;letter-spacing:.05em;text-shadow:0 1px 6px rgba(0,0,0,.5);}
+.hud-logo{font-family:'Zen Kaku Gothic New',sans-serif;font-size:.9rem;font-weight:900;color:#fff;letter-spacing:.05em;}
 .hud-logo em{color:var(--gold);font-style:normal;}
 .hud-loc{display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.38);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:4px 10px;}
 .hud-loc span{font-size:.65rem;font-weight:700;color:#fff;}
@@ -21,45 +21,25 @@ canvas{display:block;width:100%!important;height:100%!important;}
 .hud-info{display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.38);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:4px 10px 4px 4px;}
 .hud-pic{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--gold));display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:900;color:#fff;}
 .hud-name{font-size:.65rem;font-weight:700;color:#fff;}
-#minimap{position:absolute;top:50px;left:12px;width:120px;height:120px;background:rgba(0,0,0,.6);border:1.5px solid rgba(255,255,255,.2);border-radius:10px;backdrop-filter:blur(10px);pointer-events:all;overflow:visible;z-index:15;}
-#minimap-canvas{width:120px;height:120px;display:block;border-radius:9px;}
-#teleport-cooldown{position:absolute;bottom:-18px;left:0;right:0;text-align:center;font-size:.48rem;color:rgba(255,255,255,.6);font-weight:700;white-space:nowrap;}
-.tp-popup{position:absolute;left:126px;top:0;background:rgba(0,0,0,.85);border:1px solid var(--gold);border-radius:10px;padding:6px 10px;min-width:130px;pointer-events:all;z-index:20;}
-.tp-popup-title{font-size:.6rem;font-weight:900;color:var(--gold);margin-bottom:5px;}
-.tp-popup-btn{display:block;width:100%;background:var(--gold);color:#000;font-size:.58rem;font-weight:900;border:none;border-radius:7px;padding:4px 8px;cursor:pointer;font-family:'M PLUS Rounded 1c',sans-serif;text-align:center;}
-.tp-popup-btn:disabled{background:rgba(255,255,255,.2);color:rgba(255,255,255,.4);cursor:not-allowed;}
-#mission-toggle{position:absolute;top:50px;right:12px;width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.5);backdrop-filter:blur(10px);border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:all;font-size:.95rem;z-index:20;}
-.excl{position:absolute;top:-4px;right:-4px;width:14px;height:14px;border-radius:50%;background:#e74c3c;border:2px solid #050814;display:none;}
-.excl.show{display:block;}
-#mission-hud{position:absolute;top:50px;right:56px;width:210px;pointer-events:all;transform:translateX(130%);transition:transform .3s cubic-bezier(.22,1,.36,1);z-index:19;}
-#mission-hud.open{transform:translateX(0);}
-.mission-card{background:rgba(0,0,0,.45);backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:8px 10px;margin-bottom:5px;}
-.mission-card.done{border-color:rgba(46,204,113,.3);opacity:.55;}
-.mission-card.active{border-color:rgba(245,200,66,.35);box-shadow:0 0 12px rgba(245,200,66,.1);}
-.mission-title{font-size:.65rem;font-weight:900;color:var(--gold);margin-bottom:2px;}
-.mission-desc{font-size:.56rem;color:rgba(255,255,255,.65);line-height:1.3;}
-.mission-progress{margin-top:4px;height:2px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;}
-.mission-bar{height:100%;background:var(--gold);border-radius:2px;transition:width .4s;}
-.mission-badge{display:inline-block;background:rgba(46,204,113,.8);color:#fff;font-size:.48rem;font-weight:900;padding:1px 5px;border-radius:6px;margin-left:4px;}
 .hud-chat{position:absolute;bottom:170px;left:12px;width:220px;pointer-events:all;}
 .chat-messages{max-height:75px;overflow-y:auto;display:flex;flex-direction:column;gap:3px;margin-bottom:4px;scrollbar-width:none;}
 .chat-messages::-webkit-scrollbar{display:none;}
-.chat-msg{background:rgba(0,0,0,.5);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:4px 10px;font-size:.62rem;color:#fff;line-height:1.3;display:inline-block;max-width:100%;}
+.chat-msg{background:rgba(0,0,0,.5);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:4px 10px;font-size:.62rem;color:#fff;line-height:1.3;}
 .chat-msg .name{font-weight:900;color:var(--gold);margin-right:4px;}
-.chat-input-wrap{display:flex;gap:5px;align-items:center;}
-.chat-input{flex:1;background:rgba(0,0,0,.5);backdrop-filter:blur(12px);border:1.5px solid rgba(255,255,255,.2);border-radius:20px;padding:7px 13px;font-size:14px;font-weight:700;color:white;outline:none;font-family:'M PLUS Rounded 1c',sans-serif;}
+.chat-input-wrap{display:flex;gap:5px;}
+.chat-input{flex:1;background:rgba(0,0,0,.5);border:1.5px solid rgba(255,255,255,.2);border-radius:20px;padding:7px 13px;font-size:14px;font-weight:700;color:#fff;outline:none;font-family:'M PLUS Rounded 1c',sans-serif;}
 .chat-input::placeholder{color:rgba(255,255,255,.35);}
 .chat-input:focus{border-color:var(--gold);}
-.chat-send{width:36px;height:36px;border-radius:50%;background:var(--orange);border:none;color:#fff;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;pointer-events:all;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.4);}
-#anim-panel{position:absolute;bottom:0;left:0;right:0;pointer-events:all;padding:4px 0 8px;background:linear-gradient(0deg,rgba(0,0,0,.9) 0%,rgba(0,0,0,.5) 100%);backdrop-filter:blur(12px);border-top:1px solid rgba(255,255,255,.08);height:82px;}
+.chat-send{width:36px;height:36px;border-radius:50%;background:var(--orange);border:none;color:#fff;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;pointer-events:all;flex-shrink:0;}
+#anim-panel{position:absolute;bottom:0;left:0;right:0;pointer-events:all;padding:4px 0 8px;background:linear-gradient(0deg,rgba(0,0,0,.9) 0%,rgba(0,0,0,.5) 100%);backdrop-filter:blur(12px);border-top:1px solid rgba(255,255,255,.08);height:80px;}
 #anim-scroll{display:flex;gap:5px;overflow-x:auto;padding:2px 10px 0;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
 #anim-scroll::-webkit-scrollbar{display:none;}
 .anim-btn{flex-shrink:0;width:56px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
 .anim-icon{width:54px;height:54px;border-radius:10px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;transition:all .15s;}
 .anim-icon svg{width:44px;height:44px;}
-.anim-btn.active .anim-icon{background:rgba(245,200,66,.12);border-color:var(--gold);box-shadow:0 0 10px rgba(245,200,66,.25);}
+.anim-btn.active .anim-icon{background:rgba(245,200,66,.12);border-color:var(--gold);}
 .anim-btn:active .anim-icon{transform:scale(.88);}
-.anim-label{font-size:.48rem;font-weight:700;color:rgba(255,255,255,.4);text-align:center;line-height:1.1;}
+.anim-label{font-size:.48rem;font-weight:700;color:rgba(255,255,255,.4);text-align:center;}
 .anim-btn.active .anim-label{color:var(--gold);}
 #joystick-zone{position:absolute;bottom:90px;right:12px;width:96px;height:96px;pointer-events:all;}
 #cam-joystick-zone{position:absolute;bottom:90px;left:12px;width:96px;height:96px;pointer-events:all;}
@@ -67,28 +47,10 @@ canvas{display:block;width:100%!important;height:100%!important;}
 .joy-knob{width:38px;height:38px;border-radius:50%;position:absolute;box-shadow:0 2px 10px rgba(0,0,0,.4);}
 #jump-btn{position:absolute;bottom:138px;right:52px;width:46px;height:46px;border-radius:50%;background:#2b6cb0;border:none;color:#fff;font-size:1.2rem;pointer-events:all;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;z-index:12;}
 #super-jump-btn{position:absolute;bottom:138px;left:52px;width:46px;height:46px;border-radius:50%;background:var(--orange);border:none;color:#fff;font-size:.95rem;pointer-events:all;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;z-index:12;}
-#shrink-overlay{position:fixed;inset:0;z-index:30;pointer-events:none;transition:all .5s;border:0px solid rgba(100,200,255,.8);box-shadow:inset 0 0 0px rgba(100,200,255,.4);}
-#shrink-overlay.active{border-width:12px;box-shadow:inset 0 0 60px rgba(100,200,255,.4);}
-#sewer-overlay{position:fixed;inset:0;z-index:25;background:radial-gradient(ellipse at center,rgba(20,40,10,.0) 0%,rgba(10,20,5,.0) 100%);pointer-events:none;transition:all .8s;}
-#sewer-overlay.active{background:radial-gradient(ellipse at center,rgba(20,60,10,.7) 0%,rgba(0,0,0,.95) 100%);}
-.shrunk-label{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:2rem;font-weight:900;color:rgba(100,200,255,.9);text-shadow:0 0 30px rgba(100,200,255,.8);pointer-events:none;z-index:40;opacity:0;transition:opacity .5s;}
-.shrunk-label.show{opacity:1;}
-#jetpack-hud{position:fixed;top:50%;right:60px;transform:translateY(-50%);z-index:20;pointer-events:none;display:none;}
-#jetpack-hud.show{display:flex;flex-direction:column;align-items:center;gap:4px;}
-.jp-label{font-size:.6rem;font-weight:900;color:#ff8800;text-shadow:0 0 10px #ff4400;}
-.jp-bar-wrap{width:12px;height:80px;background:rgba(0,0,0,.5);border:1px solid rgba(255,136,0,.4);border-radius:6px;overflow:hidden;display:flex;flex-direction:column-reverse;}
-.jp-bar{width:100%;background:linear-gradient(180deg,#ff8800,#ff4400);border-radius:6px;transition:height .1s;}
-.toast{position:fixed;bottom:190px;left:50%;transform:translateX(-50%) translateY(14px);background:rgba(0,0,0,.88);color:var(--gold);padding:6px 14px;border-radius:16px;font-size:.68rem;font-weight:700;opacity:0;transition:all .25s;z-index:50;pointer-events:none;white-space:nowrap;}
+#zone-indicator{position:absolute;top:44px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:4px 14px;pointer-events:none;}
+#zone-indicator span{font-size:.65rem;font-weight:700;color:#fff;}
+.toast{position:fixed;bottom:188px;left:50%;transform:translateX(-50%) translateY(14px);background:rgba(0,0,0,.88);color:var(--gold);padding:6px 14px;border-radius:16px;font-size:.68rem;font-weight:700;opacity:0;transition:all .25s;z-index:50;pointer-events:none;white-space:nowrap;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-.toast.mission{background:rgba(20,80,40,.95);color:var(--green);border:1px solid var(--green);}
-.toast.secret{background:rgba(10,30,80,.95);color:#88ccff;border:1px solid #88ccff;}
-.toast.jetpack{background:rgba(80,40,10,.95);color:#ff8800;border:1px solid #ff8800;}
-#markers{position:fixed;inset:0;z-index:15;pointer-events:none;}
-.marker{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:2px;opacity:0;transition:opacity .3s;}
-.marker.visible{opacity:1;}
-.marker-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;animation:markerBounce 1.2s ease-in-out infinite;}
-.marker-label{font-size:.5rem;font-weight:900;color:#fff;background:rgba(0,0,0,.7);padding:1px 5px;border-radius:6px;white-space:nowrap;}
-@keyframes markerBounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
 #loading-screen{position:fixed;inset:0;z-index:200;background:#b0c8e8;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .5s;}
 #loading-screen.hidden{opacity:0;pointer-events:none;}
 .load-logo{font-family:'Zen Kaku Gothic New',sans-serif;font-size:2.2rem;font-weight:900;color:#1a2a40;letter-spacing:.06em;}
@@ -101,38 +63,18 @@ canvas{display:block;width:100%!important;height:100%!important;}
 </head>
 <body>
 <div id="canvas-container"></div>
-<div id="sewer-overlay"></div>
-<div id="shrink-overlay"></div>
-<div class="shrunk-label" id="shrunk-label">🔬 MICRO-MODE</div>
-
-<div id="jetpack-hud">
-  <div class="jp-label">🚀</div>
-  <div class="jp-bar-wrap"><div class="jp-bar" id="jp-bar" style="height:100%"></div></div>
-</div>
-
 <div id="loading-screen">
   <div class="load-logo">TOKYO<em>東京</em></div>
   <div class="load-kanji">MACADAM WORLD</div>
   <div class="load-bar-wrap"><div class="load-bar" id="load-bar"></div></div>
-  <div class="load-txt" id="load-txt">Chargement…</div>
+  <div class="load-txt" id="load-txt">Génération du monde…</div>
 </div>
-
 <div id="hud">
   <div class="hud-top">
     <div class="hud-logo">⬡ <em>Macadam</em> World</div>
-    <div class="hud-loc"><div class="loc-dot"></div><span id="zone-label">東京 Shinjuku</span></div>
+    <div class="hud-loc"><div class="loc-dot"></div><span id="zone-name">東京 Shinjuku</span></div>
     <div class="hud-info"><div class="hud-pic" id="hud-pic">?</div><span class="hud-name" id="hud-pseudo">Joueur</span></div>
   </div>
-  <div id="minimap">
-    <canvas id="minimap-canvas" width="240" height="240"></canvas>
-    <div id="teleport-cooldown"></div>
-    <div id="tp-popup" style="display:none;" class="tp-popup">
-      <div class="tp-popup-title" id="tp-popup-title">Destination</div>
-      <button class="tp-popup-btn" id="tp-popup-btn">⚡ Téléporter</button>
-    </div>
-  </div>
-  <button id="mission-toggle" style="pointer-events:all;">🎯<div class="excl" id="mission-excl"></div></button>
-  <div id="mission-hud"></div>
   <div class="hud-chat">
     <div class="chat-messages" id="chat-messages"></div>
     <div class="chat-input-wrap">
@@ -146,7 +88,6 @@ canvas{display:block;width:100%!important;height:100%!important;}
   <div id="joystick-zone"><div class="joy-base" id="joy-base"><div class="joy-knob" id="joy-knob" style="background:linear-gradient(135deg,#dddddd,#aaaaaa);"></div></div></div>
   <div id="anim-panel"><div id="anim-scroll"></div></div>
 </div>
-<div id="markers"></div>
 <div class="toast" id="toast"></div>
 
 <script type="importmap">
@@ -168,16 +109,17 @@ const ANIMS=[
   {label:'King Kong',file:'king%20kong.glb',svg:'victory'},{label:'Salto',file:'salto%20avant.glb',svg:'flip'},
   {label:'Foot',file:'foot.glb',svg:'kick'},{label:'Esquive',file:'esquive.glb',svg:'dodge'},
   {label:'Pompe',file:'pompe.glb',svg:'crouch'},{label:'Maestro',file:'maestro.glb',svg:'wave'},
+  {label:'Costaud',file:'costaud.glb',svg:'flex'},{label:'Enerver',file:'enerver.glb',svg:'punch'},
 ];
 const C='#f5c842';
 const SVG={
   idle:`<circle cx="28" cy="9" r="6" fill="none" stroke="${C}" stroke-width="2.5"/><line x1="28" y1="15" x2="28" y2="46" stroke="${C}" stroke-width="3" stroke-linecap="round"/><line x1="28" y1="24" x2="16" y2="36" stroke="${C}" stroke-width="3" stroke-linecap="round"/><line x1="28" y1="24" x2="40" y2="36" stroke="${C}" stroke-width="3" stroke-linecap="round"/><line x1="26" y1="46" x2="20" y2="66" stroke="${C}" stroke-width="3" stroke-linecap="round"/><line x1="30" y1="46" x2="36" y2="66" stroke="${C}" stroke-width="3" stroke-linecap="round"/>`,
   run:`<circle cx="32" cy="7" r="6" fill="none" stroke="${C}" stroke-width="2.5"/><path d="M31 13 Q28 26 26 42" stroke="${C}" stroke-width="3" fill="none" stroke-linecap="round"/><line x1="29" y1="19" x2="10" y2="22" stroke="${C}" stroke-width="3" stroke-linecap="round"/><line x1="29" y1="19" x2="48" y2="14" stroke="${C}" stroke-width="3" stroke-linecap="round"/><line x1="26" y1="42" x2="10" y2="56" stroke="${C}" stroke-width="3" stroke-linecap="round"/><line x1="26" y1="42" x2="44" y2="64" stroke="${C}" stroke-width="3" stroke-linecap="round"/>`,
   walk:`<circle cx="28" cy="8" r="6" fill="none" stroke="${C}" stroke-width="2.5"/><path d="M28 14 Q26 28 25 44" stroke="${C}" stroke-width="3" fill="none" stroke-linecap="round"/><line x1="26" y1="22" x2="12" y2="30" stroke="${C}" stroke-width="3" stroke-linecap="round"/><line x1="26" y1="22" x2="40" y2="18" stroke="${C}" stroke-width="3" stroke-linecap="round"/><line x1="25" y1="44" x2="12" y2="62" stroke="${C}" stroke-width="3" stroke-linecap="round"/><line x1="25" y1="44" x2="38" y2="58" stroke="${C}" stroke-width="3" stroke-linecap="round"/>`,
-  dance1:`<circle cx="28" cy="9" r="6" fill="none" stroke="${C}" stroke-width="2.5"/><path d="M28 15 Q32 28 30 44" stroke="${C}" stroke-width="3" fill="none" stroke-linecap="round"/><line x1="29" y1="20" x2="8" y2="12" stroke="${C}" stroke-width="3" stroke-linecap="round"/><line x1="29" y1="20" x2="48" y2="26" stroke="${C}" stroke-width="3" stroke-linecap="round"/><line x1="30" y1="44" x2="16" y2="62" stroke="${C}" stroke-width="3" stroke-linecap="round"/><line x1="30" y1="44" x2="46" y2="52" stroke="${C}" stroke-width="3" stroke-linecap="round"/>`,
-  dance2:`<circle cx="28" cy="9" r="6" fill="none" stroke="${C}" stroke-width="2.5"/><path d="M28 15 Q24 28 26 44" stroke="${C}" stroke-width="3" fill="none" stroke-linecap="round"/><line x1="27" y1="22" x2="46" y2="18" stroke="${C}" stroke-width="3" stroke-linecap="round"/><line x1="27" y1="22" x2="10" y2="28" stroke="${C}" stroke-width="3" stroke-linecap="round"/><line x1="26" y1="44" x2="12" y2="66" stroke="${C}" stroke-width="3" stroke-linecap="round"/><line x1="26" y1="44" x2="42" y2="64" stroke="${C}" stroke-width="3" stroke-linecap="round"/>`,
-  dance3:`<circle cx="28" cy="9" r="6" fill="none" stroke="${C}" stroke-width="2.5"/><line x1="28" y1="15" x2="28" y2="44" stroke="${C}" stroke-width="3" stroke-linecap="round"/><path d="M28 20 Q14 10 8 18" stroke="${C}" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M28 20 Q42 10 48 18" stroke="${C}" stroke-width="3" fill="none" stroke-linecap="round"/>`,
-  punch:`<circle cx="26" cy="9" r="6" fill="none" stroke="${C}" stroke-width="2.5"/><line x1="26" y1="15" x2="24" y2="44" stroke="${C}" stroke-width="3" stroke-linecap="round"/><line x1="25" y1="22" x2="8" y2="30" stroke="${C}" stroke-width="3" stroke-linecap="round"/><line x1="25" y1="22" x2="52" y2="16" stroke="${C}" stroke-width="3.5" stroke-linecap="round"/>`,
+  dance1:`<circle cx="28" cy="9" r="6" fill="none" stroke="${C}" stroke-width="2.5"/><path d="M28 15 Q32 28 30 44" stroke="${C}" stroke-width="3" fill="none" stroke-linecap="round"/><line x1="29" y1="20" x2="8" y2="12" stroke="${C}" stroke-width="3" stroke-linecap="round"/><line x1="29" y1="20" x2="48" y2="26" stroke="${C}" stroke-width="3" stroke-linecap="round"/>`,
+  dance2:`<circle cx="28" cy="9" r="6" fill="none" stroke="${C}" stroke-width="2.5"/><path d="M28 15 Q24 28 26 44" stroke="${C}" stroke-width="3" fill="none" stroke-linecap="round"/><line x1="27" y1="22" x2="46" y2="18" stroke="${C}" stroke-width="3" stroke-linecap="round"/>`,
+  dance3:`<circle cx="28" cy="9" r="6" fill="none" stroke="${C}" stroke-width="2.5"/><line x1="28" y1="15" x2="28" y2="44" stroke="${C}" stroke-width="3" stroke-linecap="round"/><path d="M28 20 Q14 10 8 18" stroke="${C}" stroke-width="3" fill="none" stroke-linecap="round"/>`,
+  punch:`<circle cx="26" cy="9" r="6" fill="none" stroke="${C}" stroke-width="2.5"/><line x1="26" y1="15" x2="24" y2="44" stroke="${C}" stroke-width="3" stroke-linecap="round"/><line x1="25" y1="22" x2="52" y2="16" stroke="${C}" stroke-width="3.5" stroke-linecap="round"/>`,
   kick:`<circle cx="28" cy="9" r="6" fill="none" stroke="${C}" stroke-width="2.5"/><line x1="28" y1="15" x2="26" y2="42" stroke="${C}" stroke-width="3" stroke-linecap="round"/><line x1="26" y1="42" x2="54" y2="34" stroke="${C}" stroke-width="3.5" stroke-linecap="round"/>`,
   jump:`<circle cx="28" cy="6" r="6" fill="none" stroke="${C}" stroke-width="2.5"/><line x1="28" y1="12" x2="28" y2="38" stroke="${C}" stroke-width="3" stroke-linecap="round"/><line x1="28" y1="18" x2="12" y2="12" stroke="${C}" stroke-width="3" stroke-linecap="round"/><line x1="28" y1="18" x2="44" y2="12" stroke="${C}" stroke-width="3" stroke-linecap="round"/>`,
   victory:`<circle cx="28" cy="9" r="6" fill="none" stroke="${C}" stroke-width="2.5"/><line x1="28" y1="15" x2="28" y2="46" stroke="${C}" stroke-width="3" stroke-linecap="round"/><line x1="28" y1="22" x2="10" y2="6" stroke="${C}" stroke-width="3" stroke-linecap="round"/><line x1="28" y1="22" x2="46" y2="6" stroke="${C}" stroke-width="3" stroke-linecap="round"/>`,
@@ -185,47 +127,35 @@ const SVG={
   dodge:`<circle cx="38" cy="13" r="6" fill="none" stroke="${C}" stroke-width="2.5"/><path d="M36 19 Q28 32 24 46" stroke="${C}" stroke-width="3" fill="none" stroke-linecap="round"/>`,
   crouch:`<circle cx="28" cy="16" r="6" fill="none" stroke="${C}" stroke-width="2.5"/><line x1="28" y1="22" x2="28" y2="38" stroke="${C}" stroke-width="3" stroke-linecap="round"/>`,
   wave:`<circle cx="28" cy="9" r="6" fill="none" stroke="${C}" stroke-width="2.5"/><line x1="28" y1="15" x2="28" y2="48" stroke="${C}" stroke-width="3" stroke-linecap="round"/><line x1="28" y1="20" x2="48" y2="6" stroke="${C}" stroke-width="3" stroke-linecap="round"/>`,
+  flex:`<circle cx="28" cy="8" r="6" fill="none" stroke="${C}" stroke-width="2.5"/><line x1="28" y1="14" x2="28" y2="44" stroke="${C}" stroke-width="3" stroke-linecap="round"/><path d="M28 22 Q18 14 8 20" stroke="${C}" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="6" cy="20" r="5" stroke="${C}" stroke-width="2" fill="none"/>`,
 };
 
-// ── PROFIL ──────────────────────────────────────────────
+// ── PROFIL ────────────────────────────────────────────────
 function loadProfile(){
-  try{
-    const uid=localStorage.getItem('macadam_user_id')||('p_'+Math.random().toString(36).slice(2,8));
-    localStorage.setItem('macadam_user_id',uid);
-    const saved=JSON.parse(localStorage.getItem('macadam_avatar_'+uid)||'null');
-    return{pseudo:saved?.pseudo||'Joueur'};
-  }catch(e){return{pseudo:'Joueur'};}
+  try{const uid=localStorage.getItem('macadam_user_id')||('p_'+Math.random().toString(36).slice(2,8));localStorage.setItem('macadam_user_id',uid);const s=JSON.parse(localStorage.getItem('macadam_avatar_'+uid)||'null');return{pseudo:s?.pseudo||'Joueur'};}catch(e){return{pseudo:'Joueur'};}
 }
 const profile=loadProfile();
 document.getElementById('hud-pseudo').textContent=profile.pseudo;
 document.getElementById('hud-pic').textContent=profile.pseudo.slice(0,2).toUpperCase();
 
-// ── LOADING ──────────────────────────────────────────────
-let loadPct=0;
-const loadBar=document.getElementById('load-bar'),loadTxt=document.getElementById('load-txt');
-const ldMsgs=['Textures HD…','Construction de Tokyo…','Pose du béton…','Creusage du labyrinthe…','Presque prêt…'];
+// ── LOADING ───────────────────────────────────────────────
+let ldPct=0;
+const ldBar=document.getElementById('load-bar'),ldTxt=document.getElementById('load-txt');
+const ldMsgs=['Génération des rues…','Construction des quartiers…','Pose du béton…','Égout en cours…','Presque prêt…'];
 let ldIdx=0;
 const ldInt=setInterval(()=>{
-  loadPct+=Math.random()*7;if(loadPct>84){loadPct=84;clearInterval(ldInt);}
-  loadBar.style.width=loadPct+'%';
-  const idx=Math.min(Math.floor(loadPct/20),ldMsgs.length-1);
-  if(idx>ldIdx){ldIdx=idx;loadTxt.textContent=ldMsgs[ldIdx];}
-},200);
-
+  ldPct+=Math.random()*6;if(ldPct>84){ldPct=84;clearInterval(ldInt);}
+  ldBar.style.width=ldPct+'%';
+  const idx=Math.min(Math.floor(ldPct/20),ldMsgs.length-1);
+  if(idx>ldIdx){ldIdx=idx;ldTxt.textContent=ldMsgs[ldIdx];}
+},220);
 function finishLoading(){
-  clearInterval(ldInt);loadBar.style.width='100%';loadTxt.textContent='Bienvenue à Tokyo !';
-  setTimeout(()=>{const l=document.getElementById('loading-screen');l.classList.add('hidden');setTimeout(()=>l.style.display='none',600);},350);
+  clearInterval(ldInt);ldBar.style.width='100%';ldTxt.textContent='Bienvenue à Tokyo !';
+  setTimeout(()=>{const l=document.getElementById('loading-screen');l.classList.add('hidden');setTimeout(()=>l.style.display='none',600);},400);
   addChat('☀️ Bienvenue à Tokyo, '+profile.pseudo+' !','Système');
-  addChat('🎯 Trouve le JetPack dans le labyrinthe des égouts !','Info');
-  swapAvatar(IDLE_FILE,true,null);
+  addChat('🐀 Cherche la bouche d\'égout pour explorer les souterrains !','Info');
 }
-// ── UI HELPERS ──────────────────────────────────────────
-let toastTimer=null;
-function showToast(msg,type=''){
-  const t=document.getElementById('toast');t.textContent=msg;
-  t.className='toast '+(type||'');t.classList.add('show');
-  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3500);
-}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
 function addChat(text,from){
   const msgs=document.getElementById('chat-messages');
   const d=document.createElement('div');d.className='chat-msg';
@@ -233,556 +163,287 @@ function addChat(text,from){
   msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;
   while(msgs.children.length>20)msgs.removeChild(msgs.firstChild);
 }
-function sendChat(){
-  const inp=document.getElementById('chat-input');
-  const m=inp.value.trim();if(!m)return;
-  inp.value='';addChat(m,profile.pseudo);
-}
+function sendChat(){const inp=document.getElementById('chat-input');const m=inp.value.trim();if(!m)return;inp.value='';addChat(m,profile.pseudo);}
 document.getElementById('chat-send').addEventListener('click',sendChat);
 document.getElementById('chat-input').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();sendChat();}});
 
-// ── THREE RENDERER ──────────────────────────────────────
+// ── THREE RENDERER ────────────────────────────────────────
 const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
 renderer.setPixelRatio(Math.min(window.devicePixelRatio,1.5));
 renderer.setSize(window.innerWidth,window.innerHeight);
-renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure=1.05;
 renderer.outputColorSpace=THREE.SRGBColorSpace;
 document.getElementById('canvas-container').appendChild(renderer.domElement);
+
 const scene=new THREE.Scene();
 scene.background=new THREE.Color(0x8ab4d4);
-scene.fog=new THREE.Fog(0x9ec2dc,120,350);
-const camera=new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,0.1,400);
-window.addEventListener('resize',()=>{
-  renderer.setSize(window.innerWidth,window.innerHeight);
-  camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();
-});
+scene.fog=new THREE.Fog(0x9ec2dc,100,280);
+const camera=new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,0.1,350);
+window.addEventListener('resize',()=>{renderer.setSize(window.innerWidth,window.innerHeight);camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();});
 
-// ── LUMIÈRES ────────────────────────────────────────────
+// ── LUMIÈRES ──────────────────────────────────────────────
 scene.add(new THREE.HemisphereLight(0x87CEEB,0xc8b89a,1.1));
-const sun=new THREE.DirectionalLight(0xfff5e0,2.2);sun.position.set(60,120,40);sun.castShadow=true;
-sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-160;sun.shadow.camera.bottom=-160;sun.shadow.camera.right=160;sun.shadow.camera.top=160;sun.shadow.camera.far=400;sun.shadow.bias=-0.001;scene.add(sun);
+const sun=new THREE.DirectionalLight(0xfff5e0,2.2);
+sun.position.set(60,120,40);sun.castShadow=true;
+sun.shadow.mapSize.set(2048,2048);
+sun.shadow.camera.left=-120;sun.shadow.camera.bottom=-120;
+sun.shadow.camera.right=120;sun.shadow.camera.top=120;
+sun.shadow.camera.far=350;sun.shadow.bias=-0.001;
+scene.add(sun);
 const fillLight=new THREE.DirectionalLight(0xc8d8f0,0.55);fillLight.position.set(-30,50,-50);scene.add(fillLight);
 
-// ── TEXTURES ULTRA-RÉALISTES PROCÉDURALES ──────────────
-function procTex(fn,size=512){
+// ── TEXTURES PROCÉDURALES ─────────────────────────────────
+function procTex(fn,size=256){
   const cv=document.createElement('canvas');cv.width=cv.height=size;
   const ctx=cv.getContext('2d');fn(ctx,size);
   const t=new THREE.CanvasTexture(cv);t.wrapS=t.wrapT=THREE.RepeatWrapping;return t;
 }
 
-// Asphalte HD avec cracks
 const asphaltTex=procTex((ctx,s)=>{
-  // Base sombre avec variation
-  const grad=ctx.createRadialGradient(s/2,s/2,0,s/2,s/2,s);
-  grad.addColorStop(0,'#2e2e2e');grad.addColorStop(1,'#1a1a1a');
-  ctx.fillStyle=grad;ctx.fillRect(0,0,s,s);
-  // Grains d'asphalte - petits cailloux
-  for(let i=0;i<8000;i++){
-    const v=15+Math.random()*30;
-    const size=Math.random()*2.5;
-    const gray=`rgb(${v},${v},${v})`;
-    ctx.fillStyle=gray;
-    ctx.beginPath();ctx.ellipse(Math.random()*s,Math.random()*s,size,size*0.7+0.3,Math.random()*Math.PI,0,Math.PI*2);ctx.fill();
-  }
-  // Fissures
-  ctx.strokeStyle='rgba(0,0,0,0.7)';ctx.lineWidth=0.8;
-  for(let c=0;c<15;c++){
-    ctx.beginPath();
-    let x=Math.random()*s,y=Math.random()*s;
-    ctx.moveTo(x,y);
-    for(let i=0;i<8;i++){x+=Math.random()*30-15;y+=Math.random()*30-15;ctx.lineTo(x,y);}
-    ctx.stroke();
-  }
-  // Taches huile
-  for(let i=0;i<5;i++){
-    const ox=Math.random()*s,oy=Math.random()*s;
-    const og=ctx.createRadialGradient(ox,oy,0,ox,oy,20+Math.random()*25);
-    og.addColorStop(0,'rgba(40,20,60,0.5)');og.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=og;ctx.fillRect(0,0,s,s);
-  }
-},512);
+  ctx.fillStyle='#282828';ctx.fillRect(0,0,s,s);
+  for(let i=0;i<3000;i++){const g=18+Math.random()*28|0;ctx.fillStyle=`rgb(${g},${g},${g})`;ctx.fillRect(Math.random()*s|0,Math.random()*s|0,1+(Math.random()*1.5|0),1);}
+  ctx.strokeStyle='rgba(0,0,0,0.6)';ctx.lineWidth=0.7;
+  for(let c=0;c<12;c++){ctx.beginPath();let x=Math.random()*s,y=Math.random()*s;ctx.moveTo(x,y);for(let i=0;i<6;i++){x+=Math.random()*25-12;y+=Math.random()*25-12;ctx.lineTo(x,y);}ctx.stroke();}
+});
 asphaltTex.repeat.set(10,10);
 
-// Béton trottoir HD
 const concreteTex=procTex((ctx,s)=>{
-  ctx.fillStyle='#9a9490';ctx.fillRect(0,0,s,s);
-  for(let i=0;i<5000;i++){
-    const v=120+Math.random()*40;
-    const a=0.3+Math.random()*0.4;
-    ctx.fillStyle=`rgba(${v},${v-3},${v-6},${a})`;
-    ctx.fillRect(Math.random()*s|0,Math.random()*s|0,1+(Math.random()*1.5|0),1+(Math.random()*1.5|0));
-  }
-  // Joints
-  ctx.strokeStyle='rgba(80,75,70,0.6)';ctx.lineWidth=1.5;
-  for(let x=0;x<s;x+=80){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,s);ctx.stroke();}
-  for(let y=0;y<s;y+=80){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(s,y);ctx.stroke();}
-  // Usure
-  for(let i=0;i<30;i++){
-    const ug=ctx.createRadialGradient(Math.random()*s,Math.random()*s,0,Math.random()*s,Math.random()*s,25+Math.random()*40);
-    ug.addColorStop(0,'rgba(90,85,80,0.4)');ug.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=ug;ctx.fillRect(0,0,s,s);
-  }
-},512);
+  ctx.fillStyle='#989088';ctx.fillRect(0,0,s,s);
+  for(let i=0;i<3000;i++){const g=128+Math.random()*22|0;ctx.fillStyle=`rgba(${g},${g-4},${g-8},0.55)`;ctx.fillRect(Math.random()*s|0,Math.random()*s|0,1,1);}
+  ctx.strokeStyle='rgba(108,103,96,0.5)';ctx.lineWidth=1;
+  for(let x=0;x<s;x+=64){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,s);ctx.stroke();}
+  for(let y=0;y<s;y+=64){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(s,y);ctx.stroke();}
+});
 concreteTex.repeat.set(6,6);
 
-// Herbe détaillée
 const grassTex=procTex((ctx,s)=>{
   ctx.fillStyle='#3d6830';ctx.fillRect(0,0,s,s);
-  for(let i=0;i<10000;i++){
-    const g=70+Math.random()*50;
-    ctx.fillStyle=`rgb(${20+Math.random()*30},${g},${15+Math.random()*20})`;
-    ctx.fillRect(Math.random()*s|0,Math.random()*s|0,1+(Math.random()*2|0),2+(Math.random()*4|0));
-  }
-  // Touffes
-  for(let i=0;i<200;i++){
-    const tx=Math.random()*s,ty=Math.random()*s;
-    ctx.strokeStyle=`rgba(${40+Math.random()*30},${90+Math.random()*40},${20+Math.random()*20},0.8)`;
-    ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(tx-2+Math.random()*4,ty-6-Math.random()*4);ctx.stroke();
-  }
-},512);
-grassTex.repeat.set(12,12);
+  for(let i=0;i<5000;i++){const g=88+Math.random()*40|0;ctx.fillStyle=`rgb(${22+Math.random()*22|0},${g},${16+Math.random()*18|0})`;ctx.fillRect(Math.random()*s|0,Math.random()*s|0,1+(Math.random()*1.5|0),1+(Math.random()*3|0));}
+});
+grassTex.repeat.set(8,8);
 
-// Brique réaliste avec joints et vieillissement
-function makeBrickTex(br,jo){
+// Sol jardin / terre
+const dirtTex=procTex((ctx,s)=>{
+  ctx.fillStyle='#5a3a1a';ctx.fillRect(0,0,s,s);
+  for(let i=0;i<4000;i++){const v=Math.random()*25-12;const r=90+v,g=58+v,b=26+v;ctx.fillStyle=`rgba(${Math.max(0,r)},${Math.max(0,g)},${Math.max(0,b)},0.6)`;ctx.fillRect(Math.random()*s|0,Math.random()*s|0,1+(Math.random()*2|0),1);}
+});
+dirtTex.repeat.set(5,5);
+
+// Gravier parking
+const gravelTex=procTex((ctx,s)=>{
+  ctx.fillStyle='#888070';ctx.fillRect(0,0,s,s);
+  for(let i=0;i<6000;i++){const v=Math.random()*30-15;const g=128+v|0;ctx.fillStyle=`rgba(${g},${g-5},${g-10},0.7)`;ctx.beginPath();ctx.arc(Math.random()*s,Math.random()*s,Math.random()*1.5,0,Math.PI*2);ctx.fill();}
+});
+gravelTex.repeat.set(8,8);
+
+function makeBrick(br,jo){
   return procTex((ctx,s)=>{
     ctx.fillStyle=jo;ctx.fillRect(0,0,s,s);
-    const BW=48,BH=22;
+    const BW=40,BH=18;
     for(let row=0;row*BH<s+BH;row++){
       const off=(row%2)*BW/2;
       for(let col=-1;col*BW<s+BW;col++){
-        const rr=parseInt(br.slice(1,3),16),rg=parseInt(br.slice(3,5),16),rb2=parseInt(br.slice(5,7),16);
-        const vr=Math.random()*30-15,vg=Math.random()*20-10,vb=Math.random()*20-10;
-        ctx.fillStyle=`rgb(${Math.max(30,Math.min(230,rr+vr))},${Math.max(20,Math.min(180,rg+vg))},${Math.max(20,Math.min(160,rb2+vb))})`;
+        const rr=parseInt(br.slice(1,3),16)+(Math.random()*24-12|0);
+        const rg=parseInt(br.slice(3,5),16)+(Math.random()*20-10|0);
+        const rb2=parseInt(br.slice(5,7),16)+(Math.random()*16-8|0);
+        ctx.fillStyle=`rgb(${Math.max(20,Math.min(240,rr))},${Math.max(15,Math.min(200,rg))},${Math.max(15,Math.min(180,rb2))})`;
         ctx.fillRect(col*BW+off+2,row*BH+2,BW-4,BH-4);
-        // Variante de surface
-        const sg=ctx.createLinearGradient(col*BW+off,row*BH,col*BW+off+BW,row*BH+BH);
-        sg.addColorStop(0,'rgba(255,255,255,0.05)');sg.addColorStop(0.5,'rgba(0,0,0,0.05)');sg.addColorStop(1,'rgba(0,0,0,0.1)');
-        ctx.fillStyle=sg;ctx.fillRect(col*BW+off+2,row*BH+2,BW-4,BH-4);
       }
     }
-    // Humidité/saleté
-    for(let i=0;i<40;i++){
-      const mx=Math.random()*s,my=Math.random()*s;
-      const mg=ctx.createRadialGradient(mx,my,0,mx,my,15+Math.random()*20);
-      mg.addColorStop(0,'rgba(20,15,10,0.3)');mg.addColorStop(1,'rgba(0,0,0,0)');
-      ctx.fillStyle=mg;ctx.fillRect(0,0,s,s);
-    }
-  },512);
-}
-const brickA=makeBrickTex('#b07060','#7a6a62'),brickB=makeBrickTex('#9a9090','#727070'),brickC=makeBrickTex('#c8b888','#907060');
-
-// Façade béton immeuble avec réflexion
-const concBuild=procTex((ctx,s)=>{
-  ctx.fillStyle='#b2aaa2';ctx.fillRect(0,0,s,s);
-  for(let i=0;i<6000;i++){
-    const v=Math.random()*25;
-    ctx.fillStyle=`rgba(${140+v},${135+v},${128+v},0.4)`;
-    ctx.fillRect(Math.random()*s|0,Math.random()*s|0,1,1+(Math.random()*2|0));
-  }
-  // Bandes horizontales de coulage
-  for(let y=0;y<s;y+=32){
-    ctx.fillStyle='rgba(100,95,88,0.15)';ctx.fillRect(0,y,s,1);
-  }
-  // Trainées
-  for(let i=0;i<15;i++){
-    const sx=Math.random()*s;
-    ctx.fillStyle=`rgba(80,75,70,0.2)`;
-    ctx.fillRect(sx,Math.random()*s*0.5,1+(Math.random()*1.5),s*0.3+Math.random()*s*0.3);
-  }
-},512);
-
-// Vitre réaliste avec reflets
-function makeWinTex(){
-  return procTex((ctx,s)=>{
-    ctx.fillStyle='#12202e';ctx.fillRect(0,0,s,s);
-    const cols=4,rows=6,pw=s/cols,ph=s/rows;
-    for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
-      const lit=Math.random()<0.75;
-      const baseColors=['#c2d5e5','#d8e0e8','#e2d8b5','#d0c5a0'];
-      ctx.fillStyle=lit?baseColors[Math.floor(Math.random()*baseColors.length)]:'#0a1520';
-      ctx.fillRect(c*pw+3,r*ph+3,pw-6,ph-6);
-      if(lit){
-        // Reflet coin
-        ctx.fillStyle='rgba(255,255,255,0.22)';
-        ctx.fillRect(c*pw+4,r*ph+4,pw*0.3,ph*0.2);
-        // Gradient intérieur
-        const wg=ctx.createLinearGradient(c*pw,r*ph,c*pw+pw,r*ph+ph);
-        wg.addColorStop(0,'rgba(255,255,255,0.08)');wg.addColorStop(1,'rgba(0,0,0,0.15)');
-        ctx.fillStyle=wg;ctx.fillRect(c*pw+3,r*ph+3,pw-6,ph-6);
-      }
-      // Cadre fenêtre
-      ctx.strokeStyle='rgba(80,80,80,0.8)';ctx.lineWidth=1.5;ctx.strokeRect(c*pw+3,r*ph+3,pw-6,ph-6);
-    }
-  },512);
-}
-const winA=makeWinTex(),winB=makeWinTex(),winC=makeWinTex();
-
-// Toit bardeau
-const roofTex=procTex((ctx,s)=>{
-  ctx.fillStyle='#2a2520';ctx.fillRect(0,0,s,s);
-  for(let y=0;y<s;y+=7){
-    ctx.fillStyle=y%14===0?'#242018':'#302a24';
-    ctx.fillRect(0,y,s,6);
-    // Tuile par tuile
-    for(let x=0;x<s;x+=12){
-      ctx.strokeStyle='rgba(0,0,0,0.4)';ctx.lineWidth=0.5;
-      ctx.strokeRect(x,y,12,6);
-      ctx.fillStyle='rgba(255,255,255,0.03)';ctx.fillRect(x,y,12,2);
-    }
-  }
-},512);
-
-// Panneaux enseigne japonais
-function makeSignTex(col,txt,sub){
-  return procTex((ctx,s)=>{
-    // Fond avec gradient
-    const sg=ctx.createLinearGradient(0,0,s,s);
-    const r=parseInt(col.slice(1,3),16),g=parseInt(col.slice(3,5),16),b=parseInt(col.slice(5,7),16);
-    sg.addColorStop(0,col);
-    sg.addColorStop(1,`rgb(${Math.max(0,r-40)},${Math.max(0,g-40)},${Math.max(0,b-40)})`);
-    ctx.fillStyle=sg;ctx.fillRect(0,0,s,s);
-    // Brillance
-    ctx.fillStyle='rgba(255,255,255,0.12)';ctx.fillRect(0,0,s,s*0.08);
-    ctx.fillStyle='rgba(0,0,0,0.2)';ctx.fillRect(0,s*0.92,s,s*0.08);
-    // Texte
-    ctx.fillStyle='rgba(255,255,255,0.92)';ctx.font=`bold ${s*0.28}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.shadowColor='rgba(0,0,0,0.5)';ctx.shadowBlur=4;
-    ctx.fillText(txt,s/2,s*0.42);
-    if(sub){ctx.fillStyle='rgba(255,255,255,0.55)';ctx.font=`bold ${s*0.11}px sans-serif`;ctx.shadowBlur=0;ctx.fillText(sub,s/2,s*0.72);}
-    ctx.shadowBlur=0;
-    ctx.strokeStyle='rgba(255,255,255,0.25)';ctx.lineWidth=4;ctx.strokeRect(5,5,s-10,s-10);
   },256);
 }
-const signTexList=[
-  makeSignTex('#c0392b','ラーメン','RAMEN'),makeSignTex('#2c7a3a','定食','TEISHOKU'),
-  makeSignTex('#1a4a8a','居酒屋','IZAKAYA'),makeSignTex('#7a2c8a','美容院','SALON'),
-  makeSignTex('#8a6a1a','薬局','PHARMACY'),makeSignTex('#2a6a8a','コンビニ','KONBINI'),
-  makeSignTex('#8a2a2a','銭湯','SENTO'),makeSignTex('#3a7a6a','書店','BOOKS'),
+const brickA=makeBrick('#b07060','#7a6a62');
+const brickB=makeBrick('#9a9090','#727070');
+const brickC=makeBrick('#c8b888','#907060');
+const brickD=makeBrick('#8a7070','#5a5050');
+
+const concBuild=procTex((ctx,s)=>{
+  ctx.fillStyle='#b2aaa2';ctx.fillRect(0,0,s,s);
+  for(let i=0;i<5000;i++){const v=Math.random()*20|0;ctx.fillStyle=`rgba(${140+v},${135+v},${128+v},0.4)`;ctx.fillRect(Math.random()*s|0,Math.random()*s|0,1,1+(Math.random()*2|0));}
+  for(let y=0;y<s;y+=36){ctx.strokeStyle='rgba(100,95,88,0.18)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(s,y);ctx.stroke();}
+});
+
+function makeWin(){
+  return procTex((ctx,s)=>{
+    ctx.fillStyle='#12202e';ctx.fillRect(0,0,s,s);
+    const cols=4,rows=5,pw=s/cols,ph=s/rows;
+    for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+      const lit=Math.random()<0.72;
+      ctx.fillStyle=lit?['#c2d5e5','#d8e0e8','#e2d8b5','#d0c5a0'][Math.floor(Math.random()*4)]:'#0a1520';
+      ctx.fillRect(c*pw+3,r*ph+3,pw-6,ph-6);
+      if(lit){ctx.fillStyle='rgba(255,255,255,0.18)';ctx.fillRect(c*pw+4,r*ph+4,pw*0.28,ph*0.2);}
+    }
+  },256);
+}
+const winA=makeWin(),winB=makeWin(),winC=makeWin();
+const roofTex=procTex((ctx,s)=>{ctx.fillStyle='#2a2520';ctx.fillRect(0,0,s,s);for(let y=0;y<s;y+=7){ctx.fillStyle=y%14===0?'#222018':'#302a24';ctx.fillRect(0,y,s,6);}});
+
+function makeSign(col,txt,sub){
+  return procTex((ctx,s)=>{
+    ctx.fillStyle=col;ctx.fillRect(0,0,s,s);
+    ctx.fillStyle='rgba(255,255,255,0.1)';ctx.fillRect(0,0,s,s*0.1);
+    ctx.fillStyle='rgba(255,255,255,0.9)';ctx.font=`bold ${s*0.26}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(txt,s/2,s*0.44);
+    if(sub){ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font=`bold ${s*0.11}px sans-serif`;ctx.fillText(sub,s/2,s*0.73);}
+    ctx.strokeStyle='rgba(255,255,255,0.22)';ctx.lineWidth=3;ctx.strokeRect(4,4,s-8,s-8);
+  },256);
+}
+const signTex=[
+  makeSign('#c0392b','ラーメン','RAMEN'),makeSign('#2c7a3a','定食','TEISHOKU'),
+  makeSign('#1a4a8a','居酒屋','IZAKAYA'),makeSign('#7a2c8a','美容院','SALON'),
+  makeSign('#8a6a1a','薬局','PHARMACY'),makeSign('#2a6a8a','コンビニ','KONBINI'),
+  makeSign('#8a2a2a','銭湯','SENTO'),makeSign('#3a7a6a','書店','BOOKS'),
+  makeSign('#4a2a8a','パチンコ','PACHINKO'),makeSign('#8a4a2a','焼肉','YAKINIKU'),
 ];
 
-// Égout - pierre mouillée
-const sewerWallTex=procTex((ctx,s)=>{
-  ctx.fillStyle='#1a2510';ctx.fillRect(0,0,s,s);
-  const BW=40,BH=20;
+// ── TEXTURES ÉGOUT (RÉALISTES) ────────────────────────────
+// Pierre humide vert foncé
+const sewerStoneTex=procTex((ctx,s)=>{
+  ctx.fillStyle='#1a2210';ctx.fillRect(0,0,s,s);
+  const BW=38,BH=18;
   for(let row=0;row*BH<s+BH;row++){
     const off=(row%2)*BW/2;
     for(let col=-1;col*BW<s+BW;col++){
-      const v=20+Math.random()*20;
-      ctx.fillStyle=`rgb(${v},${v+8},${v-5})`;
+      const v=16+Math.random()*18|0;
+      ctx.fillStyle=`rgb(${v},${v+9},${v-4})`;
       ctx.fillRect(col*BW+off+1,row*BH+1,BW-2,BH-2);
     }
   }
-  // Mousse et humidité
-  for(let i=0;i<60;i++){
+  // Mousse verte
+  for(let i=0;i<80;i++){
     const mx=Math.random()*s,my=Math.random()*s;
-    const mg=ctx.createRadialGradient(mx,my,0,mx,my,8+Math.random()*15);
-    mg.addColorStop(0,'rgba(30,80,20,0.5)');mg.addColorStop(1,'rgba(0,0,0,0)');
+    const mg=ctx.createRadialGradient(mx,my,0,mx,my,6+Math.random()*10);
+    mg.addColorStop(0,'rgba(20,80,10,0.65)');mg.addColorStop(1,'rgba(0,0,0,0)');
     ctx.fillStyle=mg;ctx.fillRect(0,0,s,s);
   }
-  // Trainées eau
-  for(let i=0;i<20;i++){
-    const sx=Math.random()*s;
-    ctx.fillStyle='rgba(100,180,80,0.15)';
-    ctx.fillRect(sx,Math.random()*s*0.3,1+Math.random(),s*0.4+Math.random()*s*0.4);
-  }
-},512);
-sewerWallTex.repeat.set(4,4);
+  // Trainées humidité
+  for(let i=0;i<25;i++){const sx=Math.random()*s;ctx.fillStyle='rgba(80,180,60,0.1)';ctx.fillRect(sx,Math.random()*s*0.3,1.5,s*0.5+Math.random()*s*0.3);}
+},256);
+sewerStoneTex.repeat.set(4,4);
 
+// Sol égout béton crasseux
 const sewerFloorTex=procTex((ctx,s)=>{
-  ctx.fillStyle='#151e0c';ctx.fillRect(0,0,s,s);
-  for(let i=0;i<5000;i++){
-    const v=15+Math.random()*25;
-    ctx.fillStyle=`rgba(${v},${v+10},${v-5},0.8)`;
-    ctx.fillRect(Math.random()*s|0,Math.random()*s|0,1+(Math.random()*2|0),1);
-  }
-  // Flaque centrale
-  const wg=ctx.createRadialGradient(s/2,s/2,0,s/2,s/2,s/2);
-  wg.addColorStop(0,'rgba(30,60,20,0.4)');wg.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle=wg;ctx.fillRect(0,0,s,s);
-},512);
-sewerFloorTex.repeat.set(6,6);
-
-// Peau humaine réaliste
-function makeSkinTex(baseColor){
-  return procTex((ctx,s)=>{
-    ctx.fillStyle=baseColor;ctx.fillRect(0,0,s,s);
-    // Pores
-    for(let i=0;i<3000;i++){
-      const v=Math.random()*15-7;
-      const r=parseInt(baseColor.slice(1,3),16)+v;
-      const g=parseInt(baseColor.slice(3,5),16)+v;
-      const b=parseInt(baseColor.slice(5,7),16)+v;
-      ctx.fillStyle=`rgba(${Math.max(0,Math.min(255,r))},${Math.max(0,Math.min(255,g))},${Math.max(0,Math.min(255,b))},0.5)`;
-      ctx.fillRect(Math.random()*s|0,Math.random()*s|0,1,1);
-    }
-    // Veines légères
-    ctx.strokeStyle='rgba(180,100,100,0.08)';ctx.lineWidth=1;
-    for(let i=0;i<10;i++){
-      ctx.beginPath();let x=Math.random()*s,y=Math.random()*s;ctx.moveTo(x,y);
-      for(let j=0;j<5;j++){x+=Math.random()*20-10;y+=Math.random()*20-10;ctx.lineTo(x,y);}
-      ctx.stroke();
-    }
-  },256);
-}
-const skinTex1=makeSkinTex('#f4c896'),skinTex2=makeSkinTex('#e8a86c'),skinTex3=makeSkinTex('#c8804a'),skinTex4=makeSkinTex('#5c3a1e');
-
-// Tissus vêtements
-function makeFabricTex(col){
-  return procTex((ctx,s)=>{
-    ctx.fillStyle=col;ctx.fillRect(0,0,s,s);
-    ctx.globalAlpha=0.15;
-    for(let x=0;x<s;x+=3){ctx.fillStyle='rgba(255,255,255,0.2)';ctx.fillRect(x,0,1,s);}
-    for(let y=0;y<s;y+=3){ctx.fillStyle='rgba(0,0,0,0.15)';ctx.fillRect(0,y,s,1);}
-    ctx.globalAlpha=1;
-    for(let i=0;i<2000;i++){const v=Math.random()*15-7;const r=parseInt(col.slice(1,3),16)+v,g=parseInt(col.slice(3,5),16)+v,b=parseInt(col.slice(5,7),16)+v;ctx.fillStyle=`rgba(${Math.max(0,Math.min(255,r))},${Math.max(0,Math.min(255,g))},${Math.max(0,Math.min(255,b))},0.3)`;ctx.fillRect(Math.random()*s|0,Math.random()*s|0,1,1);}
-  },256);
-}
-const clothColors=['#2244aa','#aa2222','#228833','#885522','#773388','#224466','#aa8822','#226688','#333333','#cc6600'];
-const clothTextures=clothColors.map(c=>makeFabricTex(c));
-
-// Métal carrosserie voiture HD
-function makeCarPaintTex(col){
-  return procTex((ctx,s)=>{
-    ctx.fillStyle=col;ctx.fillRect(0,0,s,s);
-    // Effet peau d'orange
-    for(let i=0;i<2000;i++){
-      const v=Math.random()*10-5;
-      const r=parseInt(col.slice(1,3),16)+v,g=parseInt(col.slice(3,5),16)+v,b=parseInt(col.slice(5,7),16)+v;
-      ctx.fillStyle=`rgba(${Math.max(0,Math.min(255,r))},${Math.max(0,Math.min(255,g))},${Math.max(0,Math.min(255,b))},0.4)`;
-      ctx.fillRect(Math.random()*s|0,Math.random()*s|0,1+(Math.random()*1.5|0),1+(Math.random()*1.5|0));
-    }
-    // Reflet
-    const rg=ctx.createLinearGradient(0,0,s,s);
-    rg.addColorStop(0,'rgba(255,255,255,0.12)');rg.addColorStop(0.4,'rgba(255,255,255,0.05)');rg.addColorStop(0.6,'rgba(0,0,0,0.05)');rg.addColorStop(1,'rgba(0,0,0,0.15)');
-    ctx.fillStyle=rg;ctx.fillRect(0,0,s,s);
-  },256);
-}
-const carPaintColors=['#1e2530','#0f0f18','#3a0808','#0a1a35','#2a1a05','#0d2018','#380505','#0e2a18','#f0f0f0','#aaaaaa','#d04000','#0033aa'];
-const carPaintTextures=carPaintColors.map(c=>makeCarPaintTex(c));
-
-// Pneu réaliste
-const tireTex=procTex((ctx,s)=>{
-  ctx.fillStyle='#111111';ctx.fillRect(0,0,s,s);
-  // Sculpture
-  for(let y=0;y<s;y+=12){
-    ctx.fillStyle='rgba(40,40,40,0.8)';ctx.fillRect(0,y,s,6);
-    for(let x=0;x<s;x+=16){ctx.fillStyle='rgba(20,20,20,0.9)';ctx.fillRect(x,y,8,6);}
-  }
-  for(let i=0;i<2000;i++){const v=Math.random()*15;ctx.fillStyle=`rgba(${v},${v},${v},0.5)`;ctx.fillRect(Math.random()*s|0,Math.random()*s|0,1,1);}
+  ctx.fillStyle='#141a0c';ctx.fillRect(0,0,s,s);
+  for(let i=0;i<5000;i++){const v=12+Math.random()*22|0;ctx.fillStyle=`rgba(${v},${v+9},${v-3},0.8)`;ctx.fillRect(Math.random()*s|0,Math.random()*s|0,1+(Math.random()*2|0),1);}
+  // Joint de dalle
+  ctx.strokeStyle='rgba(0,0,0,0.5)';ctx.lineWidth=1;
+  for(let x=0;x<s;x+=48){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,s);ctx.stroke();}
+  for(let y=0;y<s;y+=48){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(s,y);ctx.stroke();}
 },256);
+sewerFloorTex.repeat.set(5,5);
 
-// Jante alu
-const rimTex=procTex((ctx,s)=>{
-  const rg=ctx.createRadialGradient(s/2,s/2,0,s/2,s/2,s/2);
-  rg.addColorStop(0,'#e0e0e0');rg.addColorStop(0.7,'#b0b0b0');rg.addColorStop(1,'#888888');
-  ctx.fillStyle=rg;ctx.fillRect(0,0,s,s);
-  // Rayons
-  for(let i=0;i<5;i++){
-    const ang=i*Math.PI*2/5;
-    ctx.fillStyle='rgba(80,80,80,0.6)';ctx.save();ctx.translate(s/2,s/2);ctx.rotate(ang);ctx.fillRect(-3,8,6,s/2-18);ctx.restore();
-  }
-  ctx.fillStyle='rgba(60,60,60,0.8)';ctx.beginPath();ctx.arc(s/2,s/2,s*0.12,0,Math.PI*2);ctx.fill();
-  const cg=ctx.createRadialGradient(s/2-5,s/2-5,0,s/2,s/2,s*0.12);
-  cg.addColorStop(0,'rgba(220,220,220,0.9)');cg.addColorStop(1,'rgba(100,100,100,0)');
-  ctx.fillStyle=cg;ctx.fillRect(0,0,s,s);
+// Plafond béton foncé
+const sewerCeilTex=procTex((ctx,s)=>{
+  ctx.fillStyle='#111810';ctx.fillRect(0,0,s,s);
+  for(let i=0;i<4000;i++){const v=10+Math.random()*18|0;ctx.fillStyle=`rgba(${v},${v+7},${v-2},0.7)`;ctx.fillRect(Math.random()*s|0,Math.random()*s|0,1+(Math.random()*2|0),1);}
+  // Taches rouille/humidité
+  for(let i=0;i<30;i++){const mx=Math.random()*s,my=Math.random()*s;const mg=ctx.createRadialGradient(mx,my,0,mx,my,8+Math.random()*14);mg.addColorStop(0,'rgba(60,40,20,0.5)');mg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=mg;ctx.fillRect(0,0,s,s);}
 },256);
+sewerCeilTex.repeat.set(4,4);
 
-// Vitre voiture
-const carGlassTex=procTex((ctx,s)=>{
-  const gg=ctx.createLinearGradient(0,0,s,s);
-  gg.addColorStop(0,'rgba(180,210,230,0.7)');gg.addColorStop(0.3,'rgba(200,225,240,0.5)');gg.addColorStop(0.7,'rgba(160,200,220,0.6)');gg.addColorStop(1,'rgba(140,190,215,0.8)');
-  ctx.fillStyle=gg;ctx.fillRect(0,0,s,s);
+// Tuyau métal rouillé
+const pipeTex=procTex((ctx,s)=>{
+  const g=ctx.createLinearGradient(0,0,s,0);
+  g.addColorStop(0,'#4a3520');g.addColorStop(0.3,'#6a5030');g.addColorStop(0.5,'#5a4025');g.addColorStop(0.7,'#3a2a15');g.addColorStop(1,'#4a3520');
+  ctx.fillStyle=g;ctx.fillRect(0,0,s,s);
+  // Rouille
+  for(let i=0;i<60;i++){const rx=Math.random()*s,ry=Math.random()*s;const rg=ctx.createRadialGradient(rx,ry,0,rx,ry,4+Math.random()*8);rg.addColorStop(0,'rgba(160,60,20,0.6)');rg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=rg;ctx.fillRect(0,0,s,s);}
+  // Raies soudures
+  for(let y=0;y<s;y+=30){ctx.fillStyle='rgba(30,20,10,0.5)';ctx.fillRect(0,y,s,2);}
+},256);
+pipeTex.repeat.set(3,3);
+
+// Eau d'égout
+const sewerWaterTex=procTex((ctx,s)=>{
+  ctx.fillStyle='#0d1a08';ctx.fillRect(0,0,s,s);
+  for(let i=0;i<3000;i++){const v=10+Math.random()*20|0;ctx.fillStyle=`rgba(${v-5},${v+10},${v-8},0.7)`;ctx.fillRect(Math.random()*s|0,Math.random()*s|0,1+(Math.random()*3|0),1);}
   // Reflets
-  ctx.fillStyle='rgba(255,255,255,0.15)';
-  ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(s*0.4,0);ctx.lineTo(s*0.2,s*0.5);ctx.lineTo(0,s*0.3);ctx.fill();
+  for(let i=0;i<40;i++){const rx=Math.random()*s,ry=Math.random()*s;const rg=ctx.createRadialGradient(rx,ry,0,rx,ry,3+Math.random()*8);rg.addColorStop(0,'rgba(40,100,30,0.4)');rg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=rg;ctx.fillRect(0,0,s,s);}
 },256);
+sewerWaterTex.repeat.set(4,4);
 
-// Bois banc/kiosque
-const woodTex=procTex((ctx,s)=>{
-  ctx.fillStyle='#8a6030';ctx.fillRect(0,0,s,s);
-  for(let i=0;i<30;i++){
-    const wy=i*(s/30);const wg=ctx.createLinearGradient(0,wy,0,wy+s/30);
-    const v=Math.random()*20-10;const base=parseInt('#8a6030'.slice(1+(i%2)*2),16)+v;
-    wg.addColorStop(0,`rgba(${120+v},${90+v},${45+v},0.6)`);wg.addColorStop(1,`rgba(${100+v},${70+v},${35+v},0.6)`);
-    ctx.fillStyle=wg;ctx.fillRect(0,wy,s,s/30);
-  }
-  for(let i=0;i<3000;i++){const v=Math.random()*20-10;ctx.fillStyle=`rgba(${140+v},${100+v},${50+v},0.2)`;ctx.fillRect(Math.random()*s|0,Math.random()*s|0,1+(Math.random()*2|0),1);}
-  for(let y=0;y<s;y+=s/30){ctx.strokeStyle='rgba(60,40,20,0.3)';ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(s,y);ctx.stroke();}
-},256);
-
-// Vélo
-const bikeMetalTex=procTex((ctx,s)=>{
-  const mg=ctx.createLinearGradient(0,0,s,s);mg.addColorStop(0,'#888888');mg.addColorStop(0.5,'#cccccc');mg.addColorStop(1,'#777777');
-  ctx.fillStyle=mg;ctx.fillRect(0,0,s,s);
-  for(let i=0;i<1000;i++){const v=Math.random()*30-15;ctx.fillStyle=`rgba(${128+v},${128+v},${128+v},0.3)`;ctx.fillRect(Math.random()*s|0,Math.random()*s|0,1,1+(Math.random()*2|0));}
-},256);
-
-// Matériaux standards
-const matAsphalt=new THREE.MeshStandardMaterial({map:asphaltTex,roughness:0.95,color:0x999999});
+// ── MATÉRIAUX DE BASE ─────────────────────────────────────
+const matA=new THREE.MeshStandardMaterial({map:asphaltTex,roughness:0.95,color:0x999999});
 const matCon=new THREE.MeshStandardMaterial({map:concreteTex,roughness:0.9,color:0xaaaaaa});
 const matGr=new THREE.MeshStandardMaterial({map:grassTex,roughness:0.95,color:0xbbbbbb});
-const matRoof=new THREE.MeshStandardMaterial({map:roofTex,roughness:0.88,metalness:0.05,color:0xaaaaaa});
+const matDirt=new THREE.MeshStandardMaterial({map:dirtTex,roughness:0.97,color:0xaaaaaa});
+const matGravel=new THREE.MeshStandardMaterial({map:gravelTex,roughness:0.93,color:0xaaaaaa});
+const matRoof=new THREE.MeshStandardMaterial({map:roofTex,roughness:0.88,metalness:0.05});
 const barkMat=new THREE.MeshStandardMaterial({color:0x4a3820,roughness:0.92});
-const sewerWallMat=new THREE.MeshStandardMaterial({map:sewerWallTex,roughness:0.95,color:0x778866,side:THREE.DoubleSide});
-const sewerFloorMat=new THREE.MeshStandardMaterial({map:sewerFloorTex,roughness:0.97,color:0x667755});
-const woodMat=new THREE.MeshStandardMaterial({map:woodTex,roughness:0.8,color:0xcccccc});
 
-// ── COLLIDERS UNIFIÉS ──────────────────────────────────
-// Tous les colliders : boîtes AABBs et cylindres
-const boxColliders=[];  // {minX,maxX,minZ,maxZ,minY,maxY}
-const cylinderColliders=[];  // {x,z,r,maxH}
-const dynamicColliders=[]; // voitures/vélos en mouvement {mesh,hw,hd,h}
+// Matériaux égout
+const sewerWallMat=new THREE.MeshStandardMaterial({map:sewerStoneTex,roughness:0.97,color:0x889977});
+const sewerFloorMat=new THREE.MeshStandardMaterial({map:sewerFloorTex,roughness:0.98,color:0x778866});
+const sewerCeilMat=new THREE.MeshStandardMaterial({map:sewerCeilTex,roughness:0.97,color:0x667755});
+const pipeMat=new THREE.MeshStandardMaterial({map:pipeTex,roughness:0.75,metalness:0.4,color:0xbbbbaa});
+const sewerWaterMat=new THREE.MeshStandardMaterial({map:sewerWaterTex,roughness:0.08,metalness:0.15,transparent:true,opacity:0.82,color:0x88aa77});
 
-const PR=0.55; // rayon joueur
-
-function addBox(cx,cz,hw,hd,maxH=200,minY=0){
-  boxColliders.push({minX:cx-hw,maxX:cx+hw,minZ:cz-hd,maxZ:cz+hd,maxY:maxH,minY});
-}
-function addCyl(x,z,r,maxH=200){
-  cylinderColliders.push({x,z,r,maxH});
-}
-
-// Résolution collisions statiques
-function resolveCollisions(nx,nz,py){
-  // Boîtes
-  for(const c of boxColliders){
-    if(py>=c.maxY||py<c.minY)continue;
-    const px=Math.max(c.minX,Math.min(c.maxX,nx));
-    const pz=Math.max(c.minZ,Math.min(c.maxZ,nz));
-    const dx=nx-px,dz=nz-pz,d=Math.sqrt(dx*dx+dz*dz);
-    if(d<PR){if(d<0.001){nx+=PR;}else{const p=PR-d;nx+=(dx/d)*p;nz+=(dz/d)*p;}}
-  }
-  // Cylindres
-  for(const c of cylinderColliders){
-    if(py>=c.maxH)continue;
-    const dx=nx-c.x,dz=nz-c.z,d=Math.sqrt(dx*dx+dz*dz);
-    const minDist=PR+c.r;
-    if(d<minDist){if(d<0.001){nx+=minDist;}else{const p=(minDist-d)/d;nx+=dx*p;nz+=dz*p;}}
-  }
-  // Dynamiques (voitures/vélos)
-  for(const c of dynamicColliders){
-    const cx=c.mesh.position.x,cz=c.mesh.position.z;
-    const cosA=Math.cos(-c.mesh.rotation.y),sinA=Math.sin(-c.mesh.rotation.y);
-    const lx=(nx-cx)*cosA-(nz-cz)*sinA;
-    const lz=(nx-cx)*sinA+(nz-cz)*cosA;
-    const clampX=Math.max(-c.hw,Math.min(c.hw,lx));
-    const clampZ=Math.max(-c.hd,Math.min(c.hd,lz));
-    const dlx=lx-clampX,dlz=lz-clampZ;
-    const d=Math.sqrt(dlx*dlx+dlz*dlz);
-    if(d<PR&&c.mesh.position.y<py+c.h){
-      if(d<0.001){
-        const wx=cosA*PR-sinA*0,wz=sinA*PR+cosA*0;
-        nx+=wx;nz+=wz;
-      }else{
-        const p=PR-d;
-        const wx=cosA*(dlx/d)*p-sinA*(dlz/d)*p;
-        const wz=sinA*(dlx/d)*p+cosA*(dlz/d)*p;
-        nx+=wx;nz+=wz;
-      }
-    }
-  }
-  return{x:nx,z:nz};
-}
-
-// Résolution ÉGOUT (boîtes)
-const sewerBoxColliders=[];
-function resolveSewerCollisions(nx,nz,py){
-  for(const c of sewerBoxColliders){
-    const px=Math.max(c.minX,Math.min(c.maxX,nx));
-    const pz=Math.max(c.minZ,Math.min(c.maxZ,nz));
+// ── COLLIDERS ─────────────────────────────────────────────
+const colliders=[];
+function addCol(cx,cz,hw,hd,mH=200){colliders.push({minX:cx-hw,maxX:cx+hw,minZ:cz-hd,maxZ:cz+hd,mH});}
+const PR=0.55;
+function resCol(nx,nz,py,cols){
+  for(const c of cols){
+    if(py>=(c.mH||200))continue;
+    const px=Math.max(c.minX,Math.min(c.maxX,nx)),pz=Math.max(c.minZ,Math.min(c.maxZ,nz));
     const dx=nx-px,dz=nz-pz,d=Math.sqrt(dx*dx+dz*dz);
     if(d<PR){if(d<0.001){nx+=PR;}else{const p=PR-d;nx+=(dx/d)*p;nz+=(dz/d)*p;}}
   }
   return{x:nx,z:nz};
 }
 
-// ── MONDE ───────────────────────────────────────────────
-const WORLD=160;
-const PARK_X=0,PARK_Z=-130,PARK_W=90,PARK_D=60;
+// Colliders égout séparés
+const sewerColliders=[];
+function addSewerCol(cx,cz,hw,hd){sewerColliders.push({minX:cx-hw,maxX:cx+hw,minZ:cz-hd,maxZ:cz+hd,mH:200});}
 
-// SOL
-const gnd=new THREE.Mesh(new THREE.PlaneGeometry(400,400),matAsphalt);gnd.rotation.x=-Math.PI/2;gnd.receiveShadow=true;scene.add(gnd);
+// ── SOL & ROUTES ──────────────────────────────────────────
+// Sol de base asphaltée qui couvre tout
+const gnd=new THREE.Mesh(new THREE.PlaneGeometry(400,400),matA);
+gnd.rotation.x=-Math.PI/2;gnd.receiveShadow=true;scene.add(gnd);
 
-// Parcs verts
-function makePark(px,pz,s){
-  const p=new THREE.Mesh(new THREE.PlaneGeometry(s,s),matGr);p.rotation.x=-Math.PI/2;p.position.set(px,0.01,pz);p.receiveShadow=true;scene.add(p);
+// ── QUARTIERS (remplissage complet style GTA) ─────────────
+// Chaque quartier = bloc de terrain entre les rues
+
+// Trottoirs axes principaux
+function sidewalk(x,z,w,d){
+  const s=new THREE.Mesh(new THREE.BoxGeometry(w,0.12,d),matCon);
+  s.position.set(x,0.06,z);s.receiveShadow=true;scene.add(s);
 }
-makePark(0,0,60);makePark(-110,-110,50);makePark(110,-110,50);makePark(-110,110,50);makePark(110,110,50);
-makePark(-55,0,30);makePark(55,0,30);makePark(0,-55,30);makePark(0,55,30);
-const cpGround=new THREE.Mesh(new THREE.PlaneGeometry(PARK_W,PARK_D),matGr);cpGround.rotation.x=-Math.PI/2;cpGround.position.set(PARK_X,0.01,PARK_Z);cpGround.receiveShadow=true;scene.add(cpGround);
+// Axes principaux
+sidewalk(0,0,260,7);sidewalk(0,0,7,260);
+// Axes secondaires
+[-40,-80,-120,40,80,120].forEach(v=>{
+  sidewalk(v,0,6,260);sidewalk(0,v,260,6);
+});
 
-// Routes
-function sw(x,z,w,d){const s=new THREE.Mesh(new THREE.BoxGeometry(w,0.1,d),matCon);s.position.set(x,0.05,z);s.receiveShadow=true;scene.add(s);}
-sw(0,0,330,8);sw(0,0,8,330);
-[-50,-25,25,50,-75,75,-100,100,-125,125].forEach(z=>sw(0,z,330,5));
-[-50,-25,25,50,-75,75,-100,100,-125,125].forEach(x=>sw(x,0,5,330));
-const lm=new THREE.MeshBasicMaterial({color:0xddddcc});
-for(let i=-150;i<150;i+=14){
-  const l=new THREE.Mesh(new THREE.PlaneGeometry(0.22,5.5),lm);l.rotation.x=-Math.PI/2;l.position.set(0,0.025,i);scene.add(l);
-  const l2=new THREE.Mesh(new THREE.PlaneGeometry(5.5,0.22),lm);l2.rotation.x=-Math.PI/2;l2.position.set(i,0.025,0);scene.add(l2);
+// Marquages blancs routes
+const lineMat=new THREE.MeshBasicMaterial({color:0xddddcc});
+for(let i=-130;i<130;i+=14){
+  const l=new THREE.Mesh(new THREE.PlaneGeometry(0.22,5.5),lineMat);l.rotation.x=-Math.PI/2;l.position.set(0,0.025,i);scene.add(l);
+  const l2=new THREE.Mesh(new THREE.PlaneGeometry(5.5,0.22),lineMat);l2.rotation.x=-Math.PI/2;l2.position.set(i,0.025,0);scene.add(l2);
 }
 
-// Lac central
-const lakeMat=new THREE.MeshStandardMaterial({color:0x2255aa,roughness:0.05,metalness:0.3,transparent:true,opacity:0.82});
-const lake=new THREE.Mesh(new THREE.CylinderGeometry(11,11,0.1,32),lakeMat);lake.position.set(PARK_X-12,0.06,PARK_Z);scene.add(lake);
-
-// Fontaine centrale
-(()=>{
-  const sm=new THREE.MeshStandardMaterial({color:0x8a8278,roughness:0.85});
-  const wm=new THREE.MeshStandardMaterial({color:0x4488aa,roughness:0.1,metalness:0.3,transparent:true,opacity:0.75});
-  function pm(geo,mat,x,y,z){const m=new THREE.Mesh(geo,mat);m.castShadow=true;m.position.set(x,y,z);scene.add(m);return m;}
-  pm(new THREE.CylinderGeometry(4.5,5,0.8,24),sm,0,0.4,0);
-  pm(new THREE.CylinderGeometry(4,4,0.1,24),wm,0,0.85,0);
-  pm(new THREE.CylinderGeometry(0.22,0.28,3.5,10),sm,0,2.55,0);
-  pm(new THREE.CylinderGeometry(1.2,0.85,0.22,16),sm,0,4.5,0);
-  addBox(0,0,5,5,5);
-})();
-
-// Arbres
-function makeTree(px,pz,i=0){
-  const h=3.8+Math.random()*2.2;
-  const tr=new THREE.Mesh(new THREE.CylinderGeometry(0.14,0.22,h,7),barkMat);tr.castShadow=true;tr.position.set(px,h/2,pz);scene.add(tr);
-  const lc=new THREE.MeshStandardMaterial({color:new THREE.Color(['#2d5a1e','#3a6a22','#254d18','#4a7828'][i%4]),roughness:0.9});
-  const r=1.6+Math.random()*0.8;
-  [new THREE.Vector3(0,r*0.7,0),new THREE.Vector3(r*0.55,r*0.5,0),new THREE.Vector3(-r*0.5,r*0.45,0)].forEach(off=>{
-    const l=new THREE.Mesh(new THREE.SphereGeometry(r*(0.6+Math.abs(off.x)/r*0.1+0.4),7,5),lc);l.castShadow=true;l.position.set(px+off.x,h+off.y,pz+off.z);scene.add(l);
-  });
-  addCyl(px,pz,0.3,h+2);
-}
-[[-10,-11],[10,-11],[-10,11],[10,11],[-15,-15],[15,-15],[-15,15],[15,15],[-22,-22],[22,-22],[-22,22],[22,22]].forEach((p,i)=>makeTree(p[0],p[1],i));
-for(let i=0;i<60;i++){const ax=PARK_X+(Math.random()-0.5)*PARK_W*0.88,az=PARK_Z+(Math.random()-0.5)*PARK_D*0.88;const d=Math.sqrt((ax-PARK_X+12)**2+(az-PARK_Z)**2);if(d>13)makeTree(ax,az,i%4);}
-for(let x=-140;x<=140;x+=18)for(let z=-140;z<=140;z+=18){if(Math.abs(x)>8&&Math.abs(z)>8&&Math.random()<0.45)makeTree(x+(Math.random()*3-1.5),z+(Math.random()*3-1.5),Math.floor(Math.random()*4));}
-
-// Lampadaires
+// ── FONCTIONS CONSTRUCTION ────────────────────────────────
+const bArr=[brickA,brickB,brickC,brickD];
 const lpM=new THREE.MeshStandardMaterial({color:0x4a5060,roughness:0.5,metalness:0.7});
 const lgM=new THREE.MeshStandardMaterial({color:0xfffce0,roughness:0.1,emissive:new THREE.Color(0xfffce0),emissiveIntensity:0.12});
+
 function lamp(x,z){
   const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.1,7,8),lpM);pole.castShadow=true;pole.position.set(x,3.5,z);scene.add(pole);
   const arm=new THREE.Mesh(new THREE.BoxGeometry(2,0.08,0.08),lpM);arm.position.set(x+0.95,7.15,z);scene.add(arm);
   const head=new THREE.Mesh(new THREE.BoxGeometry(0.55,0.2,0.3),lpM);head.position.set(x+1.88,7.05,z);scene.add(head);
   const gl=new THREE.Mesh(new THREE.BoxGeometry(0.42,0.09,0.24),lgM);gl.position.set(x+1.88,6.93,z);scene.add(gl);
-  addCyl(x,z,0.15,8);
+  addCol(x,z,0.15,0.15);
 }
-for(let x=-130;x<=130;x+=22)for(let z=-130;z<=130;z+=22)lamp(x,z);
 
-// Bancs
-[[-8,-9],[8,-9],[-8,9],[8,9],[-12,0],[12,0],[0,-12],[0,12],[-22,-22],[22,-22],[-22,22],[22,22]].forEach(p=>{
-  const seat=new THREE.Mesh(new THREE.BoxGeometry(2.4,0.12,0.55),woodMat);seat.castShadow=true;seat.position.set(p[0],0.5,p[1]);scene.add(seat);
-  const back=new THREE.Mesh(new THREE.BoxGeometry(2.4,0.5,0.1),woodMat);back.castShadow=true;back.position.set(p[0],0.77,p[1]-0.22);scene.add(back);
-  const metM=new THREE.MeshStandardMaterial({color:0x4a5060,roughness:0.5,metalness:0.6});
-  [-1,1].forEach(s=>{const leg=new THREE.Mesh(new THREE.BoxGeometry(0.08,0.52,0.48),metM);leg.position.set(p[0]+s*0.95,0.26,p[1]);scene.add(leg);});
-  addBox(p[0],p[1],1.2,0.38,0.65);
-});
-
-// Bâtiments
-const bArr=[brickA,brickB,brickC];
 function building(x,z,w,h,d,style=0){
   const wM=style===0
-    ?new THREE.MeshStandardMaterial({map:bArr[Math.abs(x+z)%3],roughness:0.85,color:0xcccccc})
+    ?new THREE.MeshStandardMaterial({map:bArr[Math.abs(x+z)%4],roughness:0.85,color:0xcccccc})
     :new THREE.MeshStandardMaterial({map:concBuild,roughness:0.82,metalness:0.05,color:style===1?0xccc8c0:0xbec0c4});
   const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),wM);b.castShadow=true;b.receiveShadow=true;b.position.set(x,h/2,z);scene.add(b);
-  const rM=new THREE.Mesh(new THREE.BoxGeometry(w+0.2,0.5,d+0.2),matRoof);rM.position.set(x,h+0.25,z);scene.add(rM);
+  const rM=new THREE.Mesh(new THREE.BoxGeometry(w+0.2,0.45,d+0.2),matRoof);rM.position.set(x,h+0.22,z);scene.add(rM);
   const wCols=Math.max(1,Math.floor(w/2.8)),wRows=Math.max(1,Math.floor(h/3.8));
   const wm1=new THREE.MeshStandardMaterial({map:[winA,winB,winC][Math.abs(x+z)%3],roughness:0.2,metalness:0.6,color:0xaaccee});
   for(let r=0;r<wRows;r++)for(let c=0;c<wCols;c++){
@@ -790,667 +451,493 @@ function building(x,z,w,h,d,style=0){
     const win1=new THREE.Mesh(new THREE.BoxGeometry(0.85,1.3,0.07),wm1);win1.position.set(x+wx,wy,z+d/2+0.05);scene.add(win1);
     const win2=new THREE.Mesh(new THREE.BoxGeometry(0.85,1.3,0.07),wm1);win2.position.set(x+wx,wy,z-d/2-0.05);scene.add(win2);
   }
-  const sM=new THREE.MeshStandardMaterial({map:signTexList[Math.abs(Math.round(x*z))%signTexList.length],roughness:0.6});
-  const sw2=Math.min(w*0.55,5),sh=sw2*1.4;
-  const sign=new THREE.Mesh(new THREE.BoxGeometry(sw2,sh,0.12),sM);sign.position.set(x,h*0.35,z+d/2+0.1);scene.add(sign);
-  addBox(x,z,w/2+0.15,d/2+0.15);
+  const sM=new THREE.MeshStandardMaterial({map:signTex[Math.abs(Math.round(x*z))%signTex.length],roughness:0.6});
+  const sw=Math.min(w*0.55,4.5),sh=sw*1.35;
+  const sign=new THREE.Mesh(new THREE.BoxGeometry(sw,sh,0.12),sM);sign.position.set(x,h*0.33,z+d/2+0.1);scene.add(sign);
+  const antM=new THREE.MeshStandardMaterial({color:0x5a6070,roughness:0.5,metalness:0.6});
+  const ant=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.08,3.5,6),antM);ant.castShadow=true;ant.position.set(x+w/4,h+2.15,z+d/4);scene.add(ant);
+  addCol(x,z,w/2+0.15,d/2+0.15);
 }
-building(32,-32,10,45,10,1);building(44,-24,12,60,11,2);building(32,-48,9,35,9,0);building(50,-38,10,50,10,1);
-building(32,-60,11,32,11,2);building(50,-55,9,42,9,0);building(18,-48,8,28,8,1);building(62,-28,9,32,9,2);building(62,-50,11,40,11,0);
-building(-32,-32,11,50,11,0);building(-46,-24,10,42,10,1);building(-32,-48,9,34,9,2);building(-50,-38,12,48,12,0);
-building(-18,-48,8,24,8,1);building(-50,-55,10,36,10,2);building(-62,-28,9,28,9,0);building(-62,-50,11,36,11,1);
-building(32,32,9,24,9,2);building(46,24,11,34,11,0);building(32,48,10,22,10,1);building(50,40,9,30,9,2);
-building(-32,32,10,28,10,0);building(-46,24,9,24,9,1);building(-32,48,9,26,9,2);building(-50,40,11,32,11,0);
-building(80,-30,14,65,13,1);building(100,-20,12,80,12,2);building(80,-55,13,45,13,0);building(105,-45,11,55,11,1);
-building(-80,-30,13,55,13,2);building(-100,-20,11,72,11,0);building(-80,-55,12,42,12,1);
-building(80,30,12,42,12,0);building(100,20,13,58,13,1);building(80,55,11,36,11,2);
-building(-80,30,11,38,11,1);building(-100,20,12,52,12,2);building(-80,55,13,34,13,0);
-building(30,-90,10,32,10,0);building(50,-90,11,26,11,1);building(-30,-90,10,28,10,1);building(30,90,10,36,10,2);
 
+function smallBuilding(x,z,w,h,d){
+  building(x,z,w,h,d,Math.floor(Math.random()*3));
+}
+
+function makeTree(px,pz,i=0){
+  const h=3.5+Math.random()*2;
+  const tr=new THREE.Mesh(new THREE.CylinderGeometry(0.14,0.22,h,7),barkMat);tr.castShadow=true;tr.position.set(px,h/2,pz);scene.add(tr);
+  const lc=new THREE.MeshStandardMaterial({color:new THREE.Color(['#2d5a1e','#3a6a22','#254d18','#4a7828'][i%4]),roughness:0.9});
+  const r=1.5+Math.random()*0.8;
+  const leaf=new THREE.Mesh(new THREE.SphereGeometry(r,8,6),lc);leaf.castShadow=true;leaf.position.set(px,h+r*0.7,pz);scene.add(leaf);
+  const leaf2=new THREE.Mesh(new THREE.SphereGeometry(r*0.75,7,5),lc);leaf2.castShadow=true;leaf2.position.set(px+r*0.5,h+r*0.5,pz);scene.add(leaf2);
+  addCol(px,pz,0.28,0.28);
+}
+
+function parkBlock(cx,cz,w,d){
+  // Sol herbe
+  const p=new THREE.Mesh(new THREE.PlaneGeometry(w,d),matGr);p.rotation.x=-Math.PI/2;p.position.set(cx,0.015,cz);p.receiveShadow=true;scene.add(p);
+  // Allées
+  const pa=new THREE.Mesh(new THREE.PlaneGeometry(1.5,d),matCon);pa.rotation.x=-Math.PI/2;pa.position.set(cx,0.02,cz);pa.receiveShadow=true;scene.add(pa);
+  const pa2=new THREE.Mesh(new THREE.PlaneGeometry(w,1.5),matCon);pa2.rotation.x=-Math.PI/2;pa2.position.set(cx,0.02,cz);pa2.receiveShadow=true;scene.add(pa2);
+  // Arbres
+  const nx=Math.max(2,Math.floor(w/8));const nz=Math.max(2,Math.floor(d/8));
+  for(let i=0;i<nx;i++)for(let j=0;j<nz;j++){
+    if(Math.random()<0.55){
+      const tx=cx-w/2+3+i*(w-6)/(Math.max(nx-1,1))+(Math.random()*2-1);
+      const tz=cz-d/2+3+j*(d-6)/(Math.max(nz-1,1))+(Math.random()*2-1);
+      makeTree(tx,tz,(i+j)%4);
+    }
+  }
+  // Bancs
+  const woodM2=new THREE.MeshStandardMaterial({color:0x8a6a3a,roughness:0.8});
+  for(let i=0;i<Math.min(4,Math.floor(w/12));i++){
+    const bx=cx-w/3+i*(w/3)+(Math.random()*4-2);
+    const bz=cz+(Math.random()<0.5?d/4:-d/4);
+    const seat=new THREE.Mesh(new THREE.BoxGeometry(2.2,0.12,0.55),woodM2);seat.position.set(bx,0.5,bz);scene.add(seat);
+    const back=new THREE.Mesh(new THREE.BoxGeometry(2.2,0.5,0.1),woodM2);back.position.set(bx,0.77,bz-0.22);scene.add(back);
+  }
+}
+
+function gardenBlock(cx,cz,w,d){
+  // Jardin privé avec haie
+  const soil=new THREE.Mesh(new THREE.PlaneGeometry(w,d),matDirt);soil.rotation.x=-Math.PI/2;soil.position.set(cx,0.015,cz);soil.receiveShadow=true;scene.add(soil);
+  // Pelouse centrale
+  const lawn=new THREE.Mesh(new THREE.PlaneGeometry(w*0.7,d*0.7),matGr);lawn.rotation.x=-Math.PI/2;lawn.position.set(cx,0.02,cz);lawn.receiveShadow=true;scene.add(lawn);
+  // Haies
+  const hedgeMat=new THREE.MeshStandardMaterial({color:0x2a5a18,roughness:0.95});
+  [[cx,cz-d/2,w,0.8],[cx,cz+d/2,w,0.8],[cx-w/2,cz,0.8,d],[cx+w/2,cz,0.8,d]].forEach(h=>{
+    const hedge=new THREE.Mesh(new THREE.BoxGeometry(h[2],1.2,h[3]),hedgeMat);hedge.position.set(h[0],0.6,h[1]);hedge.castShadow=true;scene.add(hedge);
+    addCol(h[0],h[1],h[2]/2+0.1,h[3]/2+0.1,1.3);
+  });
+  // Fleurs colorées
+  const flColors=[0xd44060,0xe07030,0xd4c030,0x9040c0,0x4090c0,0xe06080];
+  for(let i=0;i<8;i++){
+    const fc=flColors[i%flColors.length];
+    const fm=new THREE.MeshStandardMaterial({color:fc,roughness:0.7});
+    const fl=new THREE.Mesh(new THREE.SphereGeometry(0.18,6,4),fm);
+    fl.position.set(cx+(Math.random()-0.5)*w*0.5,0.25,cz+(Math.random()-0.5)*d*0.5);scene.add(fl);
+  }
+  // 1 ou 2 arbres
+  makeTree(cx+(Math.random()*w*0.4-w*0.2),cz+(Math.random()*d*0.4-d*0.2),Math.floor(Math.random()*4));
+}
+
+function parkingBlock(cx,cz,w,d){
+  const p=new THREE.Mesh(new THREE.PlaneGeometry(w,d),matGravel);p.rotation.x=-Math.PI/2;p.position.set(cx,0.015,cz);p.receiveShadow=true;scene.add(p);
+  // Lignes places
+  const lm2=new THREE.MeshBasicMaterial({color:0xddddcc});
+  const cols=Math.max(2,Math.floor(w/4));
+  for(let i=0;i<=cols;i++){
+    const lx=cx-w/2+i*(w/cols);
+    const l=new THREE.Mesh(new THREE.PlaneGeometry(0.15,d*0.8),lm2);l.rotation.x=-Math.PI/2;l.position.set(lx,0.025,cz);scene.add(l);
+  }
+  // Quelques voitures garées
+  const cpArr=[0x2a3040,0x1a1a20,0x3a2010,0x0a2040,0xf0f0f0,0xaa3030,0x1a3020];
+  for(let i=0;i<Math.min(cols-1,6);i++){
+    if(Math.random()<0.7){
+      const pm=new THREE.MeshStandardMaterial({color:cpArr[i%cpArr.length],roughness:0.18,metalness:0.85});
+      const carX=cx-w/2+i*(w/cols)+w/cols/2;
+      const carZ=cz+(Math.random()<0.5?d*0.22:-d*0.22);
+      const body=new THREE.Mesh(new THREE.BoxGeometry(1.9,0.65,4.2),pm);body.castShadow=true;body.position.set(carX,0.48,carZ);scene.add(body);
+      const top=new THREE.Mesh(new THREE.BoxGeometry(1.65,0.52,2.5),pm);top.castShadow=true;top.position.set(carX,0.97,carZ);scene.add(top);
+      addCol(carX,carZ,1.1,2.25,1.55);
+    }
+  }
+}
+
+function shopRow(cx,cz,count,dir='x'){
+  for(let i=0;i<count;i++){
+    const off=(i-(count-1)/2)*7;
+    const sx=dir==='x'?cx+off:cx;
+    const sz=dir==='x'?cz:cz+off;
+    const h=3.8+Math.random()*2;
+    const sm=new THREE.MeshStandardMaterial({map:bArr[(i+Math.abs(cx)|0)%4],roughness:0.85,color:0xcccccc});
+    const b=new THREE.Mesh(new THREE.BoxGeometry(6.5,h,5),sm);b.castShadow=true;b.receiveShadow=true;b.position.set(sx,h/2,sz);scene.add(b);
+    const signM=new THREE.MeshStandardMaterial({map:signTex[(i+Math.abs(sz)|0)%signTex.length],roughness:0.6});
+    const sign=new THREE.Mesh(new THREE.BoxGeometry(4.5,0.75,0.12),signM);sign.position.set(sx,h*0.85,sz+(dir==='x'?2.55:-2.55));scene.add(sign);
+    const awC=[0xcc3322,0x225588,0x3a7a30,0x9a6a20,0x663388,0x228844][i%6];
+    const aw=new THREE.Mesh(new THREE.BoxGeometry(6.5,0.1,1.2),new THREE.MeshStandardMaterial({color:awC,roughness:0.7,side:THREE.DoubleSide}));
+    aw.position.set(sx,h*0.68,sz+(dir==='x'?3.1:-3.1));scene.add(aw);
+    const rM=new THREE.Mesh(new THREE.BoxGeometry(6.7,0.35,5.2),matRoof);rM.position.set(sx,h+0.17,sz);scene.add(rM);
+    addCol(sx,sz,3.4,2.6);
+  }
+}
+
+// ── CONSTRUCTION DU MONDE COMPLET ─────────────────────────
+// Le monde = grille de blocs 40x40 entre les routes (axes à 0, ±40, ±80, ±120)
+// On remplit CHAQUE bloc entre les routes
+
+// Fontaine centrale
+(()=>{
+  const sm=new THREE.MeshStandardMaterial({color:0x8a8278,roughness:0.85});
+  const wm=new THREE.MeshStandardMaterial({color:0x4488aa,roughness:0.1,metalness:0.3,transparent:true,opacity:0.75});
+  function pm(geo,mat,x,y,z){const m=new THREE.Mesh(geo,mat);m.castShadow=true;m.position.set(x,y,z);scene.add(m);return m;}
+  pm(new THREE.CylinderGeometry(5,5.8,0.9,24),sm,0,0.45,0);
+  pm(new THREE.CylinderGeometry(4.5,4.5,0.1,24),wm,0,0.95,0);
+  pm(new THREE.CylinderGeometry(0.25,0.32,4,10),sm,0,2.9,0);
+  pm(new THREE.CylinderGeometry(1.4,1.0,0.25,16),sm,0,5.15,0);
+  addCol(0,0,5.8,5.8,5);
+  // Parc central autour fontaine
+  const parkCent=new THREE.Mesh(new THREE.PlaneGeometry(30,30),matGr);parkCent.rotation.x=-Math.PI/2;parkCent.position.set(0,0.01,0);parkCent.receiveShadow=true;scene.add(parkCent);
+  [[-8,-8],[8,-8],[-8,8],[8,8],[-12,0],[12,0],[0,-12],[0,12]].forEach((p,i)=>makeTree(p[0],p[1],i%4));
+})();
+// Lampadaires (dense comme une vraie ville)
+for(let x=-125;x<=125;x+=18)for(let z=-125;z<=125;z+=18)lamp(x,z);
+
+// ── BLOCS NORD-EST (+x, -z) ───────────────────────────────
+// Bloc [0→40, 0→-40]
+building(12,-12,8,28,8,1);building(22,-8,9,36,9,2);building(30,-18,8,30,8,0);building(20,-28,10,22,10,1);building(12,-32,7,18,7,2);building(30,-30,8,24,8,0);
+shopRow(18,-38,4,'x');
+gardenBlock(35,-35,12,10);
+parkingBlock(8,-38,14,8);
+
+// Bloc [40→80, 0→-40]
+building(52,-8,10,42,10,1);building(65,-15,12,55,12,2);building(78,-8,9,38,9,0);building(55,-28,9,32,9,1);building(70,-28,10,28,10,2);
+shopRow(60,-36,4,'x');
+parkBlock(75,-35,16,10);
+gardenBlock(48,-36,10,9);
+
+// Bloc [80→120, 0→-40]
+building(92,-10,12,60,12,2);building(108,-8,10,48,10,1);building(95,-25,8,28,8,0);building(112,-25,9,35,9,2);
+shopRow(100,-35,3,'x');
+gardenBlock(90,-36,14,9);
+
+// Bloc [0→40, -40→-80]
+building(12,-52,9,34,9,0);building(24,-60,10,44,10,1);building(35,-52,8,28,8,2);building(15,-70,8,24,8,0);building(32,-72,9,30,9,1);
+parkBlock(20,-42,20,10);
+shopRow(28,-78,3,'x');
+gardenBlock(12,-76,10,8);
+parkingBlock(35,-70,10,12);
+
+// Bloc [40→80, -40→-80]
+building(52,-52,10,38,10,2);building(65,-48,11,52,11,1);building(75,-55,9,42,9,0);building(55,-68,10,35,10,2);building(72,-70,9,30,9,1);
+shopRow(60,-78,3,'x');
+parkBlock(48,-55,10,20);
+gardenBlock(76,-76,12,10);
+
+// Bloc [80→120, -40→-80]
+building(90,-48,11,45,11,0);building(108,-52,12,55,12,1);building(92,-65,9,38,9,2);building(112,-68,10,42,10,0);
+parkingBlock(100,-78,20,10);
+shopRow(88,-78,2,'x');
+
+// Bloc [0→40, -80→-120]
+building(14,-92,9,28,9,1);building(28,-88,10,34,10,2);building(38,-92,8,24,8,0);building(18,-108,9,30,9,1);building(34,-110,10,26,10,2);
+parkBlock(22,-82,18,10);
+gardenBlock(36,-108,10,10);
+shopRow(14,-118,4,'x');
+
+// Bloc [40→80, -80→-120]
+building(52,-88,10,32,10,0);building(66,-90,11,38,11,1);building(78,-88,9,28,9,2);building(55,-108,9,24,9,0);building(72,-110,10,30,10,1);
+parkBlock(62,-82,20,10);
+shopRow(60,-118,3,'x');
+
+// Bloc [80→120, -80→-120]
+building(90,-92,11,38,11,2);building(108,-88,10,44,10,0);building(94,-108,9,30,9,1);building(112,-108,10,36,10,2);
+gardenBlock(102,-82,18,10);
+parkingBlock(95,-118,22,10);
+
+// ── BLOCS NORD-OUEST (-x, -z) ─────────────────────────────
+building(-12,-12,8,28,8,0);building(-22,-8,9,36,9,1);building(-30,-18,8,30,8,2);building(-20,-28,10,22,10,0);building(-12,-32,7,18,7,1);building(-30,-30,8,24,8,2);
+shopRow(-18,-38,4,'x');gardenBlock(-35,-35,12,10);parkingBlock(-8,-38,14,8);
+building(-52,-8,10,42,10,2);building(-65,-15,12,55,12,0);building(-78,-8,9,38,9,1);building(-55,-28,9,32,9,2);building(-70,-28,10,28,10,0);
+shopRow(-60,-36,4,'x');parkBlock(-75,-35,16,10);gardenBlock(-48,-36,10,9);
+building(-92,-10,12,60,12,1);building(-108,-8,10,48,10,2);building(-95,-25,8,28,8,0);building(-112,-25,9,35,9,1);
+shopRow(-100,-35,3,'x');gardenBlock(-90,-36,14,9);
+building(-12,-52,9,34,9,1);building(-24,-60,10,44,10,2);building(-35,-52,8,28,8,0);building(-15,-70,8,24,8,1);building(-32,-72,9,30,9,2);
+parkBlock(-20,-42,20,10);shopRow(-28,-78,3,'x');gardenBlock(-12,-76,10,8);
+building(-52,-52,10,38,10,0);building(-65,-48,11,52,11,2);building(-75,-55,9,42,9,1);building(-55,-68,10,35,10,0);building(-72,-70,9,30,9,2);
+shopRow(-60,-78,3,'x');parkBlock(-48,-55,10,20);gardenBlock(-76,-76,12,10);
+building(-90,-48,11,45,11,2);building(-108,-52,12,55,12,0);building(-92,-65,9,38,9,1);building(-112,-68,10,42,10,2);
+parkingBlock(-100,-78,20,10);shopRow(-88,-78,2,'x');
+building(-14,-92,9,28,9,2);building(-28,-88,10,34,10,0);building(-38,-92,8,24,8,1);building(-18,-108,9,30,9,2);building(-34,-110,10,26,10,0);
+parkBlock(-22,-82,18,10);gardenBlock(-36,-108,10,10);shopRow(-14,-118,4,'x');
+building(-52,-88,10,32,10,1);building(-66,-90,11,38,11,2);building(-78,-88,9,28,9,0);building(-55,-108,9,24,9,1);building(-72,-110,10,30,10,2);
+parkBlock(-62,-82,20,10);shopRow(-60,-118,3,'x');
+building(-90,-92,11,38,11,0);building(-108,-88,10,44,10,1);building(-94,-108,9,30,9,2);building(-112,-108,10,36,10,0);
+gardenBlock(-102,-82,18,10);parkingBlock(-95,-118,22,10);
+
+// ── BLOCS SUD (+z) ────────────────────────────────────────
+building(12,12,8,22,8,2);building(22,8,9,28,9,0);building(30,18,8,26,8,1);building(20,28,10,20,10,2);building(12,32,7,16,7,0);
+shopRow(18,38,4,'x');gardenBlock(35,35,12,10);parkingBlock(8,38,14,8);
+building(52,8,10,38,10,0);building(65,15,12,48,12,1);building(78,8,9,34,9,2);building(55,28,9,28,9,0);building(70,28,10,24,10,1);
+shopRow(60,36,4,'x');parkBlock(75,35,16,10);
+building(92,10,12,52,12,1);building(108,8,10,44,10,2);building(95,25,8,24,8,0);
+shopRow(100,35,3,'x');
+building(12,52,9,28,9,1);building(24,60,10,38,10,2);building(35,52,8,22,8,0);building(15,70,8,20,8,1);
+parkBlock(20,42,20,10);shopRow(28,78,3,'x');
+building(52,52,10,32,10,2);building(65,48,11,44,11,0);building(75,55,9,36,9,1);building(55,68,10,28,10,2);
+shopRow(60,78,3,'x');parkBlock(48,55,10,20);
+building(90,48,11,38,11,1);building(108,52,12,48,12,2);building(92,65,9,32,9,0);building(112,68,10,36,10,1);
+parkingBlock(100,78,20,10);
+
+// Côté -x sud
+building(-12,12,8,22,8,1);building(-22,8,9,28,9,2);building(-30,18,8,26,8,0);building(-20,28,10,20,10,1);building(-12,32,7,16,7,2);
+shopRow(-18,38,4,'x');gardenBlock(-35,35,12,10);
+building(-52,8,10,38,10,1);building(-65,15,12,48,12,2);building(-78,8,9,34,9,0);building(-55,28,9,28,9,1);building(-70,28,10,24,10,2);
+shopRow(-60,36,4,'x');
+building(-92,10,12,52,12,2);building(-108,8,10,44,10,0);building(-95,25,8,24,8,1);
+shopRow(-100,35,3,'x');
+building(-12,52,9,28,9,2);building(-24,60,10,38,10,0);building(-35,52,8,22,8,1);building(-15,70,8,20,8,2);
+shopRow(-28,78,3,'x');parkBlock(-20,42,20,10);
+building(-52,52,10,32,10,0);building(-65,48,11,44,11,1);building(-75,55,9,36,9,2);
+shopRow(-60,78,3,'x');parkBlock(-48,55,10,20);
+building(-90,48,11,38,11,2);building(-108,52,12,48,12,0);building(-92,65,9,32,9,1);
+parkingBlock(-100,78,20,10);
+
+// ── BÂTIMENTS SPÉCIAUX ────────────────────────────────────
 // Hôpital
 (()=>{
   const hM=new THREE.MeshStandardMaterial({color:0xeeeae0,roughness:0.75});
-  const b=new THREE.Mesh(new THREE.BoxGeometry(18,28,16),hM);b.castShadow=true;b.receiveShadow=true;b.position.set(-68,14,15);scene.add(b);
+  const b=new THREE.Mesh(new THREE.BoxGeometry(18,26,15),hM);b.castShadow=true;b.receiveShadow=true;b.position.set(-68,13,18);scene.add(b);
   const cM=new THREE.MeshStandardMaterial({color:0xcc1111,roughness:0.6,emissive:new THREE.Color(0x110000),emissiveIntensity:0.3});
-  [new THREE.BoxGeometry(2.2,6,0.25),new THREE.BoxGeometry(6.5,2.2,0.25)].forEach(g=>{
-    const m=new THREE.Mesh(g,cM);m.position.set(-68,19,23.1);scene.add(m);
-  });
-  addBox(-68,15,9.1,8.1);
+  const cr1=new THREE.Mesh(new THREE.BoxGeometry(2.2,6,0.25),cM);cr1.position.set(-68,18,25.6);scene.add(cr1);
+  const cr2=new THREE.Mesh(new THREE.BoxGeometry(6.5,2.2,0.25),cM);cr2.position.set(-68,18,25.6);scene.add(cr2);
+  const rM=new THREE.Mesh(new THREE.BoxGeometry(18.2,0.5,15.2),matRoof);rM.position.set(-68,26.25,18);scene.add(rM);
+  addCol(-68,18,9.1,7.6);
 })();
 
-// Temple Shinto
+// Temple shinto
 (()=>{
   const tM=new THREE.MeshStandardMaterial({color:0x8a3020,roughness:0.82});
   const rM2=new THREE.MeshStandardMaterial({color:0x2a3a28,roughness:0.85});
   const base=new THREE.Mesh(new THREE.BoxGeometry(20,1.2,16),new THREE.MeshStandardMaterial({color:0xb0a888,roughness:0.9}));base.position.set(68,0.6,28);scene.add(base);
   const walls=new THREE.Mesh(new THREE.BoxGeometry(16,8,13),tM);walls.castShadow=true;walls.position.set(68,5.2,28);scene.add(walls);
   const roof=new THREE.Mesh(new THREE.CylinderGeometry(0,11,5,4),rM2);roof.castShadow=true;roof.position.set(68,11.5,28);roof.rotation.y=Math.PI/4;scene.add(roof);
+  const roofB=new THREE.Mesh(new THREE.BoxGeometry(13,0.5,11),rM2);roofB.position.set(68,7,28);scene.add(roofB);
   const toriiM=new THREE.MeshStandardMaterial({color:0xcc3318,roughness:0.75});
   [-2,2].forEach(s=>{const post=new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.28,8,8),toriiM);post.castShadow=true;post.position.set(68+s,4,38);scene.add(post);});
   const c1=new THREE.Mesh(new THREE.BoxGeometry(7,0.5,0.5),toriiM);c1.position.set(68,7.5,38);scene.add(c1);
-  addBox(68,28,9,7);addBox(68,38,3.5,0.5,8);
+  const c2=new THREE.Mesh(new THREE.BoxGeometry(5.5,0.35,0.35),toriiM);c2.position.set(68,6.5,38);scene.add(c2);
+  // Jardin autour du temple
+  const tGarden=new THREE.Mesh(new THREE.PlaneGeometry(28,22),matGr);tGarden.rotation.x=-Math.PI/2;tGarden.position.set(68,0.01,25);tGarden.receiveShadow=true;scene.add(tGarden);
+  [[-3,32],[3,32],[-3,18],[3,18]].forEach((p,i)=>makeTree(68+p[0],p[1],i));
+  addCol(68,28,9,7);addCol(68,38,3.5,0.5,8);
 })();
 
-// ── PIÉTONS ULTRA-RÉALISTES ──────────────────────────────
-// Couleurs de peau variées
-const SKIN_COLORS=['#f4c896','#e8a86c','#c8804a','#5c3a1e','#fddbb4'];
-const SKIN_MATS=SKIN_COLORS.map(c=>new THREE.MeshStandardMaterial({color:new THREE.Color(c),roughness:0.7,metalness:0}));
-const CLOTH_MATS=clothTextures.map(t=>new THREE.MeshStandardMaterial({map:t,roughness:0.85}));
-const HAIR_COLORS=[0x111111,0x3d2b1f,0x8b4513,0xf4d03f,0xff6b35,0x808080];
-const HAIR_MATS=HAIR_COLORS.map(c=>new THREE.MeshStandardMaterial({color:c,roughness:0.9}));
+// Tour grande (gratte-ciel central)
+building(0,-55,18,80,16,2);
 
-function makeRealisticHuman(startX,startZ,routeAxis,dir,route,isFemale=false){
-  const g=new THREE.Group();g.position.set(startX,0,startZ);scene.add(g);
+// Station de métro
+(()=>{
+  const stM=new THREE.MeshStandardMaterial({color:0x3a4050,roughness:0.7,metalness:0.3});
+  const b=new THREE.Mesh(new THREE.BoxGeometry(16,5,12),stM);b.castShadow=true;b.receiveShadow=true;b.position.set(0,2.5,45);scene.add(b);
+  const signM=new THREE.MeshStandardMaterial({color:0x1a88cc,roughness:0.3,metalness:0.5,emissive:new THREE.Color(0x001144),emissiveIntensity:0.4});
+  const sign=new THREE.Mesh(new THREE.BoxGeometry(12,1.2,0.15),signM);sign.position.set(0,4.5,51.1);scene.add(sign);
+  const rM=new THREE.Mesh(new THREE.BoxGeometry(16.2,0.4,12.2),matRoof);rM.position.set(0,5.2,45);scene.add(rM);
+  addCol(0,45,8.1,6.1,5.5);
+})();
 
-  const skinMat=SKIN_MATS[Math.floor(Math.random()*SKIN_MATS.length)];
-  const bodyMat=CLOTH_MATS[Math.floor(Math.random()*CLOTH_MATS.length)];
-  const legMat=CLOTH_MATS[Math.floor(Math.random()*CLOTH_MATS.length)];
-  const hairMat=HAIR_MATS[Math.floor(Math.random()*HAIR_MATS.length)];
-  const shoeMat=new THREE.MeshStandardMaterial({color:Math.random()<0.5?0x111111:0x4a3020,roughness:0.85});
+// ── ÉGOUT COMPLET RÉALISTE ────────────────────────────────
+// Position : sous la ville, Y = -7 (sol égout)
+const SW_Y=-7; // niveau sol égout
+const SW_H=4.5; // hauteur tunnel
+const SW_ENTRY_X=-60,SW_ENTRY_Z=-60; // bouche d'égout
 
-  // Chevilles/pieds
-  const footL=new THREE.Mesh(new THREE.BoxGeometry(0.13,0.08,0.22),shoeMat);footL.position.set(-0.1,0.06,0.05);g.add(footL);
-  const footR=new THREE.Mesh(new THREE.BoxGeometry(0.13,0.08,0.22),shoeMat);footR.position.set(0.1,0.06,0.05);g.add(footR);
-
-  // Jambes
-  const legL=new THREE.Mesh(new THREE.BoxGeometry(0.14,0.44,0.14),legMat);legL.position.set(-0.1,0.34,0);g.add(legL);
-  const legR=new THREE.Mesh(new THREE.BoxGeometry(0.14,0.44,0.14),legMat);legR.position.set(0.1,0.34,0);g.add(legR);
-
-  // Bassin
-  const hip=new THREE.Mesh(new THREE.BoxGeometry(0.34,0.16,0.2),bodyMat);hip.position.set(0,0.62,0);g.add(hip);
-
-  // Torse
-  const torso=new THREE.Mesh(new THREE.BoxGeometry(isFemale?0.33:0.38,0.5,0.22),bodyMat);torso.position.set(0,0.95,0);g.add(torso);
-
-  // Epaules/bras
-  const armLU=new THREE.Mesh(new THREE.BoxGeometry(0.11,0.28,0.11),bodyMat);armLU.position.set(-(isFemale?0.22:0.25),0.98,0);g.add(armLU);
-  const armRU=new THREE.Mesh(new THREE.BoxGeometry(0.11,0.28,0.11),bodyMat);armRU.position.set(isFemale?0.22:0.25,0.98,0);g.add(armRU);
-  const armLL=new THREE.Mesh(new THREE.BoxGeometry(0.10,0.26,0.10),skinMat);armLL.position.set(-(isFemale?0.22:0.25),0.7,0);g.add(armLL);
-  const armRL=new THREE.Mesh(new THREE.BoxGeometry(0.10,0.26,0.10),skinMat);armRL.position.set(isFemale?0.22:0.25,0.7,0);g.add(armRL);
-
-  // Mains
-  const handL=new THREE.Mesh(new THREE.SphereGeometry(0.07,6,5),skinMat);handL.position.set(-(isFemale?0.22:0.25),0.56,0);g.add(handL);
-  const handR=new THREE.Mesh(new THREE.SphereGeometry(0.07,6,5),skinMat);handR.position.set(isFemale?0.22:0.25,0.56,0);g.add(handR);
-
-  // Cou
-  const neck=new THREE.Mesh(new THREE.CylinderGeometry(0.065,0.07,0.1,8),skinMat);neck.position.set(0,1.23,0);g.add(neck);
-
-  // Tête avec forme réaliste
-  const head=new THREE.Mesh(new THREE.SphereGeometry(0.17,10,8),skinMat);head.scale.y=1.15;head.position.set(0,1.45,0);g.add(head);
-
-  // Yeux
-  const eyeMat=new THREE.MeshStandardMaterial({color:0x111111,roughness:0.2});
-  const whiteEyeMat=new THREE.MeshStandardMaterial({color:0xffffff,roughness:0.3});
-  [-0.065,0.065].forEach(ex=>{
-    const eyeW=new THREE.Mesh(new THREE.SphereGeometry(0.05,6,5),whiteEyeMat);eyeW.position.set(ex,1.47,0.14);g.add(eyeW);
-    const eyeP=new THREE.Mesh(new THREE.SphereGeometry(0.028,5,4),eyeMat);eyeP.position.set(ex,1.47,0.17);g.add(eyeP);
-  });
-
-  // Nez
-  const nose=new THREE.Mesh(new THREE.SphereGeometry(0.025,5,4),skinMat);nose.scale.z=1.4;nose.position.set(0,1.43,0.17);g.add(nose);
-
-  // Cheveux
-  const hair=new THREE.Mesh(new THREE.SphereGeometry(0.185,10,8),hairMat);hair.position.set(0,1.53,0);hair.scale.y=0.75;g.add(hair);
-  if(isFemale&&Math.random()<0.6){
-    const hairL=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.25,0.1),hairMat);hairL.position.set(-0.16,1.4,-0.02);g.add(hairL);
-    const hairR=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.25,0.1),hairMat);hairR.position.set(0.16,1.4,-0.02);g.add(hairR);
+// Bouche d'égout visible en surface
+(()=>{
+  const grateMat=new THREE.MeshStandardMaterial({color:0x2a2a2a,roughness:0.85,metalness:0.6});
+  const grate=new THREE.Mesh(new THREE.CylinderGeometry(1.5,1.5,0.12,16),grateMat);grate.position.set(SW_ENTRY_X,0.06,SW_ENTRY_Z);scene.add(grate);
+  // Barres de grille
+  for(let i=-1;i<=1;i++){
+    const bar=new THREE.Mesh(new THREE.BoxGeometry(0.09,0.12,3),grateMat);bar.position.set(SW_ENTRY_X+i*0.55,0.06,SW_ENTRY_Z);scene.add(bar);
+    const bar2=new THREE.Mesh(new THREE.BoxGeometry(3,0.12,0.09),grateMat);bar2.position.set(SW_ENTRY_X,0.06,SW_ENTRY_Z+i*0.55);scene.add(bar2);
   }
+  // Trou sous la grille
+  const hole=new THREE.Mesh(new THREE.CylinderGeometry(1.2,1.2,0.5,16),new THREE.MeshStandardMaterial({color:0x050808,roughness:1}));hole.position.set(SW_ENTRY_X,0,SW_ENTRY_Z);scene.add(hole);
+  // Flèche indicatrice
+  const arrowMat=new THREE.MeshStandardMaterial({color:0x40ff20,roughness:0.3,emissive:new THREE.Color(0x104010),emissiveIntensity:0.9});
+  const arrow=new THREE.Mesh(new THREE.ConeGeometry(0.6,1.2,4),arrowMat);arrow.position.set(SW_ENTRY_X,2,SW_ENTRY_Z);scene.add(arrow);
+})();
 
-  // Accessoires aléatoires
-  if(Math.random()<0.3){
-    const bagMat=new THREE.MeshStandardMaterial({color:new THREE.Color(['#222','#885522','#334488','#883333'][Math.floor(Math.random()*4)]),roughness:0.8});
-    const bag=new THREE.Mesh(new THREE.BoxGeometry(0.18,0.22,0.1),bagMat);bag.position.set(isFemale?-0.25:0.25,0.85,-0.12);g.add(bag);
-  }
-  if(Math.random()<0.15){
-    const hatMat=new THREE.MeshStandardMaterial({color:new THREE.Color([0x111111,0x3d2b1f,0x888800,0x334488][Math.floor(Math.random()*4)]),roughness:0.8});
-    const hat=new THREE.Mesh(new THREE.CylinderGeometry(0.2,0.22,0.12,12),hatMat);hat.position.set(0,1.63,0);g.add(hat);
-  }
-
-  // Orientation
-  if(routeAxis==='x')g.rotation.y=dir>0?-Math.PI/2:Math.PI/2;
-  else g.rotation.y=dir>0?0:Math.PI;
-
-  const speed=0.9+Math.random()*1.2;
-  const wobble=Math.random()*Math.PI*2;
-  const legPhase=Math.random()*Math.PI*2;
-
-  const obj={mesh:g,axis:routeAxis,dir,route,speed,wobble,legPhase,legL,legR,armLU,armRU,footL,footR,isFemale,hw:0.22,hd:0.22,h:1.8};
-  dynamicColliders.push(obj);
-  return obj;
+// Lumières d'égout (points lights verts/oranges)
+const sewerLights=[];
+function sewerLight(x,z,col,intensity=1.5){
+  const l=new THREE.PointLight(col,intensity,14);l.position.set(x,SW_Y+SW_H-0.5,z);scene.add(l);sewerLights.push(l);
 }
 
-// Spawn piétons sur trottoirs
-const pedObjects=[];
-const PED_ROUTES=[-50,-25,0,25,50,-75,75];
-PED_ROUTES.forEach(z=>{
-  for(let i=0;i<4;i++){
-    const isFem=Math.random()<0.5;
-    const dir=Math.random()<0.5?1:-1;
-    pedObjects.push(makeRealisticHuman(-120+Math.random()*240,z+(dir>0?3:-3),'x',dir,z+(dir>0?3:-3),isFem));
+// Construction des tunnels d'égout
+// Un tunnel = sol + plafond + 2 murs + eau + tuyaux + lumières
+function sewerTunnel(x,z,w,d,horizontal=true){
+  const cx=x,cz=z;
+  // Sol
+  const floor=new THREE.Mesh(new THREE.BoxGeometry(horizontal?d:w,0.3,horizontal?w:d),sewerFloorMat);
+  floor.position.set(cx,SW_Y-0.15,cz);scene.add(floor);
+  // Plafond
+  const ceil=new THREE.Mesh(new THREE.BoxGeometry(horizontal?d:w,0.35,horizontal?w:d),sewerCeilMat);
+  ceil.position.set(cx,SW_Y+SW_H+0.17,cz);scene.add(ceil);
+  // Murs latéraux
+  const side=horizontal?w:d;const length=horizontal?d:w;
+  const wallL=new THREE.Mesh(new THREE.BoxGeometry(length,SW_H,0.35),sewerWallMat);
+  wallL.position.set(cx,SW_Y+SW_H/2,cz-(side/2+0.17));scene.add(wallL);
+  const wallR=new THREE.Mesh(new THREE.BoxGeometry(length,SW_H,0.35),sewerWallMat);
+  wallR.position.set(cx,SW_Y+SW_H/2,cz+(side/2+0.17));scene.add(wallR);
+  if(!horizontal){
+    wallL.rotation.y=Math.PI/2;wallR.rotation.y=Math.PI/2;
   }
-});
-PED_ROUTES.forEach(x=>{
-  for(let i=0;i<4;i++){
-    const isFem=Math.random()<0.5;
-    const dir=Math.random()<0.5?1:-1;
-    pedObjects.push(makeRealisticHuman(x+(dir>0?3:-3),-120+Math.random()*240,'z',dir,x+(dir>0?3:-3),isFem));
-  }
-});
+  // Eau au centre (canal)
+  const water=new THREE.Mesh(new THREE.BoxGeometry(horizontal?d-0.1:w*0.45,0.12,horizontal?w*0.45:d-0.1),sewerWaterMat);
+  water.position.set(cx,SW_Y+0.1,cz);scene.add(water);
+  // Bordures canal (béton)
+  const borderMat=new THREE.MeshStandardMaterial({map:sewerFloorTex,roughness:0.95,color:0x668855});
+  const bord1=new THREE.Mesh(new THREE.BoxGeometry(horizontal?d:0.6,0.15,horizontal?0.6:d),borderMat);bord1.position.set(cx,SW_Y+0.07,cz-(horizontal?w*0.22:0));scene.add(bord1);
+  const bord2=new THREE.Mesh(new THREE.BoxGeometry(horizontal?d:0.6,0.15,horizontal?0.6:d),borderMat);bord2.position.set(cx,SW_Y+0.07,cz+(horizontal?w*0.22:0));scene.add(bord2);
 
-// ── VOITURES RÉALISTES ──────────────────────────────────
-const movingVehicles=[];
-
-function makeRealisticCar(startX,startZ,axis,dir,route,colorIdx){
-  const g=new THREE.Group();scene.add(g);
-  const paintMat=new THREE.MeshStandardMaterial({map:carPaintTextures[colorIdx%carPaintTextures.length],roughness:0.15,metalness:0.9,color:0xffffff});
-  const glassMat=new THREE.MeshStandardMaterial({map:carGlassTex,roughness:0.05,metalness:0.1,transparent:true,opacity:0.75,color:0xaaccff});
-  const chromeMat=new THREE.MeshStandardMaterial({color:0xdddddd,roughness:0.05,metalness:0.95});
-  const lightMat=new THREE.MeshStandardMaterial({color:0xffffee,roughness:0.1,emissive:new THREE.Color(0x888844),emissiveIntensity:0.3});
-  const rearLightMat=new THREE.MeshStandardMaterial({color:0xff2200,roughness:0.1,emissive:new THREE.Color(0x440000),emissiveIntensity:0.5});
-  const tireMat2=new THREE.MeshStandardMaterial({map:tireTex,roughness:0.95,color:0xffffff});
-  const rimMat2=new THREE.MeshStandardMaterial({map:rimTex,roughness:0.1,metalness:0.9,color:0xffffff});
-  const plasticMat=new THREE.MeshStandardMaterial({color:0x1a1a1a,roughness:0.7});
-
-  // Carrosserie principale
-  const bodyLow=new THREE.Mesh(new THREE.BoxGeometry(1.88,0.65,4.4),paintMat);bodyLow.position.y=0.56;bodyLow.castShadow=true;g.add(bodyLow);
-  // Habitacle (vitre+toit)
-  const cabinH=0.55,cabinW=1.6,cabinD=2.4;
-  const cabin=new THREE.Mesh(new THREE.BoxGeometry(cabinW,cabinH,cabinD),paintMat);cabin.position.set(0,1.055,0.1);cabin.castShadow=true;g.add(cabin);
-
-  // Vitres
-  const wfrontM=glassMat.clone();
-  const winFront=new THREE.Mesh(new THREE.BoxGeometry(cabinW-0.04,cabinH-0.1,0.06),wfrontM);winFront.position.set(0,1.05,cabinD/2+0.1+0.03);g.add(winFront);
-  const winRear=new THREE.Mesh(new THREE.BoxGeometry(cabinW-0.04,cabinH-0.1,0.06),glassMat.clone());winRear.position.set(0,1.05,-cabinD/2+0.1-0.03);g.add(winRear);
-  [-cabinW/2,cabinW/2].forEach((wx,si)=>{
-    const winSide=new THREE.Mesh(new THREE.BoxGeometry(0.06,cabinH-0.12,cabinD-0.1),glassMat.clone());winSide.position.set(wx,1.05,0.1);g.add(winSide);
-  });
-
-  // Phares avant (ronds avec lentille)
-  [-0.65,0.65].forEach(sx=>{
-    const housing=new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.22,0.1,12),plasticMat);housing.rotation.x=Math.PI/2;housing.position.set(sx,0.65,2.2);g.add(housing);
-    const lens=new THREE.Mesh(new THREE.CylinderGeometry(0.19,0.19,0.05,12),lightMat);lens.rotation.x=Math.PI/2;lens.position.set(sx,0.65,2.24);g.add(lens);
-    // Chrome autour
-    const ring=new THREE.Mesh(new THREE.TorusGeometry(0.21,0.025,6,12),chromeMat);ring.rotation.x=Math.PI/2;ring.position.set(sx,0.65,2.22);g.add(ring);
-  });
-
-  // Feux arrière
-  [-0.65,0.65].forEach(sx=>{
-    const rearL=new THREE.Mesh(new THREE.BoxGeometry(0.35,0.14,0.06),rearLightMat);rearL.position.set(sx,0.68,-2.2);g.add(rearL);
-    // Clignotant
-    const turnL=new THREE.Mesh(new THREE.BoxGeometry(0.18,0.1,0.05),new THREE.MeshStandardMaterial({color:0xff8800,roughness:0.1,emissive:new THREE.Color(0x442200),emissiveIntensity:0.3}));turnL.position.set(sx,0.68,-2.22);g.add(turnL);
-  });
-
-  // Calandre avant
-  const grille=new THREE.Mesh(new THREE.BoxGeometry(1.4,0.35,0.08),plasticMat);grille.position.set(0,0.38,2.22);g.add(grille);
-  const chrBump=new THREE.Mesh(new THREE.BoxGeometry(1.85,0.12,0.1),chromeMat);chrBump.position.set(0,0.22,2.2);g.add(chrBump);
-  const chrBump2=new THREE.Mesh(new THREE.BoxGeometry(1.85,0.12,0.1),chromeMat);chrBump2.position.set(0,0.22,-2.2);g.add(chrBump2);
-
-  // Pare-chocs
-  const bumpF=new THREE.Mesh(new THREE.BoxGeometry(1.88,0.22,0.18),plasticMat);bumpF.position.set(0,0.3,2.18);g.add(bumpF);
-  const bumpR=new THREE.Mesh(new THREE.BoxGeometry(1.88,0.22,0.18),plasticMat);bumpR.position.set(0,0.3,-2.18);g.add(bumpR);
-
-  // Rétroviseurs
-  [-0.97,0.97].forEach(mx=>{
-    const mirror=new THREE.Mesh(new THREE.BoxGeometry(0.04,0.1,0.2),plasticMat);mirror.position.set(mx,1.03,0.9);g.add(mirror);
-    const mirrFace=new THREE.Mesh(new THREE.BoxGeometry(0.04,0.08,0.17),glassMat.clone());mirrFace.position.set(mx,1.03,0.93);g.add(mirrFace);
-  });
-
-  // Roues avec pneus ET jantes
-  const wheelPositions=[[0.93,0.32,1.45],[-0.93,0.32,1.45],[0.93,0.32,-1.45],[-0.93,0.32,-1.45]];
-  wheelPositions.forEach(([wx,wy,wz])=>{
-    const tireGeo=new THREE.CylinderGeometry(0.32,0.32,0.2,16);
-    const tire=new THREE.Mesh(tireGeo,tireMat2);tire.rotation.z=Math.PI/2;tire.position.set(wx,wy,wz);g.add(tire);
-    const rimGeo=new THREE.CylinderGeometry(0.22,0.22,0.22,12);
-    const rim=new THREE.Mesh(rimGeo,rimMat2);rim.rotation.z=Math.PI/2;rim.position.set(wx,wy,wz);g.add(rim);
-    // Boulons
-    for(let b=0;b<5;b++){
-      const ang=b*Math.PI*2/5;
-      const bolt=new THREE.Mesh(new THREE.CylinderGeometry(0.025,0.025,0.24,5),chromeMat);bolt.rotation.z=Math.PI/2;
-      bolt.position.set(wx,wy+Math.sin(ang)*0.12,wz+Math.cos(ang)*0.12);g.add(bolt);
+  // TUYAUX le long du plafond
+  const pipeDir=horizontal?d:w;
+  for(let pi=0;pi<3;pi++){
+    const pR=0.18+pi*0.08;
+    const pipeM=new THREE.MeshStandardMaterial({map:pipeTex,roughness:0.72,metalness:0.45,color:0xbbbbaa});
+    const pipe=new THREE.Mesh(new THREE.CylinderGeometry(pR,pR,pipeDir,8),pipeM);
+    pipe.rotation.z=horizontal?Math.PI/2:0;
+    if(!horizontal)pipe.rotation.y=Math.PI/2;
+    const pipeOffset=(pi-1)*(side*0.28);
+    pipe.position.set(horizontal?cx:cx+pipeOffset,SW_Y+SW_H-pR-0.1,horizontal?cz+pipeOffset:cz);
+    scene.add(pipe);
+    // Anneaux de jonction tuyaux
+    for(let seg=0;seg<Math.floor(pipeDir/10);seg++){
+      const ring=new THREE.Mesh(new THREE.TorusGeometry(pR+0.04,0.05,6,10),new THREE.MeshStandardMaterial({color:0x5a4030,roughness:0.6,metalness:0.6}));
+      ring.rotation.x=horizontal?0:Math.PI/2;
+      ring.position.set(horizontal?cx-pipeDir/2+seg*10:cx+pipeOffset,SW_Y+SW_H-pR-0.1,horizontal?cz+pipeOffset:cz-pipeDir/2+seg*10);
+      scene.add(ring);
     }
-  });
+  }
+  // Tuyaux verticaux aux murs (conduits)
+  for(let side2=0;side2<2;side2++){
+    const vertPipe=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.12,SW_H,8),new THREE.MeshStandardMaterial({map:pipeTex,roughness:0.72,metalness:0.5,color:0x889966}));
+    const vx=horizontal?cx+pipeDir/4*(side2===0?1:-1):cx;
+    const vz=horizontal?cz:cz+pipeDir/4*(side2===0?1:-1);
+    const wallOff=(horizontal?w:d)/2+0.05;
+    vertPipe.position.set(horizontal?vx:vx-(side2===0?wallOff:-wallOff),SW_Y+SW_H/2,horizontal?vz-(side2===0?w/2+0.05:-w/2-0.05):vz);
+    scene.add(vertPipe);
+  }
+  // Lumières tous les 15m
+  const numLights=Math.max(1,Math.floor((horizontal?d:w)/15));
+  for(let li=0;li<numLights;li++){
+    const lt=horizontal?cx-d/2+(li+0.5)*(d/numLights):cx;
+    const ltz=horizontal?cz:cz-w/2+(li+0.5)*(w/numLights);
+    sewerLight(lt,ltz,li%2===0?0x40ff20:0xff8800,1.2);
+    // Luminaire (boîte lumineuse)
+    const lumMat=new THREE.MeshStandardMaterial({color:li%2===0?0x40ff20:0xff8800,roughness:0.2,emissive:new THREE.Color(li%2===0?0x104010:0x441100),emissiveIntensity:1.2});
+    const lum=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.12,0.25),lumMat);lum.position.set(lt,SW_Y+SW_H-0.08,ltz);scene.add(lum);
+  }
 
-  // Plaque immat
-  const plateMat=new THREE.MeshStandardMaterial({color:0xffffee,roughness:0.6});
-  const plate=new THREE.Mesh(new THREE.BoxGeometry(0.4,0.14,0.04),plateMat);plate.position.set(0,0.32,2.23);g.add(plate);
-
-  // Orientation selon axe
-  if(axis==='x')g.rotation.y=dir>0?-Math.PI/2:Math.PI/2;
-  else g.rotation.y=dir>0?0:Math.PI;
-
-  g.position.set(startX,0,startZ);
-  const carObj={mesh:g,axis,dir,route,speed:8+Math.random()*8,hw:0.97,hd:2.22,h:1.4};
-  movingVehicles.push(carObj);
-  dynamicColliders.push(carObj);
-  return carObj;
-}
-// ── VÉLOS RÉALISTES ──────────────────────────────────────
-function makeRealisticBike(startX,startZ,axis,dir,route){
-  const g=new THREE.Group();scene.add(g);
-
-  const frameColor=new THREE.Color(clothColors[Math.floor(Math.random()*clothColors.length)]);
-  const frameMat=new THREE.MeshStandardMaterial({color:frameColor,roughness:0.3,metalness:0.7,map:bikeMetalTex});
-  const tireMat3=new THREE.MeshStandardMaterial({color:0x111111,roughness:0.95});
-  const chromeMat=new THREE.MeshStandardMaterial({color:0xcccccc,roughness:0.1,metalness:0.95});
-  const skinColors=['#f4c896','#e8a86c','#c8804a','#5c3a1e'];
-  const skinMat=new THREE.MeshStandardMaterial({color:new THREE.Color(skinColors[Math.floor(Math.random()*skinColors.length)]),roughness:0.7});
-
-  // Roues
-  [0.65,-0.65].forEach(z=>{
-    const wheelGroup=new THREE.Group();wheelGroup.position.set(0,0.38,z);g.add(wheelGroup);
-    // Pneu
-    const torus=new THREE.Mesh(new THREE.TorusGeometry(0.35,0.06,8,16),tireMat3);torus.rotation.y=Math.PI/2;wheelGroup.add(torus);
-    // Jante
-    const rim=new THREE.Mesh(new THREE.TorusGeometry(0.28,0.025,6,12),chromeMat);rim.rotation.y=Math.PI/2;wheelGroup.add(rim);
-    // Rayons
-    for(let r=0;r<8;r++){
-      const ang=r*Math.PI/4;
-      const spoke=new THREE.Mesh(new THREE.CylinderGeometry(0.008,0.008,0.56,4),chromeMat);spoke.rotation.z=Math.PI/2;spoke.rotation.y=ang;wheelGroup.add(spoke);
-    }
-    const hub=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,0.08,8),chromeMat);hub.rotation.z=Math.PI/2;wheelGroup.add(hub);
-  });
-
-  // Cadre - triangles
-  // Tube supérieur
-  const tubeTop=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,1.36,8),frameMat);tubeTop.rotation.z=Math.PI/2;tubeTop.position.set(0,0.78,0);g.add(tubeTop);
-  // Tube inférieur diagonal
-  const tubeBotGeo=new THREE.CylinderGeometry(0.025,0.025,1.4,8);
-  const tubeBot=new THREE.Mesh(tubeBotGeo,frameMat);tubeBot.rotation.z=Math.atan2(0.35,0.63);tubeBot.position.set(0,0.57,0.05);g.add(tubeBot);
-  // Selle
-  const seatPost=new THREE.Mesh(new THREE.CylinderGeometry(0.025,0.025,0.35,8),chromeMat);seatPost.position.set(0,0.88,-0.55);g.add(seatPost);
-  const saddle=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.06,0.35),frameMat);saddle.position.set(0,1.07,-0.5);g.add(saddle);
-  saddle.scale.z=1;
-
-  // Guidon
-  const handlePost=new THREE.Mesh(new THREE.CylinderGeometry(0.025,0.025,0.3,8),chromeMat);handlePost.position.set(0,0.88,0.62);g.add(handlePost);
-  const handleBar=new THREE.Mesh(new THREE.CylinderGeometry(0.02,0.02,0.44,8),chromeMat);handleBar.rotation.z=Math.PI/2;handleBar.position.set(0,1.02,0.65);g.add(handleBar);
-  [-0.2,0.2].forEach(hx=>{
-    const grip=new THREE.Mesh(new THREE.CylinderGeometry(0.025,0.025,0.1,8),new THREE.MeshStandardMaterial({color:0x222222,roughness:0.9}));grip.rotation.z=Math.PI/2;grip.position.set(hx,1.02,0.65);g.add(grip);
-  });
-
-  // Cycliste réaliste
-  const cycSkin=skinMat;
-  const cycCloth=CLOTH_MATS[Math.floor(Math.random()*CLOTH_MATS.length)];
-  const cycHair=HAIR_MATS[Math.floor(Math.random()*HAIR_MATS.length)];
-  const helmMat=new THREE.MeshStandardMaterial({color:new THREE.Color(clothColors[Math.floor(Math.random()*clothColors.length)]),roughness:0.5});
-
-  // Corps cycliste (penché)
-  const cycBody=new THREE.Mesh(new THREE.BoxGeometry(0.32,0.45,0.2),cycCloth);cycBody.position.set(0,1.1,0);cycBody.rotation.x=-0.3;g.add(cycBody);
-  // Jambes pédalant
-  const cycLegL=new THREE.Mesh(new THREE.BoxGeometry(0.12,0.38,0.12),cycCloth);cycLegL.position.set(-0.1,0.78,0.1);g.add(cycLegL);
-  const cycLegR=new THREE.Mesh(new THREE.BoxGeometry(0.12,0.38,0.12),cycCloth);cycLegR.position.set(0.1,0.78,0.1);g.add(cycLegR);
-  // Bras sur guidon
-  const cycArmL=new THREE.Mesh(new THREE.BoxGeometry(0.09,0.08,0.3),cycCloth);cycArmL.position.set(-0.15,1.05,0.42);g.add(cycArmL);
-  const cycArmR=new THREE.Mesh(new THREE.BoxGeometry(0.09,0.08,0.3),cycCloth);cycArmR.position.set(0.15,1.05,0.42);g.add(cycArmR);
-  // Tête
-  const cycHead=new THREE.Mesh(new THREE.SphereGeometry(0.15,8,6),cycSkin);cycHead.position.set(0,1.37,0.5);g.add(cycHead);
-  // Casque
-  const helm=new THREE.Mesh(new THREE.SphereGeometry(0.17,8,6),helmMat);helm.position.set(0,1.45,0.5);helm.scale.y=0.7;g.add(helm);
-  const helmVisor=new THREE.Mesh(new THREE.BoxGeometry(0.34,0.06,0.1),new THREE.MeshStandardMaterial({color:0x222222,roughness:0.2,metalness:0.5}));helmVisor.position.set(0,1.35,0.59);g.add(helmVisor);
-  // Yeux
-  const eyMat=new THREE.MeshStandardMaterial({color:0x111111,roughness:0.2});
-  [-0.055,0.055].forEach(ex=>{const eye=new THREE.Mesh(new THREE.SphereGeometry(0.024,5,4),eyMat);eye.position.set(ex,1.37,0.64);g.add(eye);});
-
-  if(axis==='x')g.rotation.y=dir>0?-Math.PI/2:Math.PI/2;
-  else g.rotation.y=dir>0?0:Math.PI;
-
-  g.position.set(startX,0,startZ);
-  const bikeObj={mesh:g,axis,dir,route,speed:3.5+Math.random()*2.5,hw:0.22,hd:0.75,h:1.5,cycLegL,cycLegR,wheels:g.children.slice(0,2),phase:Math.random()*Math.PI*2};
-  movingVehicles.push(bikeObj);
-  dynamicColliders.push(bikeObj);
-  return bikeObj;
+  // Colliders (murs du tunnel)
+  if(horizontal){
+    addSewerCol(cx,cz-(side/2+0.35),d,0.35);
+    addSewerCol(cx,cz+(side/2+0.35),d,0.35);
+  }else{
+    addSewerCol(cx-(side/2+0.35),cz,0.35,d);
+    addSewerCol(cx+(side/2+0.35),cz,0.35,d);
+  }
 }
 
-// Spawn voitures et vélos
-const ROUTES_H=[-50,-25,0,25,50,-75,75,-100,100];
-const ROUTES_V=[-50,-25,0,25,50,-75,75,-100,100];
-let carColorIdx=0;
-ROUTES_H.forEach(z=>{
-  for(let i=0;i<3;i++){makeRealisticCar(-140+Math.random()*280,z+(Math.random()<0.5?1.5:-1.5),'x',Math.random()<0.5?1:-1,z,carColorIdx++%carPaintColors.length);}
-  for(let i=0;i<2;i++){makeRealisticBike(-120+Math.random()*240,z+(Math.random()<0.5?2.5:-2.5),'x',Math.random()<0.5?1:-1,z);}
+// Salle égout (grande pièce)
+function sewerRoom(x,z,w,d){
+  // Sol
+  const floor=new THREE.Mesh(new THREE.BoxGeometry(w,0.3,d),sewerFloorMat);floor.position.set(x,SW_Y-0.15,z);scene.add(floor);
+  // Plafond
+  const ceil=new THREE.Mesh(new THREE.BoxGeometry(w,0.35,d),sewerCeilTex?new THREE.MeshStandardMaterial({map:sewerCeilTex,roughness:0.97,color:0x667755}):sewerCeilMat);
+  ceil.position.set(x,SW_Y+SW_H+0.17,z);scene.add(ceil);
+  // Murs 4 côtés
+  [[0,-d/2-0.17,w,0.35],[0,d/2+0.17,w,0.35],[-(w/2+0.17),0,0.35,d],[(w/2+0.17),0,0.35,d]].forEach(([dx,dz,ww,dd])=>{
+    const wall=new THREE.Mesh(new THREE.BoxGeometry(ww,SW_H,dd),sewerWallMat);wall.position.set(x+dx,SW_Y+SW_H/2,z+dz);scene.add(wall);
+  });
+  // Grande flaque centrale
+  const water=new THREE.Mesh(new THREE.BoxGeometry(w*0.7,0.15,d*0.7),sewerWaterMat);water.position.set(x,SW_Y+0.1,z);scene.add(water);
+  // Colonnes
+  [[-w/4,-d/4],[w/4,-d/4],[-w/4,d/4],[w/4,d/4]].forEach(([dx,dz])=>{
+    const colM=new THREE.MeshStandardMaterial({map:sewerStoneTex,roughness:0.95,color:0x889977});
+    const col=new THREE.Mesh(new THREE.CylinderGeometry(0.45,0.55,SW_H,8),colM);col.position.set(x+dx,SW_Y+SW_H/2,z+dz);scene.add(col);
+    addSewerCol(x+dx,z+dz,0.6,0.6);
+  });
+  // Tuyaux au plafond (réseau)
+  const pipeM2=new THREE.MeshStandardMaterial({map:pipeTex,roughness:0.72,metalness:0.5,color:0xaabb99});
+  [[0,0,w,0],[0,0,0,d],[-w/4,0,w/2,0],[0,-d/4,0,d/2]].forEach(([dx,dz,pw,pd])=>{
+    if(pw>0){const p=new THREE.Mesh(new THREE.CylinderGeometry(0.2,0.2,pw,8),pipeM2);p.rotation.z=Math.PI/2;p.position.set(x+dx,SW_Y+SW_H-0.3,z+dz);scene.add(p);}
+    if(pd>0){const p=new THREE.Mesh(new THREE.CylinderGeometry(0.15,0.15,pd,8),pipeM2);p.position.set(x+dx,SW_Y+SW_H-0.35,z+dz);scene.add(p);}
+  });
+  // Lumières salle
+  sewerLight(x,z,0x40ff20,2);sewerLight(x-w/3,z-d/3,0xff8800,1.3);sewerLight(x+w/3,z+d/3,0x80ff40,1.3);
+}
+
+// LABYRINTHE ÉGOUT complet
+// Couloirs principaux (largeur 5)
+const SW=5; // largeur couloir
+const SO=SW_ENTRY_X,SZO=SW_ENTRY_Z;
+
+// Tunnel d'entrée vertical (descente)
+sewerTunnel(SO,SZO+20,SW,40,false); // couloir nord-sud
+sewerTunnel(SO,SZO+45,SW,10,false);
+
+// Jonction Est-Ouest
+sewerTunnel(SO,SZO+50,40,SW,true); // couloir E-O
+
+// Couloir gauche (ouest) descendant
+sewerTunnel(SO-20,SZO+60,SW,20,false);
+sewerTunnel(SO-20,SZO+75,SW,10,false);
+
+// Couloir droit (est) descendant
+sewerTunnel(SO+20,SZO+60,SW,20,false);
+sewerTunnel(SO+20,SZO+75,SW,10,false);
+
+// Salle centrale
+sewerRoom(SO,SZO+58,18,10);
+
+// Jonction inférieure E-O
+sewerTunnel(SO,SZO+78,50,SW,true);
+
+// Couloirs supplémentaires
+sewerTunnel(SO-25,SZO+82,SW,8,false);
+sewerTunnel(SO+25,SZO+82,SW,8,false);
+sewerTunnel(SO,SZO+85,SW,14,false);
+sewerTunnel(SO+12,SZO+92,24,SW,true);
+
+// Salle du trésor/JetPack
+sewerRoom(SO+20,SZO+92,14,10);
+
+// Couloirs additionnels pour remplir
+sewerTunnel(SO-15,SZO+62,30,SW,true);
+sewerTunnel(SO+15,SZO+62,20,SW,true);
+sewerTunnel(SO,SZO+68,SW,10,false);
+sewerTunnel(SO-18,SZO+70,SW,10,false);
+sewerTunnel(SO+18,SZO+70,SW,10,false);
+
+// Murs de fermeture (bouts de tunnels fermés)
+function sewerWall(x,z,w,d){
+  const m=new THREE.Mesh(new THREE.BoxGeometry(w,SW_H,d),sewerWallMat);m.position.set(x,SW_Y+SW_H/2,z);scene.add(m);
+  addSewerCol(x,z,w/2+0.1,d/2+0.1);
+}
+sewerWall(SO,SZO+15,SW+0.5,0.5); // ferme au nord de l'entrée (côté ville)
+sewerWall(SO-25,SZO+86,0.5,SW+0.5);
+sewerWall(SO+25,SZO+86,0.5,SW+0.5);
+
+// JetPack dans la salle
+const jpGrp=new THREE.Group();jpGrp.position.set(SO+20,SW_Y+1.5,SZO+92);scene.add(jpGrp);
+const jpBodyM=new THREE.MeshStandardMaterial({color:0xff6600,roughness:0.3,metalness:0.7,emissive:new THREE.Color(0x220000),emissiveIntensity:0.3});
+const jpBody=new THREE.Mesh(new THREE.BoxGeometry(0.6,0.8,0.35),jpBodyM);jpGrp.add(jpBody);
+[-0.22,0.22].forEach(tx=>{
+  const tank=new THREE.Mesh(new THREE.CylinderGeometry(0.14,0.14,0.75,10),jpBodyM);tank.position.set(tx,0,0);jpGrp.add(tank);
+  const glow=new THREE.MeshStandardMaterial({color:0xff8800,roughness:0.1,emissive:new THREE.Color(0xff4400),emissiveIntensity:1.5});
+  const flame=new THREE.Mesh(new THREE.ConeGeometry(0.1,0.25,6),glow);flame.position.set(tx,-0.5,0);jpGrp.add(flame);
 });
-ROUTES_V.forEach(x=>{
-  for(let i=0;i<3;i++){makeRealisticCar(x+(Math.random()<0.5?1.5:-1.5),-140+Math.random()*280,'z',Math.random()<0.5?1:-1,x,carColorIdx++%carPaintColors.length);}
-  for(let i=0;i<2;i++){makeRealisticBike(x+(Math.random()<0.5?2.5:-2.5),-120+Math.random()*240,'z',Math.random()<0.5?1:-1,x);}
+const jpLight2=new THREE.PointLight(0xff8800,2.5,8);jpLight2.position.set(SO+20,SW_Y+2,SZO+92);scene.add(jpLight2);
+
+// Capsules à collecter dans l'égout
+const coinMat=new THREE.MeshStandardMaterial({color:0x40ff40,roughness:0.1,metalness:0.8,emissive:new THREE.Color(0x103010),emissiveIntensity:0.6});
+const sewerCoins=[];
+[[SO,SZO+30],[SO,SZO+50],[SO-20,SZO+65],[SO+20,SZO+65],[SO,SZO+60],[SO-20,SZO+75],[SO+20,SZO+75],[SO,SZO+70],[SO,SZO+80],[SO+20,SZO+85]].forEach(([cx,cz])=>{
+  const c=new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.3,0.12,10),coinMat);c.rotation.x=Math.PI/2;c.position.set(cx,SW_Y+1.2,cz);scene.add(c);
+  sewerCoins.push({mesh:c,collected:false});
 });
 
-// ── OMBRE BLOB ──────────────────────────────────────────
-const blob=new THREE.Mesh(new THREE.CircleGeometry(0.5,16),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:0.22,depthWrite:false}));
+// ── OMBRE BLOB ────────────────────────────────────────────
+const blob=new THREE.Mesh(new THREE.CircleGeometry(0.48,16),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:0.22,depthWrite:false}));
 blob.rotation.x=-Math.PI/2;blob.position.y=0.012;scene.add(blob);
 
-// ── ÉCHELLE MISSION 1 ────────────────────────────────────
-let ladderZone=null;
-(()=>{
-  const BX=44,BZ=-24;
-  const ladderMat=new THREE.MeshStandardMaterial({color:0x8a8a70,roughness:0.5,metalness:0.6});
-  const LADDER_HEIGHT=60;
-  for(let y=1;y<LADDER_HEIGHT;y+=0.9){
-    const rung=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,1.6,6),ladderMat);rung.rotation.z=Math.PI/2;rung.position.set(BX+0.5,y,BZ+5.6);scene.add(rung);
-  }
-  [-0.7,0.7].forEach(sx=>{
-    const rail=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,LADDER_HEIGHT,6),ladderMat);rail.position.set(BX+0.5+sx,LADDER_HEIGHT/2,BZ+5.6);scene.add(rail);
-  });
-  const platM=new THREE.MeshStandardMaterial({color:0x606068,roughness:0.6,metalness:0.4});
-  const plat=new THREE.Mesh(new THREE.BoxGeometry(6,0.2,4),platM);plat.position.set(BX,LADDER_HEIGHT+0.1,BZ);scene.add(plat);
-  const chestMat=new THREE.MeshStandardMaterial({color:0xc8a020,roughness:0.6,metalness:0.3,emissive:new THREE.Color(0x402000),emissiveIntensity:0.5});
-  const chest=new THREE.Mesh(new THREE.BoxGeometry(1.2,0.9,0.9),chestMat);chest.position.set(BX,LADDER_HEIGHT+0.55,BZ-1);scene.add(chest);
-  ladderZone={x:BX+0.5,z:BZ+5.6,topY:LADDER_HEIGHT,platX:BX,platZ:BZ};
-})();
-
-// ── MISSION 2 : FLAQUE ───────────────────────────────────
-let puddleZone=null;
-(()=>{
-  const PX=-45,PZ=45;
-  const puddleMat=new THREE.MeshStandardMaterial({color:0x2255aa,roughness:0.05,metalness:0.2,transparent:true,opacity:0.7,emissive:new THREE.Color(0x001133),emissiveIntensity:0.2});
-  const puddle=new THREE.Mesh(new THREE.CylinderGeometry(2.2,2.2,0.06,24),puddleMat);puddle.position.set(PX,0.04,PZ);scene.add(puddle);
-  const ringMat=new THREE.MeshBasicMaterial({color:0x4488ff,transparent:true,opacity:0.4,side:THREE.DoubleSide,depthWrite:false});
-  const ring1=new THREE.Mesh(new THREE.RingGeometry(1.8,2.2,24),ringMat);ring1.rotation.x=-Math.PI/2;ring1.position.set(PX,0.06,PZ);scene.add(ring1);
-  const ring2=new THREE.Mesh(new THREE.RingGeometry(0.9,1.3,24),ringMat.clone());ring2.rotation.x=-Math.PI/2;ring2.position.set(PX,0.065,PZ);scene.add(ring2);
-  const arrowMat=new THREE.MeshStandardMaterial({color:0x88ccff,roughness:0.5,emissive:new THREE.Color(0x002244),emissiveIntensity:0.8});
-  const arrow=new THREE.Mesh(new THREE.CylinderGeometry(0,0.4,0.8,3),arrowMat);arrow.position.set(PX,1.2,PZ);scene.add(arrow);
-  puddleZone={x:PX,z:PZ,r:2.5,arrow,ring1,ring2};
-})();
-
-// ── MISSION 3 : MUR MAGIQUE ──────────────────────────────
-let wallPassZone=null;
-(()=>{
-  const WX=60,WZ=-80;
-  const wallMat=new THREE.MeshStandardMaterial({color:0x4488cc,roughness:0.1,metalness:0.3,transparent:true,opacity:0.45,emissive:new THREE.Color(0x001144),emissiveIntensity:0.6,side:THREE.DoubleSide});
-  const wall=new THREE.Mesh(new THREE.BoxGeometry(8,12,0.4),wallMat);wall.position.set(WX,6,WZ);scene.add(wall);
-  const runeMat=new THREE.MeshStandardMaterial({color:0x88ddff,roughness:0.1,emissive:new THREE.Color(0x2266aa),emissiveIntensity:1.5});
-  for(let i=0;i<8;i++){const rune=new THREE.Mesh(new THREE.SphereGeometry(0.18,6,4),runeMat);rune.position.set(WX+(Math.random()-0.5)*7,1.5+Math.random()*9,WZ+0.3);scene.add(rune);}
-  const tMat=new THREE.MeshStandardMaterial({color:0xddaa00,roughness:0.1,metalness:0.9,emissive:new THREE.Color(0x442200),emissiveIntensity:0.8});
-  const treasure=new THREE.Mesh(new THREE.SphereGeometry(0.7,12,8),tMat);treasure.position.set(WX-8,0.8,WZ);scene.add(treasure);
-  wallPassZone={x:WX,z:WZ,halfW:4.1,halfD:0.6,wall,treasure,treasureCollected:false};
-})();
-
-// ── LABYRINTHE ÉGOUT RÉALISTE ────────────────────────────
-const SEWER_FLOOR_Y=-6;
-const SW_OX=-90,SW_OZ=-70; // Entrée principale
-let sewerCoinsCollected=0;
-let jetpackCollected=false;
-const sewerCoinMeshes=[];
-
-(()=>{
-  // Matériaux égout améliorés
-  const sWall=sewerWallMat;
-  const sFloor=sewerFloorMat;
-  const sCeil=new THREE.MeshStandardMaterial({map:sewerWallTex,roughness:0.95,color:0x445533,side:THREE.DoubleSide});
-  const waterMat=new THREE.MeshStandardMaterial({color:0x1a3a18,roughness:0.1,metalness:0.05,transparent:true,opacity:0.65,emissive:new THREE.Color(0x051205),emissiveIntensity:0.3});
-
-  // Grate d'entrée avec détails
-  const grateMat=new THREE.MeshStandardMaterial({color:0x3a4030,roughness:0.8,metalness:0.5});
-  const grate=new THREE.Mesh(new THREE.CylinderGeometry(1.4,1.4,0.12,16),grateMat);grate.position.set(SW_OX,0.06,SW_OZ);scene.add(grate);
-  for(let i=0;i<4;i++){
-    const bar=new THREE.Mesh(new THREE.BoxGeometry(0.08,0.12,2.8),grateMat);bar.position.set(SW_OX-0.9+i*0.6,0.06,SW_OZ);scene.add(bar);
-  }
-  const grateHole=new THREE.Mesh(new THREE.RingGeometry(0.6,1.3,16),new THREE.MeshBasicMaterial({color:0x050505,side:THREE.DoubleSide}));grateHole.rotation.x=-Math.PI/2;grateHole.position.set(SW_OX,0.08,SW_OZ);scene.add(grateHole);
-  const arrowMat=new THREE.MeshStandardMaterial({color:0x80ff40,roughness:0.3,emissive:new THREE.Color(0x204010),emissiveIntensity:1.0});
-  const arrow=new THREE.Mesh(new THREE.CylinderGeometry(0,0.5,1,3),arrowMat);arrow.position.set(SW_OX,1.5,SW_OZ);scene.add(arrow);
-
-  // Lumières d'ambiance pour l'égout (mousse phosphorescente)
-  const mossMat=new THREE.MeshStandardMaterial({color:0x40ff20,roughness:0.9,emissive:new THREE.Color(0x104010),emissiveIntensity:0.8});
-
-  // Fonction pour créer un tronçon de tunnel
-  function sewerSegment(x,z,w,d,h=3.5,rot=0){
-    const base=new THREE.Group();base.position.set(x,SEWER_FLOOR_Y,z);base.rotation.y=rot;scene.add(base);
-    const wHalf=w/2+0.25,dHalf=d/2;
-    // Sol
-    const floor=new THREE.Mesh(new THREE.BoxGeometry(w+0.5,0.25,d),sFloor);floor.position.y=0;base.add(floor);
-    // Plafond
-    const ceil=new THREE.Mesh(new THREE.BoxGeometry(w+0.5,0.22,d),sCeil);ceil.position.y=h;base.add(ceil);
-    // Murs latéraux
-    const wallL=new THREE.Mesh(new THREE.BoxGeometry(0.22,h,d),sWall);wallL.position.set(-wHalf,h/2,0);base.add(wallL);
-    const wallR=new THREE.Mesh(new THREE.BoxGeometry(0.22,h,d),sWall);wallR.position.set(wHalf,h/2,0);base.add(wallR);
-    // Eau au sol
-    const water=new THREE.Mesh(new THREE.BoxGeometry(w*0.5,0.08,d-0.1),waterMat);water.position.y=0.15;base.add(water);
-    // Mousse phosphorescente sur les murs
-    for(let i=0;i<3;i++){
-      const moss=new THREE.Mesh(new THREE.SphereGeometry(0.12+Math.random()*0.1,5,4),mossMat);
-      moss.position.set(-wHalf+0.15,0.5+Math.random()*h*0.7,(-dHalf+Math.random()*d*0.8));
-      base.add(moss);
-    }
-    // Tuyaux
-    const pipeMat=new THREE.MeshStandardMaterial({color:0x3a5a3a,roughness:0.6,metalness:0.4});
-    const pipe=new THREE.Mesh(new THREE.CylinderGeometry(0.18,0.18,d,8),pipeMat);pipe.rotation.x=Math.PI/2;pipe.position.set(wHalf-0.35,h-0.4,0);base.add(pipe);
-    // Collider pour ce segment (en world space)
-    const cosR=Math.cos(rot),sinR=Math.sin(rot);
-    const wx_=wHalf+0.22,dz_=dHalf;
-    // Approximation collider en world space (boite)
-    const wx2=Math.abs(cosR)*wHalf+Math.abs(sinR)*dHalf+0.25;
-    const dz2=Math.abs(sinR)*wHalf+Math.abs(cosR)*dHalf;
-    // Murs latéraux du labyrinthe (comme colliders)
-    // Mur gauche
-    sewerBoxColliders.push({minX:x+cosR*(-wHalf-0.22)-sinR*(-dHalf),maxX:x+cosR*(-wHalf)+sinR*dHalf,minZ:z+sinR*(-wHalf-0.22)+cosR*(-dHalf),maxZ:z+sinR*(-wHalf)+cosR*dHalf});
-    // Mur droit  
-    sewerBoxColliders.push({minX:x+cosR*(wHalf)-sinR*(-dHalf),maxX:x+cosR*(wHalf+0.22)+sinR*dHalf,minZ:z+sinR*(wHalf)+cosR*(-dHalf),maxZ:z+sinR*(wHalf+0.22)+cosR*dHalf});
-    return base;
-  }
-
-  // Murs pleins du labyrinthe
-  function sewerWallBlock(x,z,w,d){
-    const wb=new THREE.Mesh(new THREE.BoxGeometry(w,3.5,d),sWall);wb.position.set(x,SEWER_FLOOR_Y+1.75,z);scene.add(wb);
-    sewerBoxColliders.push({minX:x-w/2,maxX:x+w/2,minZ:z-d/2,maxZ:z+d/2});
-  }
-
-  // Construction du labyrinthe
-  // Couloirs principaux
-  const SW=4; // largeur couloir
-  const SO=SW_OX,SZ2=SW_OZ;
-
-  // Couloir d'entrée (vers le bas = Z+)
-  sewerSegment(SO,SZ2+5,SW,10);
-  sewerSegment(SO,SZ2+15,SW,10);
-  sewerSegment(SO,SZ2+25,SW,10);
-
-  // Jonction 1
-  sewerSegment(SO,SZ2+30,10,SW);
-
-  // Couloir gauche
-  sewerSegment(SO-10,SZ2+30,SW,14);
-  sewerSegment(SO-10,SZ2+43,SW,12);
-
-  // Couloir droit
-  sewerSegment(SO+10,SZ2+30,SW,14);
-  sewerSegment(SO+10,SZ2+43,SW,12);
-
-  // Jonction 2 gauche
-  sewerSegment(SO-10,SZ2+50,16,SW);
-  // Jonction 2 droite
-  sewerSegment(SO+10,SZ2+50,16,SW);
-
-  // Couloirs vers le haut depuis jonction 2
-  sewerSegment(SO-18,SZ2+50,SW,12);
-  sewerSegment(SO+18,SZ2+50,SW,12);
-
-  // Grand couloir horizontal central
-  sewerSegment(SO,SZ2+50,SW,24);
-
-  // Salle centrale (plus large)
-  const chamberMesh=new THREE.Mesh(new THREE.BoxGeometry(12,3.5,12),sFloor);chamberMesh.position.set(SO,SEWER_FLOOR_Y,SZ2+58);scene.add(chamberMesh);
-  const chamberCeil=new THREE.Mesh(new THREE.BoxGeometry(12,0.22,12),sCeil);chamberCeil.position.set(SO,SEWER_FLOOR_Y+3.5,SZ2+58);scene.add(chamberCeil);
-  const chamberWater=new THREE.Mesh(new THREE.BoxGeometry(10,0.1,10),waterMat);chamberWater.position.set(SO,SEWER_FLOOR_Y+0.15,SZ2+58);scene.add(chamberWater);
-  // Colonnes dans la salle
-  const colMat=new THREE.MeshStandardMaterial({color:0x3a4a28,roughness:0.85,map:sewerWallTex});
-  [[-3,-3],[3,-3],[-3,3],[3,3]].forEach(([cx,cz])=>{
-    const col=new THREE.Mesh(new THREE.CylinderGeometry(0.35,0.45,3.5,8),colMat);col.position.set(SO+cx,SEWER_FLOOR_Y+1.75,SZ2+58+cz);scene.add(col);
-    sewerBoxColliders.push({minX:SO+cx-0.45,maxX:SO+cx+0.45,minZ:SZ2+58+cz-0.45,maxZ:SZ2+58+cz+0.45});
-  });
-
-  // Impasses / pièges
-  sewerSegment(SO-22,SZ2+55,SW,8);
-  sewerSegment(SO+22,SZ2+55,SW,8);
-
-  // Couloir secret vers jetpack
-  sewerSegment(SO,SZ2+65,SW,14);
-  sewerSegment(SO+10,SZ2+72,18,SW);
-  sewerSegment(SO+18,SZ2+72,SW,10);
-  sewerSegment(SO+18,SZ2+80,SW,10);
-
-  // Salle du JETPACK
-  const jpRoom=new THREE.Mesh(new THREE.BoxGeometry(10,4,10),sFloor);jpRoom.position.set(SO+18,SEWER_FLOOR_Y,SZ2+88);scene.add(jpRoom);
-  const jpCeil=new THREE.Mesh(new THREE.BoxGeometry(10,0.22,10),sCeil);jpCeil.position.set(SO+18,SEWER_FLOOR_Y+4,SZ2+88);scene.add(jpCeil);
-  // Murs salle jetpack
-  [[0,-5,-10,0.5],[0,5,-10,0.5],[5,0,-0.5,10],[-5,0,-0.5,10]].forEach(([dx,dz,ww,dd])=>{
-    const wm=new THREE.Mesh(new THREE.BoxGeometry(Math.abs(ww),4,Math.abs(dd)),sWall);
-    wm.position.set(SO+18+dx,SEWER_FLOOR_Y+2,SZ2+88+dz);scene.add(wm);
-  });
-  // Lumière spéciale dans la salle jetpack
-  const jpLight=new THREE.PointLight(0xff8800,2,12);jpLight.position.set(SO+18,SEWER_FLOOR_Y+3,SZ2+88);scene.add(jpLight);
-
-  // JETPACK OBJET - réaliste
-  const jpGroup=new THREE.Group();jpGroup.position.set(SO+18,SEWER_FLOOR_Y+1.5,SZ2+88);scene.add(jpGroup);
-  const jpBodyMat=new THREE.MeshStandardMaterial({color:0xff6600,roughness:0.3,metalness:0.7,emissive:new THREE.Color(0x220000),emissiveIntensity:0.3});
-  const jpChromeMat=new THREE.MeshStandardMaterial({color:0xdddddd,roughness:0.05,metalness:0.95});
-  const jpGlowMat=new THREE.MeshStandardMaterial({color:0xff8800,roughness:0.1,emissive:new THREE.Color(0xff4400),emissiveIntensity:1.5});
-  // Corps principal
-  const jpBody=new THREE.Mesh(new THREE.BoxGeometry(0.6,0.8,0.35),jpBodyMat);jpGroup.add(jpBody);
-  // Réservoirs
-  [-0.22,0.22].forEach(tx=>{
-    const tank=new THREE.Mesh(new THREE.CylinderGeometry(0.14,0.14,0.75,10),jpBodyMat);tank.position.set(tx,0,0);jpGroup.add(tank);
-    // Valve
-    const valve=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,0.1,8),jpChromeMat);valve.position.set(tx,-0.4,0);jpGroup.add(valve);
-    // Tuyère
-    const nozzle=new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.06,0.2,8),jpChromeMat);nozzle.position.set(tx,-0.52,0);jpGroup.add(nozzle);
-    // Flamme
-    const flame=new THREE.Mesh(new THREE.CylinderGeometry(0,0.08,0.22,6),jpGlowMat);flame.position.set(tx,-0.65,0);jpGroup.add(flame);
-  });
-  // Jauges
-  const gaugeMat=new THREE.MeshStandardMaterial({color:0x222222,roughness:0.5});
-  const gauge=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,0.04,12),gaugeMat);gauge.rotation.x=Math.PI/2;gauge.position.set(0,0.1,0.2);jpGroup.add(gauge);
-  const gaugeNeedle=new THREE.Mesh(new THREE.BoxGeometry(0.01,0.04,0.01),new THREE.MeshStandardMaterial({color:0xff0000,roughness:0.1}));gaugeNeedle.position.set(0,0.1,0.23);jpGroup.add(gaugeNeedle);
-  // Bracelet
-  const strap=new THREE.Mesh(new THREE.BoxGeometry(0.7,0.08,0.05),new THREE.MeshStandardMaterial({color:0x222222,roughness:0.9}));strap.position.set(0,0.3,0.2);jpGroup.add(strap);
-
-  // Panneau indicateur
-  const signPole=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,2.5,6),jpChromeMat);signPole.position.set(SO+18-2,SEWER_FLOOR_Y+1.25,SZ2+88);scene.add(signPole);
-  const signBoard=procTex((ctx,s)=>{
-    ctx.fillStyle='#ff6600';ctx.fillRect(0,0,s,s);
-    ctx.fillStyle='#ffffff';ctx.font=`bold ${s*0.2}px sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText('🚀 JETPACK',s/2,s*0.4);ctx.font=`bold ${s*0.12}px sans-serif`;ctx.fillText('MISSION',s/2,s*0.72);
-  },256);
-  const signBoardMesh=new THREE.Mesh(new THREE.BoxGeometry(1.2,0.7,0.08),new THREE.MeshStandardMaterial({map:signBoard,roughness:0.6}));signBoardMesh.position.set(SO+18-2,SEWER_FLOOR_Y+2.5,SZ2+88);scene.add(signBoardMesh);
-
-  // Capsules vertes à collecter dans le labyrinthe
-  const coinMat=new THREE.MeshStandardMaterial({color:0x40ff40,roughness:0.1,metalness:0.8,emissive:new THREE.Color(0x103010),emissiveIntensity:0.6});
-  const coinPositions=[
-    [SO,SZ2+15],[SO-10,SZ2+37],[SO+10,SZ2+37],
-    [SO-10,SZ2+50],[SO+10,SZ2+50],
-    [SO,SZ2+50],[SO-20,SZ2+55],[SO+20,SZ2+55],
-    [SO,SZ2+62],[SO+18,SZ2+75],
-  ];
-  coinPositions.forEach(([cx,cz])=>{
-    const c=new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.3,0.1,10),coinMat);
-    c.rotation.x=Math.PI/2;c.position.set(cx,SEWER_FLOOR_Y+1,cz);scene.add(c);
-    sewerCoinMeshes.push({mesh:c,collected:false});
-  });
-
-  // Fleches directionnelles dans l'égout
-  const arrowDirMat=new THREE.MeshStandardMaterial({color:0xff8800,roughness:0.3,emissive:new THREE.Color(0x441100),emissiveIntensity:0.5});
-  [[SO,SZ2+20,0],[SO,SZ2+45,0],[SO+5,SZ2+50,Math.PI/2],[SO+15,SZ2+65,Math.PI/2]].forEach(([ax,az,ar])=>{
-    const arr=new THREE.Mesh(new THREE.ConeGeometry(0.3,0.7,4),arrowDirMat);arr.rotation.x=Math.PI/2;arr.rotation.z=ar;arr.position.set(ax,SEWER_FLOOR_Y+0.5,az);scene.add(arr);
-  });
-
-  window._sewerArrow=arrow;
-  window._jpGroup=jpGroup;
-})();
-
-// ── MISSIONS ────────────────────────────────────────────
-const missions=[
-  {id:'ladder',title:'🪜 Grimpeur Urbain',desc:'Montez en haut du grand immeuble par l\'échelle',progress:0,total:1,done:false},
-  {id:'puddle',title:'💧 Passage Secret',desc:'Sautez dans la flaque magique',progress:0,total:1,done:false},
-  {id:'wall',title:'🔮 Mur Magique',desc:'Traversez le mur magique pour rétrécir',progress:0,total:1,done:false},
-  {id:'sewer',title:'🐀 Explorateur des Égouts',desc:'Collecte 10 capsules et trouve le JetPack !',progress:0,total:10,done:false},
-  {id:'jetpack',title:'🚀 JetPack !',desc:'Trouve le JetPack dans les égouts',progress:0,total:1,done:false},
-];
-function renderMissions(){
-  const hud=document.getElementById('mission-hud');hud.innerHTML='';
-  missions.forEach(m=>{
-    const card=document.createElement('div');card.className='mission-card '+(m.done?'done':'active');
-    card.innerHTML=`<div class="mission-title">${m.title}${m.done?'<span class="mission-badge">✓</span>':''}</div><div class="mission-desc">${m.desc}</div>${!m.done?`<div class="mission-progress"><div class="mission-bar" style="width:${(m.progress/m.total)*100}%"></div></div>`:''}`; 
-    hud.appendChild(card);
-  });
-  document.getElementById('mission-excl').classList.toggle('show',missions.some(m=>!m.done));
-}
-function completeMission(id,msg){
-  const m=missions.find(x=>x.id===id);if(!m||m.done)return;m.done=true;m.progress=m.total;
-  showToast('🎉 MISSION : '+m.title,'mission');addChat('🏆 '+msg,'Système');renderMissions();
-}
-function updateMissionProgress(id,val){const m=missions.find(x=>x.id===id);if(!m||m.done)return;m.progress=val;renderMissions();}
-
-// ── MINI-CARTE ──────────────────────────────────────────
-const mmCanvas=document.getElementById('minimap-canvas');
-const mmCtx=mmCanvas.getContext('2d');
-const MM_SIZE=240,MM_WORLD=165;
-const TELEPORT_POINTS=[
-  {id:'tp1',label:'🏯 Temple',x:68,z:28,color:'#f5c842'},
-  {id:'tp2',label:'🌸 Parc Central',x:0,z:-130,color:'#2ecc71'},
-  {id:'tp3',label:'🏥 Hôpital',x:-68,z:15,color:'#e74c3c'},
-  {id:'tp4',label:'🪜 Immeuble',x:44,z:-24,color:'#88ccff'},
-  {id:'tp5',label:'💧 Flaque',x:-45,z:45,color:'#4488ff'},
-  {id:'tp6',label:'🔮 Mur Magique',x:60,z:-80,color:'#9b59b6'},
-  {id:'tp7',label:'🐀 Égout',x:SW_OX,z:SW_OZ,color:'#80ff40'},
-  {id:'tp8',label:'🏠 Centre',x:0,z:0,color:'#ffffff'},
-];
-let selectedTP=null,tpCooldown=0,tpCooldownTimer=null;
-function worldToMM(wx,wz){return{x:(wx/MM_WORLD)*(MM_SIZE/2)+MM_SIZE/2,y:(wz/MM_WORLD)*(MM_SIZE/2)+MM_SIZE/2};}
-function drawMinimap(){
-  mmCtx.clearRect(0,0,MM_SIZE,MM_SIZE);
-  mmCtx.fillStyle='#111a25';mmCtx.fillRect(0,0,MM_SIZE,MM_SIZE);
-  mmCtx.strokeStyle='rgba(255,255,255,.07)';mmCtx.lineWidth=0.5;
-  [-125,-100,-75,-50,-25,0,25,50,75,100,125].forEach(v=>{
-    const a=worldToMM(v,-165),b=worldToMM(v,165);mmCtx.beginPath();mmCtx.moveTo(a.x,a.y);mmCtx.lineTo(b.x,b.y);mmCtx.stroke();
-    const c=worldToMM(-165,v),d=worldToMM(165,v);mmCtx.beginPath();mmCtx.moveTo(c.x,c.y);mmCtx.lineTo(d.x,d.y);mmCtx.stroke();
-  });
-  mmCtx.strokeStyle='rgba(180,180,160,.4)';mmCtx.lineWidth=2.5;
-  const r1s=worldToMM(-165,0),r1e=worldToMM(165,0);mmCtx.beginPath();mmCtx.moveTo(r1s.x,r1s.y);mmCtx.lineTo(r1e.x,r1e.y);mmCtx.stroke();
-  const r2s=worldToMM(0,-165),r2e=worldToMM(0,165);mmCtx.beginPath();mmCtx.moveTo(r2s.x,r2s.y);mmCtx.lineTo(r2e.x,r2e.y);mmCtx.stroke();
-  mmCtx.strokeStyle='rgba(140,140,120,.2)';mmCtx.lineWidth=1;
-  [-50,-25,25,50,-75,75,-100,100].forEach(v=>{
-    const a=worldToMM(v,-165),b=worldToMM(v,165);mmCtx.beginPath();mmCtx.moveTo(a.x,a.y);mmCtx.lineTo(b.x,b.y);mmCtx.stroke();
-    const c=worldToMM(-165,v),d=worldToMM(165,v);mmCtx.beginPath();mmCtx.moveTo(c.x,c.y);mmCtx.lineTo(d.x,d.y);mmCtx.stroke();
-  });
-  const pk=worldToMM(-30,-30),pk2=worldToMM(30,30);mmCtx.fillStyle='rgba(46,140,60,.35)';mmCtx.fillRect(pk.x,pk.y,pk2.x-pk.x,pk2.y-pk.y);
-  TELEPORT_POINTS.forEach(tp=>{
-    const pos=worldToMM(tp.x,tp.z);
-    mmCtx.beginPath();mmCtx.arc(pos.x,pos.y,5,0,Math.PI*2);mmCtx.fillStyle=tp.color;mmCtx.fill();
-    if(selectedTP&&selectedTP.id===tp.id){mmCtx.strokeStyle='#fff';mmCtx.lineWidth=2;mmCtx.stroke();}
-    mmCtx.fillStyle='rgba(255,255,255,.7)';mmCtx.font='bold 7px sans-serif';mmCtx.textAlign='center';
-    mmCtx.fillText(tp.label.split(' ')[0],pos.x,pos.y-7);
-  });
-  const pl=worldToMM(pp.x,pp.z);
-  mmCtx.beginPath();mmCtx.arc(pl.x,pl.y,5,0,Math.PI*2);mmCtx.fillStyle='#fff';mmCtx.fill();
-  mmCtx.strokeStyle='#f5c842';mmCtx.lineWidth=1.5;mmCtx.stroke();
-  mmCtx.beginPath();mmCtx.moveTo(pl.x,pl.y);mmCtx.lineTo(pl.x+Math.sin(pRot)*10,pl.y+Math.cos(pRot)*10);
-  mmCtx.strokeStyle='#f5c842';mmCtx.lineWidth=2;mmCtx.stroke();
-}
-mmCanvas.addEventListener('click',e=>{
-  const rect=mmCanvas.getBoundingClientRect(),scaleX=MM_SIZE/rect.width,scaleY=MM_SIZE/rect.height;
-  const cx=(e.clientX-rect.left)*scaleX,cy=(e.clientY-rect.top)*scaleY;
-  let closest=null,closestD=999;
-  TELEPORT_POINTS.forEach(tp=>{const pos=worldToMM(tp.x,tp.z);const d=Math.sqrt((cx-pos.x)**2+(cy-pos.y)**2);if(d<20&&d<closestD){closest=tp;closestD=d;}});
-  if(closest){
-    selectedTP=closest;const popup=document.getElementById('tp-popup'),title=document.getElementById('tp-popup-title'),btn=document.getElementById('tp-popup-btn');
-    title.textContent=closest.label;popup.style.display='block';
-    if(tpCooldown>0){btn.textContent='⏳ Recharge '+tpCooldown+'s';btn.disabled=true;}else{btn.textContent='⚡ Téléporter ici';btn.disabled=false;}
-  }else{document.getElementById('tp-popup').style.display='none';selectedTP=null;}
-});
-document.getElementById('tp-popup-btn').addEventListener('click',()=>{
-  if(!selectedTP||tpCooldown>0)return;
-  pp.x=selectedTP.x;pp.z=selectedTP.z;pp.y=0;jumpVel=0;onGround=true;isInSewer=false;
-  if(isInSewer)exitSewer();
-  showToast('⚡ Téléporté : '+selectedTP.label);addChat('⚡ Téléporté vers '+selectedTP.label,'Carte');
-  document.getElementById('tp-popup').style.display='none';selectedTP=null;
-  tpCooldown=30;
-  const cdEl=document.getElementById('teleport-cooldown');clearInterval(tpCooldownTimer);
-  tpCooldownTimer=setInterval(()=>{tpCooldown--;cdEl.textContent=tpCooldown>0?'⏳ '+tpCooldown+'s':'';if(tpCooldown<=0){clearInterval(tpCooldownTimer);cdEl.textContent='';}},1000);
-});
-
-// ── AVATAR ──────────────────────────────────────────────
+// ── AVATAR ────────────────────────────────────────────────
 const avatarGroup=new THREE.Group();avatarGroup.position.set(0,0,8);scene.add(avatarGroup);
 let avatarMixer=null,emoteTimer=null,lastWalking=false;
 const gltfLoader=new GLTFLoader();const glbCache={};
-function loadGLB(url,cb){if(glbCache[url]){cb(glbCache[url]);return;}gltfLoader.load(url,gltf=>{glbCache[url]=gltf;cb(gltf);},undefined,err=>console.error('GLB fail:',url,err));}
+function loadGLB(url,cb){if(glbCache[url]){cb(glbCache[url]);return;}gltfLoader.load(url,gltf=>{glbCache[url]=gltf;cb(gltf);},undefined,()=>{});}
 function swapAvatar(file,loop,onDone){
   const url=BASE+file;
   loadGLB(url,gltf=>{
@@ -1464,15 +951,14 @@ function swapAvatar(file,loop,onDone){
     if(gltf.animations&&gltf.animations.length){
       avatarMixer=new THREE.AnimationMixer(model);
       const action=avatarMixer.clipAction(gltf.animations[0]);
-      action.setLoop(loop?THREE.LoopRepeat:THREE.LoopOnce,loop?Infinity:1);
-      action.clampWhenFinished=!loop;action.play();
+      action.setLoop(loop?THREE.LoopRepeat:THREE.LoopOnce,loop?Infinity:1);action.clampWhenFinished=!loop;action.play();
       if(onDone)onDone(gltf.animations[0].duration);
     }
   });
 }
 loadGLB(BASE+IDLE_FILE,()=>{});loadGLB(BASE+WALK_FILE,()=>{});
-function setWalkSwap(walking){if(walking===lastWalking)return;lastWalking=walking;clearTimeout(emoteTimer);emoteTimer=null;swapAvatar(walking?WALK_FILE:IDLE_FILE,true,null);}
-function playEmote(file,label){clearTimeout(emoteTimer);emoteTimer=null;swapAvatar(file,false,duration=>{showToast('▶ '+label);emoteTimer=setTimeout(()=>{emoteTimer=null;lastWalking=false;swapAvatar(IDLE_FILE,true,null);},duration*1000+350);});}
+function setWalkSwap(w){if(w===lastWalking)return;lastWalking=w;clearTimeout(emoteTimer);emoteTimer=null;swapAvatar(w?WALK_FILE:IDLE_FILE,true,null);}
+function playEmote(file,label){clearTimeout(emoteTimer);emoteTimer=null;swapAvatar(file,false,dur=>{showToast('▶ '+label);emoteTimer=setTimeout(()=>{emoteTimer=null;lastWalking=false;swapAvatar(IDLE_FILE,true,null);},dur*1000+350);});}
 
 // ANIM PANEL
 const animScroll=document.getElementById('anim-scroll');let activeBtn=null;
@@ -1489,7 +975,7 @@ ANIMS.forEach((anim,i)=>{
   animScroll.appendChild(btn);if(i===0)activeBtn=btn;
 });
 
-// ── JOYSTICKS ────────────────────────────────────────────
+// ── JOYSTICKS ─────────────────────────────────────────────
 const joyBase=document.getElementById('joy-base'),joyKnob=document.getElementById('joy-knob');
 const JR=40;const joy={active:false,x:0,y:0,id:null};
 function getJC(){const r=joyBase.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2};}
@@ -1512,114 +998,54 @@ const keys={};
 document.addEventListener('keydown',e=>keys[e.key]=true);
 document.addEventListener('keyup',e=>keys[e.key]=false);
 
-// ── SAUT ────────────────────────────────────────────────
+// ── SAUT ──────────────────────────────────────────────────
 const JVN=9,JVS=20,GR=28;
 let jumpVel=0,onGround=true,jtc=0,jtt=null;
+let hasJetpack=false,jetpackFuel=100;
+let jpCollected=false;
+
 function doJump(){
-  if(hasJetpack&&!isInSewer){useJetpack();return;}
   if(!onGround)return;jtc++;clearTimeout(jtt);
   if(jtc>=2){jtc=0;jumpVel=JVS;onGround=false;showToast('🚀 SUPER SAUT !');}
   else{jtt=setTimeout(()=>{if(jtc===1&&onGround){jumpVel=JVN;onGround=false;}jtc=0;},280);}
 }
 document.getElementById('jump-btn').addEventListener('touchstart',e=>{e.preventDefault();doJump();},{passive:false});
 document.getElementById('jump-btn').addEventListener('click',doJump);
-document.getElementById('super-jump-btn').addEventListener('touchstart',e=>{e.preventDefault();if(hasJetpack){useJetpack();return;}if(!onGround)return;jtc=0;clearTimeout(jtt);jumpVel=JVS;onGround=false;showToast('🚀 SUPER SAUT !');},{passive:false});
-document.getElementById('super-jump-btn').addEventListener('click',()=>{if(hasJetpack){useJetpack();return;}if(!onGround)return;jtc=0;clearTimeout(jtt);jumpVel=JVS;onGround=false;showToast('🚀 SUPER SAUT !');});
+document.getElementById('super-jump-btn').addEventListener('touchstart',e=>{e.preventDefault();if(hasJetpack&&jetpackFuel>0&&!isInSewer){jumpVel=Math.max(jumpVel,15);onGround=false;}else{if(!onGround)return;jtc=0;clearTimeout(jtt);jumpVel=JVS;onGround=false;showToast('🚀 SUPER SAUT !');}},{passive:false});
+document.getElementById('super-jump-btn').addEventListener('click',()=>{if(!onGround)return;jtc=0;clearTimeout(jtt);jumpVel=JVS;onGround=false;showToast('🚀 SUPER SAUT !');});
 
-// ── ÉTAT RUNTIME ────────────────────────────────────────
-let isShrunk=false,shrunkTimer=null;
+// ── ÉTAT ──────────────────────────────────────────────────
 let isInSewer=false;
-let isOnLadder=false;
-let hasJetpack=false;
-let jetpackFuel=100;
-const JETPACK_POWER=18,JETPACK_DRAIN=35,JETPACK_REGEN=15;
+let sewerCoinsCount=0;
 
-function useJetpack(){
-  if(!hasJetpack||jetpackFuel<=0)return;
-  if(onGround||!onGround){jumpVel=Math.max(jumpVel,12);onGround=false;}
-}
-
-function updateJetpackUI(){
-  const hud=document.getElementById('jetpack-hud');
-  const bar=document.getElementById('jp-bar');
-  hud.classList.toggle('show',hasJetpack);
-  if(hasJetpack)bar.style.height=jetpackFuel+'%';
-}
-
-function enterShrink(){
-  if(isShrunk)return;isShrunk=true;
-  document.getElementById('shrink-overlay').classList.add('active');
-  document.getElementById('shrunk-label').classList.add('show');
-  document.getElementById('zone-label').textContent='🔬 Zone Micro';
-  showToast('🔬 Tu as rétrécis !','secret');
-  addChat('✨ Tu es devenu minuscule !','Magie');
-  completeMission('wall','Tu as traversé le mur magique !');
-  clearTimeout(shrunkTimer);shrunkTimer=setTimeout(()=>exitShrink(),15000);
-}
-function exitShrink(){
-  if(!isShrunk)return;isShrunk=false;
-  document.getElementById('shrink-overlay').classList.remove('active');
-  document.getElementById('shrunk-label').classList.remove('show');
-  document.getElementById('zone-label').textContent='東京 Shinjuku';
-  showToast('↑ Taille normale !');
-}
 function enterSewer(){
   if(isInSewer)return;isInSewer=true;
-  document.getElementById('sewer-overlay').classList.add('active');
-  document.getElementById('zone-label').textContent='🐀 Labyrinthe des Égouts';
-  addChat('💀 Dans les égouts ! Trouve le JetPack 🚀 !','Égouts');
-  showToast('⬇️ Tu es dans les égouts !');
+  document.getElementById('zone-name').textContent='🐀 Égout Souterrain';
+  // Fog spécial égout
+  scene.fog=new THREE.Fog(0x0a120a,8,28);
+  scene.background=new THREE.Color(0x080f06);
+  showToast('⬇️ Dans les égouts ! Trouve le 🚀 JetPack !');
+  addChat('💀 Égout ! Lumière verte = direction, orange = danger !','Souterrain');
 }
 function exitSewer(){
   if(!isInSewer)return;isInSewer=false;
-  document.getElementById('sewer-overlay').classList.remove('active');
-  document.getElementById('zone-label').textContent='東京 Shinjuku';
-  showToast('⬆️ Tu ressors des égouts !');
+  document.getElementById('zone-name').textContent='東京 Shinjuku';
+  scene.fog=new THREE.Fog(0x9ec2dc,100,280);
+  scene.background=new THREE.Color(0x8ab4d4);
+  showToast('⬆️ Retour à la surface !');
 }
 
-// ── MARKERS ────────────────────────────────────────────
-const markersDiv=document.getElementById('markers');
-const markerDefs=[
-  {id:'m1',icon:'🪜',label:'Grimpe!',color:'#f5c842'},
-  {id:'m2',icon:'💧',label:'Secret',color:'#4488ff'},
-  {id:'m3',icon:'🔮',label:'Magie',color:'#88ccff'},
-  {id:'m4',icon:'🐀',label:'Labyrinthe',color:'#80ff40'},
-];
-const markerEls={};
-markerDefs.forEach(d=>{
-  const el=document.createElement('div');el.className='marker';el.id='marker-'+d.id;
-  el.innerHTML=`<div class="marker-icon" style="background:rgba(0,0,0,.7);border:2px solid ${d.color}">${d.icon}</div><span class="marker-label" style="color:${d.color}">${d.label}</span>`;
-  markersDiv.appendChild(el);markerEls[d.id]=el;
-});
-const MARKER_POSITIONS={
-  m1:new THREE.Vector3(44.5,0.5,-18.4),
-  m2:new THREE.Vector3(-45,1.5,45),
-  m3:new THREE.Vector3(60,1.5,-80),
-  m4:new THREE.Vector3(SW_OX,1.5,SW_OZ),
-};
-function updateMarkers(){
-  Object.entries(MARKER_POSITIONS).forEach(([id,pos3])=>{
-    const el=markerEls[id];if(!el)return;
-    const missionId={m1:'ladder',m2:'puddle',m3:'wall',m4:'sewer'}[id];
-    const m=missions.find(x=>x.id===missionId);
-    if(m&&m.done){el.classList.remove('visible');return;}
-    const v=pos3.clone().project(camera);const behind=(v.z>1);
-    const x=(v.x+1)/2*window.innerWidth,y=(1-v.y)/2*window.innerHeight;
-    const dist3=pos3.distanceTo(pp);
-    if(!behind&&dist3<80){el.classList.add('visible');el.style.left=x+'px';el.style.top=y+'px';}
-    else el.classList.remove('visible');
-  });
-}
-
-// ── BOUCLE PRINCIPALE ───────────────────────────────────
-const SPEED=6,BOUND=WORLD-4;
+// ── BOUCLE PRINCIPALE ─────────────────────────────────────
+const SPEED=6,BOUND=130;
 const pp=new THREE.Vector3(0,0,8);
 let pRot=0,cameraYaw=Math.PI;
 const CD=8,CH=2.6,CLY=1.2,CL=4;
 const clock=new THREE.Clock();
 let time=0;
 
-finishLoading();renderMissions();
+function updateBubble(){}
+
+finishLoading();
 
 function animate(){
   requestAnimationFrame(animate);
@@ -1627,64 +1053,14 @@ function animate(){
   time+=dt;
   if(avatarMixer)avatarMixer.update(dt);
 
-  // ── Animations des zones ────────────────────────────
-  if(puddleZone){
-    puddleZone.ring1.material.opacity=0.2+0.2*Math.sin(time*2);
-    puddleZone.ring2.material.opacity=0.2+0.3*Math.sin(time*2.5+1);
-    puddleZone.ring1.scale.setScalar(1+0.06*Math.sin(time*1.5));
-    puddleZone.ring2.scale.setScalar(1+0.08*Math.sin(time*2+0.5));
-    puddleZone.arrow.rotation.y=time*2;puddleZone.arrow.position.y=1.2+0.2*Math.sin(time*2);
-  }
-  if(window._sewerArrow){window._sewerArrow.rotation.y=time*1.5;window._sewerArrow.position.y=1.5+0.25*Math.sin(time*1.8);}
-  if(window._jpGroup&&!jetpackCollected){window._jpGroup.rotation.y=time;window._jpGroup.position.y=SEWER_FLOOR_Y+1.5+0.2*Math.sin(time*2);}
-  if(wallPassZone&&!wallPassZone.treasureCollected)wallPassZone.treasure.rotation.y=time;
-  sewerCoinMeshes.forEach(c=>{if(!c.collected){c.mesh.rotation.z=time*2;c.mesh.position.y=SEWER_FLOOR_Y+1+0.1*Math.sin(time*3+c.mesh.position.x);}});
+  // Animations JetPack + coins
+  if(!jpCollected&&jpGrp){jpGrp.rotation.y=time;jpGrp.position.y=SW_Y+1.5+0.25*Math.sin(time*2);}
+  sewerCoins.forEach(c=>{if(!c.collected){c.mesh.rotation.z=time*2.5;c.mesh.position.y=SW_Y+1.2+0.08*Math.sin(time*3+c.mesh.position.x);}});
+  // Pulsation lumières égout
+  sewerLights.forEach((l,i)=>{l.intensity=1.1+0.4*Math.sin(time*1.5+i*0.7);});
+  jpLight2.intensity=2+Math.sin(time*3)*0.8;
 
-  // ── VÉHICULES - Déplacement et collisions ───────────
-  movingVehicles.forEach(v=>{
-    if(v.axis==='x'){
-      v.mesh.position.x+=v.dir*v.speed*dt;
-      if(v.mesh.position.x>152)v.mesh.position.x=-152;
-      if(v.mesh.position.x<-152)v.mesh.position.x=152;
-    }else{
-      v.mesh.position.z+=v.dir*v.speed*dt;
-      if(v.mesh.position.z>152)v.mesh.position.z=-152;
-      if(v.mesh.position.z<-152)v.mesh.position.z=152;
-    }
-    // Rotation roues vélo
-    if(v.cycLegL!==undefined){
-      v.phase=(v.phase||0)+v.speed*dt*1.5;
-      v.cycLegL.position.z=0.12*Math.sin(v.phase);
-      v.cycLegL.position.y=0.78+0.04*Math.cos(v.phase);
-      v.cycLegR.position.z=-0.12*Math.sin(v.phase);
-      v.cycLegR.position.y=0.78-0.04*Math.cos(v.phase);
-    }
-  });
-
-  // ── PIÉTONS - Déplacement animé ─────────────────────
-  pedObjects.forEach(p=>{
-    p.legPhase+=p.speed*dt*2;
-    if(p.axis==='x'){
-      p.mesh.position.x+=p.dir*p.speed*dt;
-      if(p.mesh.position.x>145)p.mesh.position.x=-145;
-      if(p.mesh.position.x<-145)p.mesh.position.x=145;
-    }else{
-      p.mesh.position.z+=p.dir*p.speed*dt;
-      if(p.mesh.position.z>145)p.mesh.position.z=-145;
-      if(p.mesh.position.z<-145)p.mesh.position.z=145;
-    }
-    // Animation jambes réaliste
-    const lAng=Math.sin(p.legPhase)*0.35;
-    const rAng=-Math.sin(p.legPhase)*0.35;
-    p.legL.rotation.x=lAng;p.legR.rotation.x=rAng;
-    p.armLU.rotation.x=rAng*0.6;p.armRU.rotation.x=lAng*0.6;
-    p.footL.position.z=Math.sin(p.legPhase)*0.06;
-    p.footR.position.z=-Math.sin(p.legPhase)*0.06;
-    // Mise à jour collider dynamique
-    p.hw=0.22;p.hd=0.22;p.h=1.8;
-  });
-
-  // ── INPUT ──────────────────────────────────────────
+  // Input
   let mx=joy.x,mz=-joy.y;
   if(keys['ArrowUp']||keys['w']||keys['W'])mz=1;
   if(keys['ArrowDown']||keys['s']||keys['S'])mz=-1;
@@ -1694,42 +1070,21 @@ function animate(){
   if(camJoy.active&&Math.abs(camJoy.x)>0.04)cameraYaw-=camJoy.x*2.2*dt;
   if(keys['q']||keys['Q'])cameraYaw+=1.8*dt;
   if(keys['e']||keys['E'])cameraYaw-=1.8*dt;
-
-  // JetPack (maintenir O ou bouton)
-  if(keys['o']||keys['O']){if(hasJetpack&&jetpackFuel>0){jumpVel=Math.max(jumpVel,JETPACK_POWER);onGround=false;jetpackFuel=Math.max(0,jetpackFuel-JETPACK_DRAIN*dt);updateJetpackUI();}}
-  else if(hasJetpack&&jetpackFuel<100){jetpackFuel=Math.min(100,jetpackFuel+JETPACK_REGEN*dt);updateJetpackUI();}
+  // JetPack
+  if((keys['o']||keys['O'])&&hasJetpack&&jetpackFuel>0){jumpVel=Math.max(jumpVel,15);onGround=false;jetpackFuel=Math.max(0,jetpackFuel-30*dt);}
+  else if(hasJetpack&&jetpackFuel<100){jetpackFuel=Math.min(100,jetpackFuel+12*dt);}
 
   const moving=Math.abs(mx)>0.05||Math.abs(mz)>0.05;
   if(moving&&emoteTimer){clearTimeout(emoteTimer);emoteTimer=null;}
-  if(onGround&&!isOnLadder)setWalkSwap(moving);
 
-  // ── PHYSIQUE ÉCHELLE ────────────────────────────────
-  if(ladderZone){
-    const distLadder=Math.sqrt((pp.x-ladderZone.x)**2+(pp.z-ladderZone.z)**2);
-    if(distLadder<1.5&&!isOnLadder&&mz>0.3){
-      isOnLadder=true;showToast('🪜 Accroché ! Monte avec ↑');addChat('Tu commences à grimper…','Info');
-    }
-    if(isOnLadder){
-      pp.x=ladderZone.x;pp.z=ladderZone.z;onGround=false;jumpVel=0;
-      if(mz>0.2)pp.y=Math.min(pp.y+4*dt,ladderZone.topY+0.2);
-      else if(mz<-0.2)pp.y=Math.max(pp.y-4*dt,0);
-      if(pp.y<=0.1){isOnLadder=false;pp.y=0;onGround=true;}
-      if(pp.y>=ladderZone.topY-0.5){
-        isOnLadder=false;onGround=true;pp.x=ladderZone.platX;pp.z=ladderZone.platZ;pp.y=ladderZone.topY+0.2;
-        showToast('🏆 Sommet atteint !','mission');completeMission('ladder','Tu as grimpé jusqu\'au toit !');updateMissionProgress('ladder',1);
-      }
-      setWalkSwap(false);
-    }
-  }
-
-  // ── MOUVEMENT VILLE ────────────────────────────────
-  if(!isOnLadder&&!isInSewer){
+  // Mouvement surface
+  if(!isInSewer){
+    if(onGround)setWalkSwap(moving);
     if(moving){
       const sc=Math.sin(cameraYaw),cc=Math.cos(cameraYaw);
-      const spd=isShrunk?SPEED*0.4:SPEED;
-      const dx=(sc*(-mz)+cc*mx)*spd*dt,dz=(cc*(-mz)-sc*mx)*spd*dt;
+      const dx=(sc*(-mz)+cc*mx)*SPEED*dt,dz=(cc*(-mz)-sc*mx)*SPEED*dt;
       let nx=pp.x+dx,nz=pp.z+dz;
-      if(!isShrunk){const res=resolveCollisions(nx,nz,pp.y);nx=res.x;nz=res.z;}
+      const res=resCol(nx,nz,pp.y,colliders);nx=res.x;nz=res.z;
       pp.x=Math.max(-BOUND,Math.min(BOUND,nx));pp.z=Math.max(-BOUND,Math.min(BOUND,nz));
       pRot=Math.atan2(dx,dz);
       const tY=pRot+Math.PI;let diff=tY-cameraYaw;
@@ -1737,97 +1092,61 @@ function animate(){
       cameraYaw+=diff*Math.min(CL*dt,1.0);
     }
     if(!onGround){jumpVel-=GR*dt;pp.y+=jumpVel*dt;if(pp.y<=0){pp.y=0;jumpVel=0;onGround=true;setWalkSwap(moving);}}
+
+    // Entrée égout
+    const de=Math.sqrt((pp.x-SW_ENTRY_X)**2+(pp.z-SW_ENTRY_Z)**2);
+    if(de<2.5&&onGround){enterSewer();pp.y=SW_Y+0.15;pp.z=SW_ENTRY_Z+22;}
   }
 
-  // ── MOUVEMENT ÉGOUT ───────────────────────────────
+  // Mouvement égout
   if(isInSewer){
+    setWalkSwap(moving);
     if(moving){
       const sc=Math.sin(cameraYaw),cc=Math.cos(cameraYaw);
-      const dx=(sc*(-mz)+cc*mx)*SPEED*0.7*dt,dz=(cc*(-mz)-sc*mx)*SPEED*0.7*dt;
+      const dx=(sc*(-mz)+cc*mx)*SPEED*0.65*dt,dz=(cc*(-mz)-sc*mx)*SPEED*0.65*dt;
       let nx=pp.x+dx,nz=pp.z+dz;
-      const res=resolveSewerCollisions(nx,nz,pp.y);nx=res.x;nz=res.z;
+      const res=resCol(nx,nz,pp.y,sewerColliders);nx=res.x;nz=res.z;
       pp.x=Math.max(-BOUND,Math.min(BOUND,nx));pp.z=Math.max(-BOUND,Math.min(BOUND,nz));
       pRot=Math.atan2(dx,dz);
       const tY=pRot+Math.PI;let diff=tY-cameraYaw;
       while(diff>Math.PI)diff-=2*Math.PI;while(diff<-Math.PI)diff+=2*Math.PI;
       cameraYaw+=diff*Math.min(CL*dt,1.0);
     }
-    pp.y=SEWER_FLOOR_Y+0.1;onGround=true;jumpVel=0;setWalkSwap(moving);
+    pp.y=SW_Y+0.1;onGround=true;jumpVel=0;
 
-    // Collecte capsules
-    sewerCoinMeshes.forEach(c=>{
+    // Collecte coins
+    sewerCoins.forEach(c=>{
       if(!c.collected){
         const d=Math.sqrt((pp.x-c.mesh.position.x)**2+(pp.z-c.mesh.position.z)**2);
-        if(d<1.5){
-          c.collected=true;c.mesh.visible=false;sewerCoinsCollected++;
-          showToast(`💚 Capsule ${sewerCoinsCollected}/10 !`,'mission');
-          updateMissionProgress('sewer',sewerCoinsCollected);
-          if(sewerCoinsCollected>=10)completeMission('sewer','Toutes les capsules collectées !');
-          addChat(`Capsule ${sewerCoinsCollected}/10 récupérée !`,'Égout');
-        }
+        if(d<1.8){c.collected=true;c.mesh.visible=false;sewerCoinsCount++;showToast(`💚 Capsule ${sewerCoinsCount}/10 !`);addChat(`Capsule ${sewerCoinsCount}/10 !`,'Égout');}
       }
     });
 
     // Collecte JetPack
-    if(!jetpackCollected&&window._jpGroup){
-      const djp=Math.sqrt((pp.x-window._jpGroup.position.x)**2+(pp.z-window._jpGroup.position.z)**2);
-      if(djp<2){
-        jetpackCollected=true;hasJetpack=true;window._jpGroup.visible=false;
-        showToast('🚀 JETPACK RÉCUPÉRÉ ! Appuie sur O ou 🚀 pour voler !','jetpack');
-        addChat('🚀🚀 JetPack équipé ! Tu peux maintenant voler !','Système');
-        completeMission('jetpack','JetPack trouvé dans les égouts !');updateMissionProgress('jetpack',1);
-        updateJetpackUI();
-        // Lumière sur le joueur
-        const jpLight=new THREE.PointLight(0xff8800,1.5,8);avatarGroup.add(jpLight);
-        jpLight.position.y=1;
-      }
+    if(!jpCollected&&jpGrp){
+      const dj=Math.sqrt((pp.x-jpGrp.position.x)**2+(pp.z-jpGrp.position.z)**2);
+      if(dj<2.5){jpCollected=true;hasJetpack=true;jpGrp.visible=false;showToast('🚀🚀 JETPACK ! Appuie O pour voler !');addChat('🚀 JetPack équipé !','Système');}
     }
 
-    // Sortie égout (retour à l'entrée)
-    const distEntry=Math.sqrt((pp.x-SW_OX)**2+(pp.z-SW_OZ)**2);
-    if(distEntry<3){exitSewer();pp.y=0.5;}
+    // Sortie égout
+    const de2=Math.sqrt((pp.x-SW_ENTRY_X)**2+(pp.z-(SW_ENTRY_Z+22))**2);
+    if(de2<2.5){exitSewer();pp.y=0.5;}
   }
 
-  // ── ZONES DE MISSION VILLE ──────────────────────────
-  if(puddleZone){
-    const dPud=Math.sqrt((pp.x-puddleZone.x)**2+(pp.z-puddleZone.z)**2);
-    if(dPud<puddleZone.r&&!isInSewer&&onGround&&!missions.find(x=>x.id==='puddle')?.done){
-      const m=missions.find(x=>x.id==='puddle');if(m)m.done=true;
-      enterSewer();pp.x=SW_OX;pp.z=SW_OZ+5;pp.y=SEWER_FLOOR_Y+0.1;
-      showToast('🌊 Aspiré dans les égouts !','secret');addChat('💧 La flaque t\'a aspiré !','Système');renderMissions();
-    }
-  }
-  if(wallPassZone){
-    const inZone=Math.abs(pp.x-wallPassZone.x)<wallPassZone.halfW+1&&Math.abs(pp.z-wallPassZone.z)<wallPassZone.halfD+0.8;
-    if(inZone&&!isShrunk)enterShrink();
-    if(!wallPassZone.treasureCollected){
-      const dT=Math.sqrt((pp.x-(wallPassZone.x-8))**2+(pp.z-wallPassZone.z)**2);
-      if(dT<1.5&&isShrunk){wallPassZone.treasureCollected=true;wallPassZone.treasure.visible=false;showToast('💎 Trésor secret !','mission');addChat('💎 Trésor rare trouvé !','Système');}
-    }
-    if(isShrunk&&Math.abs(pp.x-wallPassZone.x)>20)exitShrink();
-  }
-  // Entrée égout par la grille
-  const distSewer=Math.sqrt((pp.x-SW_OX)**2+(pp.z-SW_OZ)**2);
-  if(distSewer<2&&!isInSewer&&onGround){enterSewer();pp.y=SEWER_FLOOR_Y+0.1;}
-
-  // ── AVATAR & CAMÉRA ────────────────────────────────
-  const scale=isShrunk?0.35:1;
-  avatarGroup.scale.setScalar(scale);
+  // Avatar + caméra
   avatarGroup.position.set(pp.x,pp.y,pp.z);
   avatarGroup.rotation.y=pRot;
-  blob.position.x=pp.x;blob.position.z=pp.z;blob.position.y=isInSewer?SEWER_FLOOR_Y+0.02:0.012;
+  blob.position.x=pp.x;blob.position.z=pp.z;
+  blob.position.y=isInSewer?SW_Y+0.02:0.012;
 
-  const camDist=isShrunk?3:isInSewer?3.5:CD;
-  const camH=isShrunk?1:isInSewer?2.2:CH;
-  const camLookY=isShrunk?0.5:isInSewer?1.0:CLY;
-  camera.position.set(pp.x+Math.sin(cameraYaw)*camDist,pp.y+camH,pp.z+Math.cos(cameraYaw)*camDist);
-  camera.lookAt(pp.x,pp.y+camLookY,pp.z);
+  const camD=isInSewer?4:CD;
+  const camH2=isInSewer?2:CH;
+  const camLY=isInSewer?0.9:CLY;
+  camera.position.set(pp.x+Math.sin(cameraYaw)*camD,pp.y+camH2,pp.z+Math.cos(cameraYaw)*camD);
+  camera.lookAt(pp.x,pp.y+camLY,pp.z);
 
-  updateMarkers();drawMinimap();
   renderer.render(scene,camera);
 }
-
-document.getElementById('mission-toggle').addEventListener('click',()=>{document.getElementById('mission-hud').classList.toggle('open');});
 animate();
 </script>
 </body>
