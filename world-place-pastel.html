@@ -263,6 +263,7 @@ let ldPct = 0;
 const ldBar = document.getElementById('load-bar'), ldTxt = document.getElementById('load-txt');
 const ldMsgs = ['Génération des rues…','Construction des quartiers…','Pose du béton…','Placement des véhicules…','Presque prêt…'];
 let ldIdx = 0;
+  setTimeout(()=>finishLoading(), 3000);
 const ldInt = setInterval(()=>{
   ldPct += Math.random()*5;
   if(ldPct>88){ldPct=88;clearInterval(ldInt);}
