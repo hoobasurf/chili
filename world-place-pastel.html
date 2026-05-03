@@ -1263,10 +1263,11 @@ loadAnim(IDLE_FILE,(glb)=>{
   if(glb.animations.length>0){currentAction=playerMixer.clipAction(glb.animations[0]);currentAction.play();}
   updatePlayerVisuals();
   finishLoading();
-},(xhr)=>{},(err)=>{
-  // GLB échoue → on charge quand même
+},(p)=>{},(err)=>{
+  console.warn('GLB introuvable, démarrage sans modèle');
   finishLoading();
 });
+
 
 // ── JOYSTICKS ─────────────────────────────────────────────
 const joyState={x:0,z:0,active:false,id:-1};
@@ -1525,15 +1526,14 @@ function animate(){
 
 // Spawn wagons
 makeMetroCar(fromX,fromZ,0);makeMetroCar(fromX,fromZ+30,0);
-// Failsafe : si le GLB ne charge pas en 5s, on lance quand même
+// Failsafe : démarre après 4 secondes même si le GLB échoue
 setTimeout(()=>{
   const ls=document.getElementById('loading-screen');
   if(!ls.classList.contains('hidden')) finishLoading();
-}, 5000);
+}, 4000);
 
 animate();
 
-  animate();
 </script>
 </body>
 </html>
