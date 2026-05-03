@@ -316,7 +316,7 @@ sun.shadow.camera.left=-150;sun.shadow.camera.bottom=-150;
 sun.shadow.camera.right=150;sun.shadow.camera.top=150;
 sun.shadow.camera.far=400;sun.shadow.bias=-0.001;
 scene.add(sun);
-scene.add(Object.assign(new THREE.DirectionalLight(0xc8d8f0,0.55),{position:new THREE.Vector3(-30,50,-50)}));
+const fillLight=new THREE.DirectionalLight(0xc8d8f0,0.55);fillLight.position.set(-30,50,-50);scene.add(fillLight);
 
 // ── TEXTURES PROCÉDURALES ─────────────────────────────────
 function procTex(fn,size=256){
