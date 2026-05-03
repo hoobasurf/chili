@@ -1202,7 +1202,20 @@ loadAnim(IDLE_FILE,(glb)=>{
   if(glb.animations.length>0){currentAction=playerMixer.clipAction(glb.animations[0]);currentAction.play();}
   updatePlayerVisuals();
   finishLoading();
+},(xhr)=>{},(err)=>{
+  // GLB échoue → on lance quand même le jeu sans modèle
+  finishLoading();
 });
+
+  function loadAnim(file,cb){
+  if(animCache[file]){cb(animCache[file]);return;}
+  loader.load(BASE+file,(glb)=>{animCache[file]=glb;cb(glb);},(p)=>{},(e)=>{
+    console.warn('GLB fail',file);
+    // Si c'est le fichier idle de démarrage, on finit quand même le loading
+    if(file===IDLE_FILE) finishLoading();
+  });
+}
+
 
 // ── JOYSTICKS ─────────────────────────────────────────────
 const joyState={x:0,z:0,active:false,id:-1};
