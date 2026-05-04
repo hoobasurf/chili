@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -20,32 +19,32 @@ canvas{display:block;width:100%!important;height:100%!important;}
 /* === HUD === */
 #hud{position:fixed;inset:0;z-index:10;pointer-events:none;}
 .hud-top{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:linear-gradient(180deg,rgba(0,0,0,.6) 0%,transparent 100%);}
-.hud-logo{font-family:‘Zen Kaku Gothic New’,sans-serif;font-size:.9rem;font-weight:900;color:#fff;letter-spacing:.05em;text-shadow:0 0 20px rgba(245,200,66,.4);}
-.hud-logo em{color:var(–gold);font-style:normal;}
-.hud-loc{display:flex;align-items:center;gap:5px;background:var(–glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(–glass-border);border-radius:16px;padding:4px 10px;}
+.hud-logo{font-family:'Zen Kaku Gothic New',sans-serif;font-size:.9rem;font-weight:900;color:#fff;letter-spacing:.05em;text-shadow:0 0 20px rgba(245,200,66,.4);}
+.hud-logo em{color:var(--gold);font-style:normal;}
+.hud-loc{display:flex;align-items:center;gap:5px;background:var(--glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:16px;padding:4px 10px;}
 .hud-loc span{font-size:.65rem;font-weight:700;color:#fff;}
-.loc-dot{width:6px;height:6px;border-radius:50%;background:var(–gold);animation:pulse 2s infinite;}
+.loc-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.hud-info{display:flex;align-items:center;gap:6px;background:var(–glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(–glass-border);border-radius:16px;padding:4px 10px 4px 4px;}
-.hud-pic{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(–orange),var(–gold));display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:900;color:#fff;}
+.hud-info{display:flex;align-items:center;gap:6px;background:var(--glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:16px;padding:4px 10px 4px 4px;}
+.hud-pic{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--gold));display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:900;color:#fff;}
 .hud-name{font-size:.65rem;font-weight:700;color:#fff;}
 
 /* === MINIMAP === */
-#minimap{position:absolute;top:52px;left:10px;width:120px;height:120px;border-radius:12px;background:var(–glass);border:1.5px solid var(–glass-border);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);overflow:hidden;pointer-events:all;cursor:pointer;transition:all .3s;}
+#minimap{position:absolute;top:52px;left:10px;width:120px;height:120px;border-radius:12px;background:var(--glass);border:1.5px solid var(--glass-border);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);overflow:hidden;pointer-events:all;cursor:pointer;transition:all .3s;}
 #minimap.expanded{width:320px;height:320px;border-radius:16px;z-index:50;}
 #minimap canvas{width:100%;height:100%;}
 .minimap-label{position:absolute;bottom:3px;left:0;right:0;text-align:center;font-size:.45rem;font-weight:700;color:rgba(255,255,255,.5);}
-#minimap-tp-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:none;background:rgba(0,0,0,.7);color:var(–gold);font-size:.6rem;font-weight:700;padding:4px 8px;border-radius:8px;pointer-events:none;white-space:nowrap;}
+#minimap-tp-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:none;background:rgba(0,0,0,.7);color:var(--gold);font-size:.6rem;font-weight:700;padding:4px 8px;border-radius:8px;pointer-events:none;white-space:nowrap;}
 #minimap.expanded #minimap-tp-hint{display:block;}
 
 /* === SIDEBAR MISSIONS === */
-#mission-toggle{position:absolute;top:52px;right:10px;width:36px;height:36px;border-radius:50%;background:var(–glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1.5px solid rgba(245,200,66,.5);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:900;color:var(–gold);cursor:pointer;pointer-events:all;z-index:20;transition:all .2s;}
+#mission-toggle{position:absolute;top:52px;right:10px;width:36px;height:36px;border-radius:50%;background:var(--glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1.5px solid rgba(245,200,66,.5);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:900;color:var(--gold);cursor:pointer;pointer-events:all;z-index:20;transition:all .2s;}
 #mission-toggle:active{transform:scale(.88);}
-#mission-badge{position:absolute;top:-4px;right:-4px;width:16px;height:16px;border-radius:50%;background:var(–orange);font-size:.5rem;font-weight:900;color:#fff;display:flex;align-items:center;justify-content:center;}
-#mission-sidebar{position:absolute;top:52px;right:10px;width:200px;max-height:70vh;background:var(–glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1.5px solid var(–glass-border);border-radius:14px;overflow:hidden;pointer-events:all;z-index:19;transform:translateX(220px);transition:transform .3s ease;display:flex;flex-direction:column;}
+#mission-badge{position:absolute;top:-4px;right:-4px;width:16px;height:16px;border-radius:50%;background:var(--orange);font-size:.5rem;font-weight:900;color:#fff;display:flex;align-items:center;justify-content:center;}
+#mission-sidebar{position:absolute;top:52px;right:10px;width:200px;max-height:70vh;background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1.5px solid var(--glass-border);border-radius:14px;overflow:hidden;pointer-events:all;z-index:19;transform:translateX(220px);transition:transform .3s ease;display:flex;flex-direction:column;}
 #mission-sidebar.open{transform:translateX(0);}
-.mission-header{padding:8px 12px;border-bottom:1px solid var(–glass-border);display:flex;align-items:center;justify-content:space-between;}
-.mission-header span{font-size:.72rem;font-weight:900;color:var(–gold);}
+.mission-header{padding:8px 12px;border-bottom:1px solid var(--glass-border);display:flex;align-items:center;justify-content:space-between;}
+.mission-header span{font-size:.72rem;font-weight:900;color:var(--gold);}
 .mission-close{font-size:.8rem;color:rgba(255,255,255,.5);cursor:pointer;padding:2px 4px;}
 .mission-list{overflow-y:auto;flex:1;scrollbar-width:none;}
 .mission-list::-webkit-scrollbar{display:none;}
@@ -55,67 +54,67 @@ canvas{display:block;width:100%!important;height:100%!important;}
 .mission-title{font-size:.62rem;font-weight:700;color:#fff;}
 .mission-desc{font-size:.52rem;color:rgba(255,255,255,.45);margin-top:1px;}
 .mission-item .badge{display:inline-block;font-size:.45rem;font-weight:900;padding:1px 5px;border-radius:6px;margin-bottom:2px;}
-.badge-new{background:var(–orange);color:#fff;}
-.badge-active{background:var(–gold);color:#1a1a00;}
+.badge-new{background:var(--orange);color:#fff;}
+.badge-active{background:var(--gold);color:#1a1a00;}
 .badge-done{background:#2ecc71;color:#fff;}
 
 /* === CHAT === */
 .hud-chat{position:absolute;bottom:170px;left:12px;width:220px;pointer-events:all;}
 .chat-messages{max-height:80px;overflow-y:auto;display:flex;flex-direction:column;gap:3px;margin-bottom:4px;scrollbar-width:none;}
 .chat-messages::-webkit-scrollbar{display:none;}
-.chat-msg{background:var(–glass);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(–glass-border);border-radius:14px;padding:4px 10px;font-size:.62rem;color:#fff;line-height:1.3;}
-.chat-msg .name{font-weight:900;color:var(–gold);margin-right:4px;}
+.chat-msg{background:var(--glass);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--glass-border);border-radius:14px;padding:4px 10px;font-size:.62rem;color:#fff;line-height:1.3;}
+.chat-msg .name{font-weight:900;color:var(--gold);margin-right:4px;}
 .chat-input-wrap{display:flex;gap:5px;}
-.chat-input{flex:1;background:var(–glass);border:1.5px solid var(–glass-border);border-radius:20px;padding:7px 13px;font-size:14px;font-weight:700;color:#fff;outline:none;font-family:‘M PLUS Rounded 1c’,sans-serif;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);}
+.chat-input{flex:1;background:var(--glass);border:1.5px solid var(--glass-border);border-radius:20px;padding:7px 13px;font-size:14px;font-weight:700;color:#fff;outline:none;font-family:'M PLUS Rounded 1c',sans-serif;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);}
 .chat-input::placeholder{color:rgba(255,255,255,.35);}
-.chat-input:focus{border-color:var(–gold);}
-.chat-send{width:36px;height:36px;border-radius:50%;background:var(–orange);border:none;color:#fff;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;pointer-events:all;flex-shrink:0;}
+.chat-input:focus{border-color:var(--gold);}
+.chat-send{width:36px;height:36px;border-radius:50%;background:var(--orange);border:none;color:#fff;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;pointer-events:all;flex-shrink:0;}
 
 /* === ANIM PANEL === */
-#anim-panel{position:absolute;bottom:0;left:0;right:0;pointer-events:all;padding:4px 0 env(safe-area-inset-bottom,8px);background:var(–glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(–glass-border);height:80px;}
+#anim-panel{position:absolute;bottom:0;left:0;right:0;pointer-events:all;padding:4px 0 env(safe-area-inset-bottom,8px);background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--glass-border);height:80px;}
 #anim-scroll{display:flex;gap:5px;overflow-x:auto;padding:2px 10px 0;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
 #anim-scroll::-webkit-scrollbar{display:none;}
 .anim-btn{flex-shrink:0;width:56px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
-.anim-icon{width:54px;height:54px;border-radius:10px;background:rgba(255,255,255,.04);border:1.5px solid var(–glass-border);display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.anim-icon{width:54px;height:54px;border-radius:10px;background:rgba(255,255,255,.04);border:1.5px solid var(--glass-border);display:flex;align-items:center;justify-content:center;transition:all .15s;}
 .anim-icon svg{width:44px;height:44px;}
-.anim-btn.active .anim-icon{background:rgba(245,200,66,.1);border-color:var(–gold);}
+.anim-btn.active .anim-icon{background:rgba(245,200,66,.1);border-color:var(--gold);}
 .anim-btn:active .anim-icon{transform:scale(.88);}
 .anim-label{font-size:.48rem;font-weight:700;color:rgba(255,255,255,.4);text-align:center;}
-.anim-btn.active .anim-label{color:var(–gold);}
+.anim-btn.active .anim-label{color:var(--gold);}
 
 /* === JOYSTICKS === */
 #cam-joystick-zone{position:absolute;bottom:90px;left:10px;width:96px;height:96px;pointer-events:all;}
 #joystick-zone{position:absolute;bottom:90px;right:10px;width:96px;height:96px;pointer-events:all;}
-.joy-base{width:96px;height:96px;border-radius:50%;background:var(–glass);border:1.5px solid var(–glass-border);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);position:relative;display:flex;align-items:center;justify-content:center;}
+.joy-base{width:96px;height:96px;border-radius:50%;background:var(--glass);border:1.5px solid var(--glass-border);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);position:relative;display:flex;align-items:center;justify-content:center;}
 .joy-knob{width:38px;height:38px;border-radius:50%;position:absolute;box-shadow:0 2px 10px rgba(0,0,0,.5);}
 #super-jump-btn{position:absolute;bottom:196px;left:27px;width:46px;height:46px;border-radius:50%;background:rgba(232,93,38,.85);backdrop-filter:blur(8px);border:1.5px solid rgba(255,120,60,.4);color:#fff;font-size:.95rem;pointer-events:all;cursor:pointer;box-shadow:0 2px 12px rgba(232,93,38,.4);display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;z-index:12;}
 #jump-btn{position:absolute;bottom:196px;right:27px;width:46px;height:46px;border-radius:50%;background:rgba(43,108,176,.85);backdrop-filter:blur(8px);border:1.5px solid rgba(80,140,220,.4);color:#fff;font-size:1.2rem;pointer-events:all;cursor:pointer;box-shadow:0 2px 12px rgba(43,108,176,.4);display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;z-index:12;}
 
 /* === TOAST === */
-.toast{position:fixed;bottom:188px;left:50%;transform:translateX(-50%) translateY(14px);background:var(–glass-strong);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);color:var(–gold);padding:6px 14px;border:1px solid rgba(245,200,66,.3);border-radius:16px;font-size:.68rem;font-weight:700;opacity:0;transition:all .25s;z-index:50;pointer-events:none;white-space:nowrap;}
+.toast{position:fixed;bottom:188px;left:50%;transform:translateX(-50%) translateY(14px);background:var(--glass-strong);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);color:var(--gold);padding:6px 14px;border:1px solid rgba(245,200,66,.3);border-radius:16px;font-size:.68rem;font-weight:700;opacity:0;transition:all .25s;z-index:50;pointer-events:none;white-space:nowrap;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
 /* === LOADING === */
 #loading-screen{position:fixed;inset:0;z-index:200;background:linear-gradient(135deg,#080e1e,#0f1e38);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .6s;}
 #loading-screen.hidden{opacity:0;pointer-events:none;}
-.load-logo{font-family:‘Zen Kaku Gothic New’,sans-serif;font-size:2.8rem;font-weight:900;color:#fff;letter-spacing:.06em;text-shadow:0 0 40px rgba(245,200,66,.5);}
-.load-logo em{color:var(–gold);font-style:normal;}
+.load-logo{font-family:'Zen Kaku Gothic New',sans-serif;font-size:2.8rem;font-weight:900;color:#fff;letter-spacing:.06em;text-shadow:0 0 40px rgba(245,200,66,.5);}
+.load-logo em{color:var(--gold);font-style:normal;}
 .load-sub{font-size:.8rem;color:rgba(255,255,255,.4);letter-spacing:.3em;font-weight:700;}
 .load-bar-wrap{width:200px;height:4px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;}
-.load-bar{height:100%;width:0%;background:linear-gradient(90deg,var(–orange),var(–gold));border-radius:2px;transition:width .2s;}
+.load-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--orange),var(--gold));border-radius:2px;transition:width .2s;}
 .load-txt{font-size:.68rem;color:rgba(255,255,255,.5);font-weight:700;}
 
 /* === MISSION POPUP === */
-#mission-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.85);background:var(–glass-strong);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1.5px solid rgba(245,200,66,.4);border-radius:18px;padding:18px 22px;z-index:100;pointer-events:all;min-width:240px;opacity:0;transition:all .3s;display:none;}
+#mission-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.85);background:var(--glass-strong);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1.5px solid rgba(245,200,66,.4);border-radius:18px;padding:18px 22px;z-index:100;pointer-events:all;min-width:240px;opacity:0;transition:all .3s;display:none;}
 #mission-popup.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
-.mp-title{font-family:‘Zen Kaku Gothic New’,sans-serif;font-size:1rem;font-weight:900;color:var(–gold);margin-bottom:6px;}
+.mp-title{font-family:'Zen Kaku Gothic New',sans-serif;font-size:1rem;font-weight:900;color:var(--gold);margin-bottom:6px;}
 .mp-desc{font-size:.72rem;color:rgba(255,255,255,.8);line-height:1.5;margin-bottom:8px;}
 .mp-tp{font-size:.65rem;color:rgba(100,200,255,.8);margin-bottom:12px;cursor:pointer;text-decoration:underline;}
-.mp-btn{background:var(–orange);color:#fff;border:none;border-radius:20px;padding:7px 18px;font-size:.72rem;font-weight:700;cursor:pointer;font-family:‘M PLUS Rounded 1c’,sans-serif;margin-right:8px;}
-.mp-close{background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:20px;padding:7px 14px;font-size:.72rem;font-weight:700;cursor:pointer;font-family:‘M PLUS Rounded 1c’,sans-serif;}
+.mp-btn{background:var(--orange);color:#fff;border:none;border-radius:20px;padding:7px 18px;font-size:.72rem;font-weight:700;cursor:pointer;font-family:'M PLUS Rounded 1c',sans-serif;margin-right:8px;}
+.mp-close{background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:20px;padding:7px 14px;font-size:.72rem;font-weight:700;cursor:pointer;font-family:'M PLUS Rounded 1c',sans-serif;}
 
 /* === VEHICLE ENTER HINT === */
-#vehicle-hint{position:fixed;bottom:250px;left:50%;transform:translateX(-50%);background:var(–glass-strong);backdrop-filter:blur(16px);border:1px solid var(–glass-border);border-radius:12px;padding:5px 14px;font-size:.68rem;font-weight:700;color:#fff;display:none;z-index:30;pointer-events:none;}
+#vehicle-hint{position:fixed;bottom:250px;left:50%;transform:translateX(-50%);background:var(--glass-strong);backdrop-filter:blur(16px);border:1px solid var(--glass-border);border-radius:12px;padding:5px 14px;font-size:.68rem;font-weight:700;color:#fff;display:none;z-index:30;pointer-events:none;}
 </style>
 
 </head>
@@ -142,14 +141,10 @@ canvas{display:block;width:100%!important;height:100%!important;}
     <div id="minimap-tp-hint">Clic → Téléporter</div>
   </div>
 
-  <!-- Mission toggle button -->
-
   <div id="mission-toggle" style="pointer-events:all;">
     !
     <div id="mission-badge">0</div>
   </div>
-
-  <!-- Mission sidebar -->
 
   <div id="mission-sidebar">
     <div class="mission-header">
@@ -194,24 +189,66 @@ canvas{display:block;width:100%!important;height:100%!important;}
   <button class="mp-close" id="mp-close-btn">Fermer</button>
 </div>
 
-<script src="https://unpkg.com/three@0.134.0/build/three.min.js"></script>
+<!-- THREE.js avec fallback CDN -->
+<script src="https://unpkg.com/three@0.134.0/build/three.min.js"
+  onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/three@0.134.0/build/three.min.js'"></script>
 
 <script>
+// Chargement robuste du GLTFLoader avec double fallback + retry si THREE pas encore prêt
 (function(){
-  var s=document.createElement('script');
-  s.src='https://unpkg.com/three@0.134.0/examples/js/loaders/GLTFLoader.js';
-  s.onload=function(){ startGame(); };
-  s.onerror=function(){
-    THREE.GLTFLoader=function(){};
-    THREE.GLTFLoader.prototype.load=function(u,ok,p,err){ if(err)err(new Error('no loader')); };
+  var _started = false;
+
+  function startGameWithoutGLTF(){
+    if(_started) return; _started = true;
+    if(typeof THREE === 'undefined'){
+      document.getElementById('load-txt').textContent = 'Erreur : THREE.js introuvable. Vérifiez votre connexion.';
+      return;
+    }
+    // Fournir un GLTFLoader vide pour ne pas crasher
+    THREE.GLTFLoader = function(){};
+    THREE.GLTFLoader.prototype.load = function(u,ok,p,err){ if(err) err(new Error('no loader')); };
     startGame();
-  };
-  document.head.appendChild(s);
+  }
+
+  function loadFromCDN2(){
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/loaders/GLTFLoader.js';
+    s.onload = function(){ if(!_started){ _started=true; startGame(); } };
+    s.onerror = function(){ startGameWithoutGLTF(); };
+    document.head.appendChild(s);
+  }
+
+  function tryLoad(retries){
+    if(typeof THREE === 'undefined'){
+      if(retries > 0) setTimeout(function(){ tryLoad(retries - 1); }, 400);
+      else startGameWithoutGLTF();
+      return;
+    }
+    var s = document.createElement('script');
+    s.src = 'https://unpkg.com/three@0.134.0/examples/js/loaders/GLTFLoader.js';
+    s.onload = function(){ if(!_started){ _started=true; startGame(); } };
+    s.onerror = function(){ loadFromCDN2(); };
+    document.head.appendChild(s);
+  }
+
+  // Lancer après chargement complet de la page
+  if(document.readyState === 'complete'){
+    tryLoad(6);
+  } else {
+    window.addEventListener('load', function(){ tryLoad(6); });
+  }
+
+  // Safety absolu : si rien ne s'est passé après 5s, forcer le démarrage
+  setTimeout(function(){
+    if(!_started) startGameWithoutGLTF();
+  }, 5000);
 })();
 </script>
 
 <script>
 function startGame(){
+  if(window._gameStarted) return;
+  window._gameStarted = true;
 
 const BASE='https://raw.githubusercontent.com/hoobasurf/chili/main/';
 const WALK_FILE='course.glb';
@@ -229,7 +266,6 @@ const MISSIONS=[
   {id:'m8',title:'Marin',desc:'Monte sur un bateau',badge:'new',done:false,progress:0,total:1,tp:{x:80,z:-100}},
 ];
 let activeMission=null;
-let pendingMissions=MISSIONS.length;
 
 function renderMissions(){
   const list=document.getElementById('mission-list');
@@ -274,7 +310,6 @@ function showMissionPopup(m){
 }
 renderMissions();
 
-// Mission toggle
 const mToggle=document.getElementById('mission-toggle');
 const mSidebar=document.getElementById('mission-sidebar');
 mToggle.addEventListener('click',()=>mSidebar.classList.toggle('open'));
@@ -309,6 +344,7 @@ const ldInt=setInterval(()=>{
   const idx=Math.min(Math.floor(ldPct/16),ldMsgs.length-1);
   if(idx>ldIdx){ldIdx=idx;ldTxt.textContent=ldMsgs[ldIdx];}
 },200);
+
 function finishLoading(){
   if(ldDone)return;ldDone=true;clearInterval(ldInt);
   ldBar.style.width='100%';ldTxt.textContent='Bienvenue à Tokyo !';
@@ -321,7 +357,8 @@ function finishLoading(){
   addChat('🗺️ ! → Missions | 🚇 Metro | ⛵ Bateau','Info');
   addChat('🎮 Joystick G = Caméra, Joystick D = Mouvement','Info');
 }
-setTimeout(()=>finishLoading(),3500);
+// Finir le chargement après 2.5s (réduit) + safety à 5s
+setTimeout(()=>finishLoading(),2500);
 
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
 function addChat(text,from){
@@ -369,16 +406,13 @@ function procTex(fn,size){
   const t=new THREE.CanvasTexture(cv);t.wrapS=t.wrapT=THREE.RepeatWrapping;return t;
 }
 
-// Asphalte détaillé
 const asphaltTex=procTex((ctx,s)=>{
   ctx.fillStyle='#1c1c1c';ctx.fillRect(0,0,s,s);
   for(let i=0;i<8000;i++){const g=14+(Math.random()*22|0);ctx.fillStyle=`rgb(${g},${g},${g})`;ctx.fillRect(Math.random()*s|0,Math.random()*s|0,1+(Math.random()<0.1?1:0),1);}
-  // fissures
   ctx.strokeStyle='rgba(80,80,80,0.3)';ctx.lineWidth=0.5;
   for(let i=0;i<6;i++){ctx.beginPath();ctx.moveTo(Math.random()*s,Math.random()*s);ctx.lineTo(Math.random()*s,Math.random()*s);ctx.stroke();}
 },512);asphaltTex.repeat.set(14,14);
 
-// Trottoir carrelé
 const sidewalkTex=procTex((ctx,s)=>{
   ctx.fillStyle='#b0a8a0';ctx.fillRect(0,0,s,s);
   const tile=28;
@@ -391,7 +425,6 @@ const sidewalkTex=procTex((ctx,s)=>{
   for(let i=0;i<=s;i+=tile){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,s);ctx.stroke();ctx.beginPath();ctx.moveTo(0,i);ctx.lineTo(s,i);ctx.stroke();}
 },256);sidewalkTex.repeat.set(5,5);
 
-// Herbe dense
 const grassTex=procTex((ctx,s)=>{
   ctx.fillStyle='#2a5a1a';ctx.fillRect(0,0,s,s);
   for(let i=0;i<10000;i++){
@@ -401,7 +434,6 @@ const grassTex=procTex((ctx,s)=>{
   }
 },256);grassTex.repeat.set(10,10);
 
-// Brique rouge-orangé
 const brickRedTex=procTex((ctx,s)=>{
   ctx.fillStyle='#6a3020';ctx.fillRect(0,0,s,s);
   const BW=42,BH=18;
@@ -415,7 +447,6 @@ const brickRedTex=procTex((ctx,s)=>{
   }
 },256);brickRedTex.repeat.set(4,8);
 
-// Brique beige
 const brickBeigeTex=procTex((ctx,s)=>{
   ctx.fillStyle='#8a7a60';ctx.fillRect(0,0,s,s);
   const BW=40,BH=16;
@@ -429,7 +460,6 @@ const brickBeigeTex=procTex((ctx,s)=>{
   }
 },256);brickBeigeTex.repeat.set(4,8);
 
-// Béton moderne
 const concreteTex=procTex((ctx,s)=>{
   ctx.fillStyle='#909898';ctx.fillRect(0,0,s,s);
   for(let i=0;i<5000;i++){const v=120+(Math.random()*28|0);ctx.fillStyle=`rgba(${v},${v+2},${v+4},0.5)`;ctx.fillRect(Math.random()*s|0,Math.random()*s|0,1,1);}
@@ -437,7 +467,6 @@ const concreteTex=procTex((ctx,s)=>{
   for(let i=0;i<=s;i+=64){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,s);ctx.stroke();ctx.beginPath();ctx.moveTo(0,i);ctx.lineTo(s,i);ctx.stroke();}
 },256);concreteTex.repeat.set(5,5);
 
-// Verre teint (gratte-ciel)
 const glassTex=procTex((ctx,s)=>{
   ctx.fillStyle='#0a1a2a';ctx.fillRect(0,0,s,s);
   const pw=s/6,ph=s/10;
@@ -455,7 +484,6 @@ const glassTex=procTex((ctx,s)=>{
   for(let i=0;i<=s;i+=ph){ctx.beginPath();ctx.moveTo(0,i);ctx.lineTo(s,i);ctx.stroke();}
 },256);glassTex.repeat.set(2,3);
 
-// Bois
 const woodTex=procTex((ctx,s)=>{
   const g=ctx.createLinearGradient(0,0,s,0);
   g.addColorStop(0,'#5a3818');g.addColorStop(0.5,'#7a5228');g.addColorStop(1,'#5a3818');
@@ -467,7 +495,6 @@ const woodTex=procTex((ctx,s)=>{
   }
 },256);woodTex.repeat.set(2,4);
 
-// Tuiles japonaises
 const tilesTex=procTex((ctx,s)=>{
   ctx.fillStyle='#2a1e18';ctx.fillRect(0,0,s,s);
   const tw=24,th=14;
@@ -481,7 +508,6 @@ const tilesTex=procTex((ctx,s)=>{
   }
 },256);tilesTex.repeat.set(6,6);
 
-// Panneau signe
 function makeSignTex(col,txt,sub){
   return procTex((ctx,s)=>{
     const g=ctx.createLinearGradient(0,0,0,s);
@@ -510,8 +536,6 @@ const signTextures=[
   makeSignTex('#c04020','🚒 消防署','FIRE'),makeSignTex('#1a50a0','🏥 病院','HOSPITAL'),
   makeSignTex('#205080','🚓 警察署','POLICE'),makeSignTex('#408040','🏪 コンビニ','KONBINI 24H'),
 ];
-
-// Eau de mer
 const waterTex=procTex((ctx,s)=>{
   ctx.fillStyle='#0a2848';ctx.fillRect(0,0,s,s);
   for(let i=0;i<s;i+=6){
@@ -521,13 +545,11 @@ const waterTex=procTex((ctx,s)=>{
   }
 },256);waterTex.repeat.set(10,10);
 
-// Rooftop
 const rooftopTex=procTex((ctx,s)=>{
   ctx.fillStyle='#1e1c18';ctx.fillRect(0,0,s,s);
   for(let y=0;y<s;y+=8){ctx.fillStyle=y%16===0?'#181610':'#242018';ctx.fillRect(0,y,s,7);}
 },128);
 
-// Sol souterrain
 const sewerTex=procTex((ctx,s)=>{
   ctx.fillStyle='#121a08';ctx.fillRect(0,0,s,s);
   const BW=36,BH=16;
@@ -559,7 +581,6 @@ const matSewerFloor=new THREE.MeshStandardMaterial({map:sewerTex,roughness:0.98,
 const matLampMetal=new THREE.MeshStandardMaterial({color:0x5a6070,roughness:0.4,metalness:0.8});
 const matLampGlow=new THREE.MeshStandardMaterial({color:0xfffce0,emissive:new THREE.Color(0xfffce0),emissiveIntensity:0.4,roughness:0.1});
 const matRailing=new THREE.MeshStandardMaterial({color:0x888888,roughness:0.3,metalness:0.9});
-const matMetro=new THREE.MeshStandardMaterial({color:0xdddddd,roughness:0.5,metalness:0.4});
 const matEiffelMetal=new THREE.MeshStandardMaterial({color:0x8a7050,roughness:0.55,metalness:0.6});
 const matBoatHull=new THREE.MeshStandardMaterial({color:0xcc4422,roughness:0.7});
 const matBoatDeck=new THREE.MeshStandardMaterial({color:0xeeddbb,roughness:0.8});
@@ -583,21 +604,17 @@ function resolveCollisions(nx,nz,py,cols){
 }
 
 // ===================== GROUND & ROADS =====================
-// Mer / fleuve au sud
 const seaMesh=new THREE.Mesh(new THREE.PlaneGeometry(600,200),matWater);
 seaMesh.rotation.x=-Math.PI/2;seaMesh.position.set(0,-0.3,-220);seaMesh.receiveShadow=true;scene.add(seaMesh);
 
-// Ground
 const ground=new THREE.Mesh(new THREE.PlaneGeometry(500,500),matAsphalt);
 ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
 
-// Herbe dans parcs
 function makeGrassPatch(x,z,w,d){
   const g=new THREE.Mesh(new THREE.PlaneGeometry(w,d),matGrass);
   g.rotation.x=-Math.PI/2;g.position.set(x,0.01,z);g.receiveShadow=true;scene.add(g);
 }
 
-// Trottoirs
 function makeSidewalk(x,z,w,d){
   const sw=new THREE.Mesh(new THREE.BoxGeometry(w,0.12,d),matSidewalk);
   sw.position.set(x,0.06,z);sw.receiveShadow=true;scene.add(sw);
@@ -609,7 +626,6 @@ function makeSidewalk(x,z,w,d){
   makeSidewalk(ax-6.5,0,2.8,260);makeSidewalk(ax+6.5,0,2.8,260);
 });
 
-// Lignes de route
 const lineMat=new THREE.MeshBasicMaterial({color:0xfff5cc});
 [-120,-80,-40,0,40,80,120].forEach(ax=>{
   for(let i=-130;i<130;i+=12){
@@ -625,7 +641,7 @@ function makeLamp(x,z,style){
   style=style||0;
   const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.12,7.5,8),matLampMetal);
   pole.castShadow=true;pole.position.set(x,3.75,z);scene.add(pole);
-  if(style===0){// Moderne
+  if(style===0){
     const arm=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,2.5,6),matLampMetal);
     arm.rotation.z=Math.PI/5;arm.position.set(x+0.9,7.4,z);scene.add(arm);
     const head=new THREE.Mesh(new THREE.BoxGeometry(0.6,0.2,0.35),matLampMetal);
@@ -633,7 +649,7 @@ function makeLamp(x,z,style){
     const glow=new THREE.Mesh(new THREE.BoxGeometry(0.48,0.1,0.28),matLampGlow);
     glow.position.set(x+1.9,6.98,z);scene.add(glow);
     const pLight=new THREE.PointLight(0xffeecc,0.6,18);pLight.position.set(x+1.9,6.8,z);scene.add(pLight);
-  }else{// Japonais traditionnel
+  }else{
     const sphere=new THREE.Mesh(new THREE.SphereGeometry(0.3,8,6),matLampGlow);
     sphere.position.set(x,7.8,z);scene.add(sphere);
     const pLight=new THREE.PointLight(0xffeecc,0.5,16);pLight.position.set(x,7.5,z);scene.add(pLight);
@@ -663,12 +679,12 @@ function makeTree(x,z,variant){
   trunk.castShadow=true;trunk.position.set(x,h/2,z);scene.add(trunk);
   const leafMat=new THREE.MeshStandardMaterial({color:leafPalette[variant%leafPalette.length],roughness:0.95});
   const r=1.3+Math.random()*0.9;
-  if(variant%3===0){// Sphérique
+  if(variant%3===0){
     const leaf=new THREE.Mesh(new THREE.SphereGeometry(r,8,6),leafMat);leaf.castShadow=true;leaf.position.set(x,h+r*0.5,z);scene.add(leaf);
     const leaf2=new THREE.Mesh(new THREE.SphereGeometry(r*0.7,7,5),leafMat);leaf2.castShadow=true;leaf2.position.set(x+r*0.45,h+r*0.3,z+r*0.2);scene.add(leaf2);
-  }else if(variant%3===1){// Cône
+  }else if(variant%3===1){
     const leaf=new THREE.Mesh(new THREE.ConeGeometry(r*1.1,r*2.2,8),leafMat);leaf.castShadow=true;leaf.position.set(x,h+r*0.9,z);scene.add(leaf);
-  }else{// Étalé
+  }else{
     for(let i=0;i<3;i++){
       const lr=new THREE.Mesh(new THREE.SphereGeometry(r*0.75,7,5),leafMat);lr.castShadow=true;
       lr.position.set(x+Math.cos(i*2.1)*r*0.7,h+r*0.3+i*0.4,z+Math.sin(i*2.1)*r*0.7);
@@ -678,7 +694,6 @@ function makeTree(x,z,variant){
   addCol(x,z,0.28,0.28);
 }
 
-// Buissons
 function makeBush(x,z){
   const mat=new THREE.MeshStandardMaterial({color:0x2a5518,roughness:0.95});
   const b=new THREE.Mesh(new THREE.SphereGeometry(0.6+Math.random()*0.4,7,5),mat);
@@ -693,10 +708,8 @@ function makeBuilding(x,z,w,h,d,styleIdx,roofStyle){
   styleIdx=styleIdx||0;
   const wallMat=styleIdx===99?matGlass:buildingWallMats[styleIdx%buildingWallMats.length].clone();
   if(styleIdx!==99)wallMat.color=new THREE.Color(buildingWallColors[styleIdx%buildingWallColors.length]);
-  // Body
   const body=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),wallMat);
   body.castShadow=true;body.receiveShadow=true;body.position.set(x,h/2,z);scene.add(body);
-  // Windows overlay
   if(styleIdx!==99){
     const wCols=Math.max(1,Math.floor(w/3.5));
     const wRows=Math.max(1,Math.floor(h/4));
@@ -710,24 +723,21 @@ function makeBuilding(x,z,w,h,d,styleIdx,roofStyle){
       const wb=wf.clone();wb.position.set(x+wx,wy,z-d/2-0.05);scene.add(wb);
     }
   }
-  // Roof
   const roofMesh=new THREE.Mesh(new THREE.BoxGeometry(w+0.3,0.5,d+0.3),matRooftop);
   roofMesh.position.set(x,h+0.25,z);scene.add(roofMesh);
-  if(roofStyle===1){// Toit en pente
+  if(roofStyle===1){
     const roofSlope=new THREE.Mesh(new THREE.ConeGeometry(Math.max(w,d)*0.75,2.5,4),matTiles);
     roofSlope.position.set(x,h+1.5,z);roofSlope.rotation.y=Math.PI/4;roofSlope.castShadow=true;scene.add(roofSlope);
-  }else if(roofStyle===2){// Pagode
+  }else if(roofStyle===2){
     const pagLayer1=new THREE.Mesh(new THREE.ConeGeometry(Math.max(w,d)*0.7,1.8,4),matTiles);
     pagLayer1.position.set(x,h+0.9,z);pagLayer1.rotation.y=Math.PI/4;pagLayer1.castShadow=true;scene.add(pagLayer1);
     const pagLayer2=new THREE.Mesh(new THREE.ConeGeometry(Math.max(w,d)*0.5,1.4,4),matTiles);
     pagLayer2.position.set(x,h+2.8,z);pagLayer2.rotation.y=Math.PI/4;pagLayer2.castShadow=true;scene.add(pagLayer2);
   }
-  // Antenne / sign
   const signMat=new THREE.MeshStandardMaterial({map:signTextures[Math.abs(Math.round(x*0.3+z*0.7))%signTextures.length],roughness:0.5});
   const sw2=Math.min(w*0.55,4.5),sh=sw2*1.1;
   const sign=new THREE.Mesh(new THREE.BoxGeometry(sw2,sh,0.12),signMat);
   sign.position.set(x,Math.min(4.5,h*0.35),z+d/2+0.1);scene.add(sign);
-  // Antenna
   if(h>12){
     const antMat=new THREE.MeshStandardMaterial({color:0x606878,roughness:0.4,metalness:0.7});
     const ant=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.07,4,6),antMat);
@@ -738,14 +748,11 @@ function makeBuilding(x,z,w,h,d,styleIdx,roofStyle){
   addCol(x,z,w/2+0.15,d/2+0.15);
 }
 
-// Gratte-ciel en verre
 function makeSkyscraper(x,z,w,h,d){
   const body=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),matGlass);
   body.castShadow=true;body.receiveShadow=true;body.position.set(x,h/2,z);scene.add(body);
-  // Reflet horizontal
   const stripe=new THREE.Mesh(new THREE.BoxGeometry(w+0.1,0.4,d+0.1),new THREE.MeshStandardMaterial({color:0xaaccee,roughness:0.1,metalness:0.9,transparent:true,opacity:0.6}));
   for(let i=4;i<h;i+=6){stripe.position.set(x,i,z);scene.add(stripe.clone());}
-  // Sommet éclairé
   const top=new THREE.Mesh(new THREE.BoxGeometry(w,0.6,d),new THREE.MeshStandardMaterial({color:0x66aacc,roughness:0.05,emissive:new THREE.Color(0x224488),emissiveIntensity:0.5}));
   top.position.set(x,h+0.3,z);scene.add(top);
   const antMat2=new THREE.MeshStandardMaterial({color:0x888888,roughness:0.4,metalness:0.8});
@@ -756,7 +763,6 @@ function makeSkyscraper(x,z,w,h,d){
   addCol(x,z,w/2+0.15,d/2+0.15);
 }
 
-// Bâtiments spéciaux
 function makeHospital(x,z){
   makeBuilding(x,z,28,18,22,4,0);
   const crossMat=new THREE.MeshStandardMaterial({color:0xff3333,roughness:0.6});
@@ -800,7 +806,6 @@ function fillBlock(bx,bz,type){
     const h=8+Math.random()*16;
     const roofS=Math.floor(Math.random()*3);
     makeBuilding(bx,bz,20+Math.random()*10,h,20+Math.random()*10,Math.floor(Math.random()*5),roofS);
-    // Petits bâtiments adjacents
     if(Math.random()<0.5){
       makeBuilding(bx+(Math.random()-.5)*18,bz+(Math.random()-.5)*18,8,3+Math.random()*4,8,Math.floor(Math.random()*4),1);
     }
@@ -836,7 +841,6 @@ function fillCentralPark(cx,cz){
   const alMat=new THREE.MeshStandardMaterial({map:sidewalkTex,roughness:0.88,color:0xdddddd});
   const al1=new THREE.Mesh(new THREE.PlaneGeometry(2,40),alMat);al1.rotation.x=-Math.PI/2;al1.position.set(cx,0.016,cz);scene.add(al1);
   const al2=new THREE.Mesh(new THREE.PlaneGeometry(40,2),alMat);al2.rotation.x=-Math.PI/2;al2.position.set(cx,0.016,cz);scene.add(al2);
-  // Fontaine
   const stMat=new THREE.MeshStandardMaterial({color:0x8a8278,roughness:0.85});
   const wMat2=new THREE.MeshStandardMaterial({color:0x4488aa,roughness:0.05,metalness:0.3,transparent:true,opacity:0.78});
   const basin=new THREE.Mesh(new THREE.CylinderGeometry(4,4.5,0.9,24),stMat);basin.position.set(cx,0.45,cz);basin.castShadow=true;scene.add(basin);
@@ -845,13 +849,11 @@ function fillCentralPark(cx,cz){
   const top=new THREE.Mesh(new THREE.CylinderGeometry(1.2,0.9,0.22,16),stMat);top.position.set(cx,4.2,cz);scene.add(top);
   const pLight=new THREE.PointLight(0x88ccff,0.8,20);pLight.position.set(cx,2,cz);scene.add(pLight);
   addCol(cx,cz,4.8,4.8,5);
-  // Bancs
   const benchMat=new THREE.MeshStandardMaterial({map:woodTex,roughness:0.85});
   [[cx+8,cz],[cx-8,cz],[cx,cz+8],[cx,cz-8]].forEach(p=>{
     const bench=new THREE.Mesh(new THREE.BoxGeometry(2.5,0.25,0.8),benchMat);bench.position.set(p[0],0.5,p[1]);scene.add(bench);
     const legs=new THREE.Mesh(new THREE.BoxGeometry(2.5,0.45,0.1),matBark);legs.position.set(p[0],0.22,p[1]);scene.add(legs);
   });
-  // Arbres
   [[-12,-12],[12,-12],[-12,12],[12,12],[-16,0],[16,0],[0,-16],[0,16],[-8,8],[8,-8]].forEach((p,i)=>{
     makeTree(cx+p[0],cz+p[1],i%leafPalette.length);
   });
@@ -862,17 +864,14 @@ BLOCK_CENTERS.forEach((bz,row)=>{
   BLOCK_CENTERS.forEach((bx,col)=>{
     if(bx===20&&bz===-60)fillBlock(bx,bz,'park');
     else fillBlock(bx,bz,blockPlan[row][col]);
-    // Arbres de rue
     if(Math.random()<0.35){
       for(let i=0;i<2;i++)makeTree(bx+(Math.random()-.5)*28,bz+(Math.random()-.5)*28,i);
     }
   });
 });
-
 // ===================== TOUR EIFFEL =====================
 function makeTourEiffel(cx,cz){
   const mat=matEiffelMetal;
-  // Pieds
   const footPos=[[-8,-8],[8,-8],[-8,8],[8,8]];
   footPos.forEach(fp=>{
     const foot=new THREE.Mesh(new THREE.CylinderGeometry(0.6,2.0,20,6),mat);
@@ -881,7 +880,6 @@ function makeTourEiffel(cx,cz){
     foot.rotation.z=Math.atan2(8,20)*Math.sign(-fp[0]);
     scene.add(foot);
   });
-  // Niveaux
   [0,30,60,80].forEach((h,i)=>{
     const r=9-i*2;
     const platform=new THREE.Mesh(new THREE.CylinderGeometry(r+0.5,r+0.5,1,8),mat);
@@ -894,7 +892,6 @@ function makeTourEiffel(cx,cz){
       }
     }
   });
-  // Flèche
   const spire=new THREE.Mesh(new THREE.CylinderGeometry(0.1,1.5,50,8),mat);
   spire.position.set(cx,106,cz);spire.castShadow=true;scene.add(spire);
   const light=new THREE.Mesh(new THREE.SphereGeometry(0.5,8,6),new THREE.MeshStandardMaterial({color:0xffffaa,emissive:new THREE.Color(0xffffaa),emissiveIntensity:2}));
@@ -909,24 +906,19 @@ const metroTrain={group:null,t:0,speed:0.0018,onBoard:false};
 function makeMetroSystem(){
   const trackMat=new THREE.MeshStandardMaterial({color:0x555555,roughness:0.5,metalness:0.6});
   const pillarMat=new THREE.MeshStandardMaterial({color:0x888888,roughness:0.5,metalness:0.4});
-  // Points de la ligne de métro
   const metroPath=[
     {x:-130,z:-40},{x:-80,z:-40},{x:-40,z:-40},{x:0,z:-40},
     {x:40,z:-40},{x:80,z:-40},{x:130,z:-40}
   ];
-  const metroY=12; // hauteur des rails
-  // Rails + piliers
+  const metroY=12;
   for(let i=0;i<metroPath.length-1;i++){
     const A=metroPath[i],B=metroPath[i+1];
     const dx=B.x-A.x,dz=B.z-A.z;
     const len=Math.sqrt(dx*dx+dz*dz);
     const cx2=(A.x+B.x)/2,cz2=(A.z+B.z)/2;
-    // Rail gauche
     const railL=new THREE.Mesh(new THREE.BoxGeometry(len,0.2,0.25),trackMat);
     railL.position.set(cx2,metroY,cz2-1);railL.rotation.y=Math.atan2(dz,dx);scene.add(railL);
-    // Rail droit
     const railR=railL.clone();railR.position.set(cx2,metroY,cz2+1);scene.add(railR);
-    // Traverse
     const steps=Math.floor(len/4);
     for(let s=0;s<=steps;s++){
       const t=s/steps;
@@ -934,7 +926,6 @@ function makeMetroSystem(){
       const tie=new THREE.Mesh(new THREE.BoxGeometry(0.2,0.1,2.5),trackMat);
       tie.position.set(tx,metroY-0.15,tz);scene.add(tie);
     }
-    // Piliers tous les 20m
     for(let s=0;s<=len;s+=20){
       const t=s/len;
       const tx=A.x+dx*t,tz=A.z+dz*t;
@@ -943,7 +934,6 @@ function makeMetroSystem(){
       addCol(tx,tz,0.7,0.7);
     }
   }
-  // Stations
   const stations=[metroPath[0],metroPath[3],metroPath[6]];
   stations.forEach(st=>{
     const stationMat=new THREE.MeshStandardMaterial({color:0xdddddd,roughness:0.7});
@@ -951,13 +941,11 @@ function makeMetroSystem(){
     platform.position.set(st.x,metroY+0.25,st.z);scene.add(platform);
     const roof=new THREE.Mesh(new THREE.BoxGeometry(20,0.3,7),new THREE.MeshStandardMaterial({color:0x336699,roughness:0.5,metalness:0.4,transparent:true,opacity:0.7}));
     roof.position.set(st.x,metroY+4,st.z);scene.add(roof);
-    // Escaliers
     for(let step=0;step<8;step++){
       const s=new THREE.Mesh(new THREE.BoxGeometry(3,0.2,1),stationMat);
       s.position.set(st.x+7,step*1.5,st.z);scene.add(s);
     }
   });
-  // Train
   const trainGroup=new THREE.Group();
   const carMat=new THREE.MeshStandardMaterial({color:0xddeeee,roughness:0.3,metalness:0.5});
   const stripeM=new THREE.MeshStandardMaterial({color:0x2244aa,roughness:0.5});
@@ -979,13 +967,13 @@ makeMetroSystem();
 const boats=[];
 function makeBoat(x,z,type){
   const g=new THREE.Group();
-  if(type===0){// Cargo
+  if(type===0){
     const hull=new THREE.Mesh(new THREE.BoxGeometry(20,4,8),matBoatHull);hull.castShadow=true;g.add(hull);
     const deck=new THREE.Mesh(new THREE.BoxGeometry(18,1,6),matBoatDeck);deck.position.set(0,2.5,0);g.add(deck);
     const cab2=new THREE.Mesh(new THREE.BoxGeometry(6,4,5),new THREE.MeshStandardMaterial({color:0xccbbaa,roughness:0.7}));cab2.position.set(-4,5,0);g.add(cab2);
     const chimney=new THREE.Mesh(new THREE.CylinderGeometry(0.6,0.8,3,8),new THREE.MeshStandardMaterial({color:0x444444,roughness:0.5}));chimney.position.set(-4,8.5,0);g.add(chimney);
     const mast=new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.15,10,6),matRailing);mast.position.set(4,7,0);g.add(mast);
-  }else{// Bateau à passagers
+  }else{
     const hull=new THREE.Mesh(new THREE.BoxGeometry(30,3,10),matBoatHull);hull.castShadow=true;g.add(hull);
     const deck=new THREE.Mesh(new THREE.BoxGeometry(28,0.5,9),matBoatDeck);deck.position.set(0,1.75,0);g.add(deck);
     const cabin=new THREE.Mesh(new THREE.BoxGeometry(22,3.5,7),new THREE.MeshStandardMaterial({map:glassTex,roughness:0.1,metalness:0.5,transparent:true,opacity:0.88}));cabin.position.set(0,3.5,0);g.add(cabin);
@@ -998,13 +986,10 @@ function makeBoat(x,z,type){
   addCol(x,z,type===0?11:16,type===0?5:6);
   return g;
 }
-// Bateaux dans la mer au sud
 makeBoat(-60,-160,1);makeBoat(30,-170,0);makeBoat(-20,-180,1);makeBoat(80,-165,0);
-// Port / quai
 const quayMat=new THREE.MeshStandardMaterial({map:concreteTex,roughness:0.9,color:0xcccccc});
 const quay=new THREE.Mesh(new THREE.BoxGeometry(80,1,20),quayMat);quay.position.set(0,-0.5,-145);quay.receiveShadow=true;scene.add(quay);
 addCol(0,-145,40,10);
-// Grues du port
 function makeCrane(x,z){
   const mat=new THREE.MeshStandardMaterial({color:0xee8822,roughness:0.5,metalness:0.4});
   const base=new THREE.Mesh(new THREE.BoxGeometry(4,12,4),mat);base.position.set(x,6,z);base.castShadow=true;scene.add(base);
@@ -1023,12 +1008,10 @@ function makeBridge(x1,z1,x2,z2){
   const bridgeMat=new THREE.MeshStandardMaterial({color:0x888888,roughness:0.6,metalness:0.5});
   const deck=new THREE.Mesh(new THREE.BoxGeometry(len,0.5,12),bridgeMat);
   deck.position.set(cx2,0.25,cz2);deck.rotation.y=-angle;deck.castShadow=true;deck.receiveShadow=true;scene.add(deck);
-  // Garde-fous
   [-5,5].forEach(side=>{
     const rail=new THREE.Mesh(new THREE.BoxGeometry(len,1.2,0.2),matRailing);
     rail.position.set(cx2,0.8,cz2+side);rail.rotation.y=-angle;scene.add(rail);
   });
-  // Pylônes
   [0.2,0.8].forEach(t=>{
     const px=x1+dx*t,pz=z1+dz*t;
     const pylon=new THREE.Mesh(new THREE.BoxGeometry(1.5,14,1.5),bridgeMat);
@@ -1215,9 +1198,7 @@ const loader=new THREE.GLTFLoader();
 let playerMixer=null,playerModel=null,currentAction=null;
 const animCache={};
 const playerState={x:0,z:5,y:0,vy:0,onGround:true,speed:0,angle:0,currentAnim:'idle',inSewer:false,inVehicle:null,onMetro:false,onBoat:null};
-// Caméra : yaw = orientation caméra, camTargetYaw suit l'angle du joueur en mouvement
 const camState={dist:7,yaw:0,pitch:0.42,targetYaw:0,targetPitch:0.42,autoFollow:true};
-let lastMoveAngle=0;
 
 function makeProceduralPlayer(){
   const g=new THREE.Group();
@@ -1314,7 +1295,6 @@ const mmCtx=mmCanvas.getContext('2d');
 let minimapExpanded=false;
 document.getElementById('minimap').addEventListener('click',e=>{
   if(minimapExpanded){
-    // Téléportation : calculer coord monde depuis clic
     const rect=e.currentTarget.getBoundingClientRect();
     const mx=e.clientX-rect.left,my=e.clientY-rect.top;
     const MM=minimapExpanded?320:120;
@@ -1344,42 +1324,34 @@ function drawMinimap(){
   mmCtx.fillStyle='#0a1018';mmCtx.fillRect(0,0,MM,MM);
   const cx=MM/2-playerState.x*MM_SCALE;
   const cz=MM/2-playerState.z*MM_SCALE;
-  // Routes
   mmCtx.strokeStyle='#2a3040';mmCtx.lineWidth=minimapExpanded?6:3;
   [-120,-80,-40,0,40,80,120].forEach(ax=>{
     mmCtx.beginPath();mmCtx.moveTo(0,cz+ax*MM_SCALE);mmCtx.lineTo(MM,cz+ax*MM_SCALE);mmCtx.stroke();
     mmCtx.beginPath();mmCtx.moveTo(cx+ax*MM_SCALE,0);mmCtx.lineTo(cx+ax*MM_SCALE,MM);mmCtx.stroke();
   });
-  // Mer
   mmCtx.fillStyle='#1a3a5a';
   mmCtx.fillRect(0,cz-220*MM_SCALE,MM,(220-120)*MM_SCALE);
-  // Parc
   mmCtx.fillStyle='#1a4a10';
   mmCtx.fillRect(cx+4*MM_SCALE,cz-80*MM_SCALE,20*MM_SCALE,20*MM_SCALE);
-  // Tour Eiffel
   mmCtx.fillStyle='#8a7050';
   mmCtx.beginPath();mmCtx.arc(cx-100*MM_SCALE,cz+100*MM_SCALE,4*MM_SCALE,0,Math.PI*2);mmCtx.fill();
   if(minimapExpanded){mmCtx.fillStyle='rgba(255,255,255,0.6)';mmCtx.font='9px sans-serif';mmCtx.fillText('🗼',cx-100*MM_SCALE-5,cz+100*MM_SCALE+4);}
-  // Missions
   MISSIONS.forEach(m=>{
     if(m.done)return;
     mmCtx.fillStyle=activeMission===m.id?'#f5c842':'#ff6633';
     mmCtx.beginPath();mmCtx.arc(cx+m.tp.x*MM_SCALE,cz+m.tp.z*MM_SCALE,minimapExpanded?5:3,0,Math.PI*2);mmCtx.fill();
     if(minimapExpanded){mmCtx.fillStyle='rgba(255,255,255,0.7)';mmCtx.font='8px sans-serif';mmCtx.fillText('!',cx+m.tp.x*MM_SCALE-2,cz+m.tp.z*MM_SCALE+3);}
   });
-  // NPC
   mmCtx.fillStyle='#4488ff';
   npcs.slice(0,15).forEach(n=>{
     const nx=cx+n.group.position.x*MM_SCALE,nz=cz+n.group.position.z*MM_SCALE;
     if(nx>0&&nx<MM&&nz>0&&nz<MM){mmCtx.beginPath();mmCtx.arc(nx,nz,1.5,0,Math.PI*2);mmCtx.fill();}
   });
-  // Cars
   mmCtx.fillStyle='#ff4422';
   movingCars.forEach(c=>{
     const vx=cx+c.group.position.x*MM_SCALE,vz=cz+c.group.position.z*MM_SCALE;
     if(vx>0&&vx<MM&&vz>0&&vz<MM)mmCtx.fillRect(vx-1.5,vz-1.5,3,3);
   });
-  // Joueur
   mmCtx.fillStyle='#f5c842';
   mmCtx.beginPath();mmCtx.arc(MM/2,MM/2,5,0,Math.PI*2);mmCtx.fill();
   mmCtx.strokeStyle='#f5c842';mmCtx.lineWidth=2;
@@ -1417,7 +1389,6 @@ function updateMetroTrain(dt){
   const tz=A.z+(B.z-A.z)*segT;
   metroTrain.group.position.set(tx,13,tz);
   metroTrain.group.rotation.y=Math.atan2(B.x-A.x,B.z-A.z);
-  // Si joueur sur le métro, on le suit
   if(playerState.onMetro){
     playerState.x=tx;playerState.z=tz;playerState.y=15.5;
   }
@@ -1454,7 +1425,6 @@ function updateNPCs(dt){
 }
 
 function updatePlayer(dt){
-  // Joystick caméra gauche
   if(camJoyState.active){
     camState.targetYaw+=camJoyState.x*dt*2.4;
     camState.targetPitch=Math.max(0.1,Math.min(0.88,camState.targetPitch+camJoyState.y*dt*1.3));
@@ -1463,7 +1433,6 @@ function updatePlayer(dt){
   camState.yaw+=(camState.targetYaw-camState.yaw)*0.12;
   camState.pitch+=(camState.targetPitch-camState.pitch)*0.1;
 
-  // Joystick droite = mouvement
   let dx=0,dz=0;
   const run=keys['ShiftLeft']||keys['ShiftRight'];
   const spd=run?PLAYER_RUN_SPEED:PLAYER_SPEED;
@@ -1474,7 +1443,6 @@ function updatePlayer(dt){
   if(keys['ArrowRight']||keys['KeyD'])dx+=1;
   if(keys['Space']&&playerState.onGround&&!playerState.inVehicle){playerState.vy=7.5;playerState.onGround=false;}
 
-  // Convertir input joystick en direction monde (relative à la caméra)
   const cos=Math.cos(camState.yaw),sin=Math.sin(camState.yaw);
   const wx=dx*cos+dz*sin;
   const wz=-dx*sin+dz*cos;
@@ -1489,7 +1457,6 @@ function updatePlayer(dt){
     const res=resolveCollisions(npx,npz,playerState.y,cols);
     playerState.x=res.x;playerState.z=res.z;
     playerState.angle=Math.atan2(nx,nz);
-    // Caméra suit le joueur automatiquement (douce)
     if(camState.autoFollow||!camJoyState.active){
       camState.targetYaw=playerState.angle;
       camState.autoFollow=true;
@@ -1497,10 +1464,8 @@ function updatePlayer(dt){
     moved=true;
   }
 
-  // Réactivation auto-follow quand plus de mouvement caméra joystick
   if(!camJoyState.active)camState.autoFollow=true;
 
-  // Gravité
   if(!playerState.inVehicle&&!playerState.onMetro){
     const floorY=playerState.inSewer?SEWER_Y:0;
     playerState.vy-=GRAVITY*dt;
@@ -1508,7 +1473,6 @@ function updatePlayer(dt){
     if(playerState.y<=floorY){playerState.y=floorY;playerState.vy=0;playerState.onGround=true;}
   }
 
-  // Interaction souterrain
   const distToHole=Math.sqrt((playerState.x-sewerHole.x)**2+(playerState.z-sewerHole.z)**2);
   if(distToHole<2.2&&!playerState.inSewer){
     showVehicleHint('[ E ] Descendre dans l\'égout');
@@ -1526,7 +1490,6 @@ function updatePlayer(dt){
     }
   }
 
-  // Interaction métro
   if(metroTrain.group&&!playerState.inSewer){
     const mtPos=metroTrain.group.position;
     const distToMetro=Math.sqrt((playerState.x-mtPos.x)**2+(playerState.z-mtPos.z)**2);
@@ -1539,7 +1502,6 @@ function updatePlayer(dt){
     }
   }
 
-  // Interaction bateaux
   if(!playerState.inSewer&&!playerState.onMetro){
     let nearBoat=null;
     boats.forEach((b,i)=>{
@@ -1560,7 +1522,6 @@ function updatePlayer(dt){
 
   updateZone();
 
-  // Anim auto
   if(moved&&playerState.onGround&&playerState.currentAnim==='idle'){
     playerState.currentAnim='walk';
     document.querySelectorAll('.anim-btn').forEach((b,i)=>b.classList.toggle('active',i===1));
