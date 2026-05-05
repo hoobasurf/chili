@@ -11,14 +11,11 @@
 :root{--g:#f5c842;--o:#e85d26;--gl:rgba(8,12,24,0.55);--gb:rgba(255,255,255,0.13);--gs:rgba(8,12,24,0.82);}
 html,body{width:100%;height:100%;overflow:hidden;background:#0a1428;font-family:'M PLUS Rounded 1c',sans-serif;user-select:none;-webkit-user-select:none;touch-action:none;}
 
-/* CANVAS */
 #cc{position:fixed;inset:0;z-index:0;}
 #cc canvas{display:block;width:100%!important;height:100%!important;}
 
-/* HUD — par-dessus canvas, pointer-events none par défaut */
 #hud{position:fixed;inset:0;z-index:10;pointer-events:none;}
 
-/* TOP BAR */
 .htop{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:linear-gradient(180deg,rgba(0,0,0,.6) 0%,transparent 100%);}
 .hlogo{font-family:‘Zen Kaku Gothic New’,sans-serif;font-size:.85rem;font-weight:900;color:#fff;}
 .hlogo em{color:var(–g);font-style:normal;}
@@ -30,13 +27,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a1428;font-family:
 .hpic{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(–o),var(–g));display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:900;color:#fff;}
 .hname{font-size:.6rem;font-weight:700;color:#fff;}
 
-/* MINIMAP */
 #mm{position:absolute;top:52px;left:10px;width:110px;height:110px;border-radius:10px;background:var(–gl);border:1px solid var(–gb);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);overflow:hidden;pointer-events:all;cursor:pointer;transition:all .3s;z-index:15;}
 #mm.exp{width:280px;height:280px;border-radius:14px;}
 #mm canvas{width:100%;height:100%;}
 .mml{position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:.42rem;font-weight:700;color:rgba(255,255,255,.45);}
 
-/* MISSION TOGGLE */
 #mtog{position:absolute;top:52px;right:10px;width:36px;height:36px;border-radius:50%;background:var(–gl);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1.5px solid rgba(245,200,66,.5);display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:900;color:var(–g);cursor:pointer;pointer-events:all;z-index:20;}
 #mbadge{position:absolute;top:-3px;right:-3px;width:14px;height:14px;border-radius:50%;background:var(–o);font-size:.45rem;font-weight:900;color:#fff;display:flex;align-items:center;justify-content:center;}
 #mside{position:absolute;top:52px;right:10px;width:190px;max-height:60vh;background:var(–gl);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(–gb);border-radius:12px;overflow:hidden;pointer-events:all;z-index:19;transform:translateX(210px);transition:transform .28s ease;display:flex;flex-direction:column;}
@@ -53,24 +48,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a1428;font-family:
 .badge{display:inline-block;font-size:.42rem;font-weight:900;padding:1px 5px;border-radius:5px;margin-bottom:1px;}
 .bn{background:var(–o);color:#fff;}.bd{background:#2ecc71;color:#fff;}
 
-/* =====================================================
-BOTTOM CONTROLS — disposition fixe sans chevauchement
-Zone de 170px de haut divisée en couches :
-Layer 1 (bottom 0-80px)   : anim panel
-Layer 2 (bottom 80-176px) : joysticks + boutons saut
-Layer 3 (bottom 176-220px): chat
-===================================================== */
-
-/* ANIM PANEL */
-#ap{
-position:absolute;
-bottom:0;left:0;right:0;
-height:80px;
-background:var(–gl);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-border-top:1px solid var(–gb);
-pointer-events:all;
-z-index:11;
-}
+#ap{position:absolute;bottom:0;left:0;right:0;height:80px;background:var(–gl);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(–gb);pointer-events:all;z-index:11;}
 #asc{display:flex;gap:4px;overflow-x:auto;padding:4px 8px 0;scrollbar-width:none;-webkit-overflow-scrolling:touch;height:100%;}
 #asc::-webkit-scrollbar{display:none;}
 .abtn{flex-shrink:0;width:52px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
@@ -81,71 +59,15 @@ z-index:11;
 .albl{font-size:.44rem;font-weight:700;color:rgba(255,255,255,.38);text-align:center;white-space:nowrap;}
 .abtn.active .albl{color:var(–g);}
 
-/* JOYSTICK GAUCHE (caméra) — bas gauche, au-dessus du panel */
-#cjz{
-position:absolute;
-bottom:88px;   /* juste au-dessus du panel (80px) + 8px marge */
-left:10px;
-width:90px;height:90px;
-pointer-events:all;
-z-index:12;
-}
-/* JOYSTICK DROIT (mouvement) — bas droit */
-#jz{
-position:absolute;
-bottom:88px;
-right:10px;
-width:90px;height:90px;
-pointer-events:all;
-z-index:12;
-}
+#cjz{position:absolute;bottom:88px;left:10px;width:90px;height:90px;pointer-events:all;z-index:12;}
+#jz{position:absolute;bottom:88px;right:10px;width:90px;height:90px;pointer-events:all;z-index:12;}
 .jbase{width:90px;height:90px;border-radius:50%;background:var(–gl);border:1.5px solid var(–gb);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);position:relative;display:flex;align-items:center;justify-content:center;}
 .jknob{width:34px;height:34px;border-radius:50%;position:absolute;box-shadow:0 2px 8px rgba(0,0,0,.5);}
 
-/* BOUTON SUPER-JUMP — au-dessus du joystick gauche */
-#sjb{
-position:absolute;
-bottom:188px;  /* 88 + 90 + 10 */
-left:28px;     /* centré sur le joystick gauche (10 + 45 - 21 = 34, ~28) */
-width:42px;height:42px;
-border-radius:50%;
-background:rgba(232,93,38,.85);
-backdrop-filter:blur(6px);
-border:1.5px solid rgba(255,120,60,.4);
-color:#fff;font-size:.9rem;
-pointer-events:all;cursor:pointer;
-display:flex;align-items:center;justify-content:center;
--webkit-tap-highlight-color:transparent;
-z-index:12;
-box-shadow:0 2px 10px rgba(232,93,38,.4);
-}
-/* BOUTON JUMP — au-dessus du joystick droit */
-#jb{
-position:absolute;
-bottom:188px;
-right:28px;
-width:42px;height:42px;
-border-radius:50%;
-background:rgba(43,108,176,.85);
-backdrop-filter:blur(6px);
-border:1.5px solid rgba(80,140,220,.4);
-color:#fff;font-size:1.1rem;
-pointer-events:all;cursor:pointer;
-display:flex;align-items:center;justify-content:center;
--webkit-tap-highlight-color:transparent;
-z-index:12;
-box-shadow:0 2px 10px rgba(43,108,176,.4);
-}
+#sjb{position:absolute;bottom:188px;left:28px;width:42px;height:42px;border-radius:50%;background:rgba(232,93,38,.85);backdrop-filter:blur(6px);border:1.5px solid rgba(255,120,60,.4);color:#fff;font-size:.9rem;pointer-events:all;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;z-index:12;box-shadow:0 2px 10px rgba(232,93,38,.4);}
+#jb{position:absolute;bottom:188px;right:28px;width:42px;height:42px;border-radius:50%;background:rgba(43,108,176,.85);backdrop-filter:blur(6px);border:1.5px solid rgba(80,140,220,.4);color:#fff;font-size:1.1rem;pointer-events:all;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;z-index:12;box-shadow:0 2px 10px rgba(43,108,176,.4);}
 
-/* CHAT — centré entre joysticks, au-dessus des joysticks */
-.hchat{
-position:absolute;
-bottom:188px;   /* même hauteur que les boutons saut */
-left:120px;     /* après le joystick gauche (10+90+20) */
-right:120px;    /* avant le joystick droit */
-pointer-events:all;
-z-index:11;
-}
+.hchat{position:absolute;bottom:188px;left:120px;right:120px;pointer-events:all;z-index:11;}
 .cmsgs{max-height:64px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;margin-bottom:3px;scrollbar-width:none;}
 .cmsgs::-webkit-scrollbar{display:none;}
 .cmsg{background:var(–gl);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid var(–gb);border-radius:12px;padding:3px 9px;font-size:.58rem;color:#fff;line-height:1.3;}
@@ -156,14 +78,11 @@ z-index:11;
 .cin:focus{border-color:var(–g);}
 .csend{width:32px;height:32px;flex-shrink:0;border-radius:50%;background:var(–o);border:none;color:#fff;cursor:pointer;font-size:.85rem;display:flex;align-items:center;justify-content:center;}
 
-/* TOAST */
 .toast{position:fixed;bottom:290px;left:50%;transform:translateX(-50%) translateY(12px);background:var(–gs);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);color:var(–g);padding:5px 14px;border:1px solid rgba(245,200,66,.3);border-radius:14px;font-size:.65rem;font-weight:700;opacity:0;transition:all .22s;z-index:50;pointer-events:none;white-space:nowrap;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-/* HINT interaction */
 #vh{position:fixed;bottom:290px;left:50%;transform:translateX(-50%);background:var(–gs);backdrop-filter:blur(14px);border:1px solid var(–gb);border-radius:10px;padding:4px 14px;font-size:.64rem;font-weight:700;color:#fff;display:none;z-index:30;pointer-events:none;white-space:nowrap;}
 
-/* LOADING */
 #ls{position:fixed;inset:0;z-index:200;background:linear-gradient(135deg,#080e1e,#0f1e38);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .5s;}
 #ls.hidden{opacity:0;pointer-events:none;}
 .llogo{font-family:‘Zen Kaku Gothic New’,sans-serif;font-size:2.5rem;font-weight:900;color:#fff;letter-spacing:.06em;text-shadow:0 0 36px rgba(245,200,66,.45);}
@@ -173,10 +92,8 @@ z-index:11;
 .lb{height:100%;width:0%;background:linear-gradient(90deg,var(–o),var(–g));border-radius:2px;transition:width .18s;}
 .lt{font-size:.64rem;color:rgba(255,255,255,.45);font-weight:700;}
 
-/* ERREUR */
 #errmsg{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(180,20,20,.9);color:#fff;padding:16px 20px;border-radius:14px;font-size:.75rem;font-weight:700;text-align:center;z-index:300;display:none;max-width:280px;line-height:1.5;}
 
-/* POPUP MISSION */
 #mpop{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.85);background:var(–gs);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1.5px solid rgba(245,200,66,.38);border-radius:16px;padding:16px 20px;z-index:100;pointer-events:all;min-width:220px;max-width:290px;opacity:0;transition:all .28s;display:none;}
 #mpop.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
 .mpt{font-family:‘Zen Kaku Gothic New’,sans-serif;font-size:.95rem;font-weight:900;color:var(–g);margin-bottom:5px;}
@@ -190,7 +107,7 @@ z-index:11;
 <body>
 
 <div id="cc"></div>
-<div id="errmsg" id="errmsg"></div>
+<div id="errmsg"></div>
 
 <div id="ls">
   <div class="llogo">TOKYO <em>東京</em></div>
@@ -214,8 +131,6 @@ z-index:11;
     <div class="mlist" id="mlist"></div>
   </div>
 
-  <!-- Chat centré entre les deux joysticks -->
-
   <div class="hchat">
     <div class="cmsgs" id="cmsgs"></div>
     <div class="cinwrap">
@@ -223,8 +138,6 @@ z-index:11;
       <button class="csend" id="csnd">▶</button>
     </div>
   </div>
-
-  <!-- Joystick gauche = caméra -->
 
   <div id="cjz">
     <div class="jbase" id="cjb">
@@ -234,8 +147,6 @@ z-index:11;
 
 <button id="sjb">🚀</button>
 <button id="jb">↑</button>
-
-  <!-- Joystick droit = mouvement -->
 
   <div id="jz">
     <div class="jbase" id="jbase">
@@ -257,8 +168,6 @@ z-index:11;
   <button class="mpcl" id="mpcl3">Fermer</button>
 </div>
 
-<!-- THREE.js : essayer unpkg, puis jsDelivr -->
-
 <script>
 function loadScript(src, cb, errCb) {
   var s = document.createElement('script');
@@ -275,7 +184,6 @@ function showErr(msg) {
   document.getElementById('lt').textContent = '❌ ' + msg;
 }
 
-// Charger THREE puis GLTFLoader avec fallbacks
 var threeLoaded = false;
 function loadGLTF(cb) {
   loadScript(
@@ -286,7 +194,6 @@ function loadGLTF(cb) {
         'https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/loaders/GLTFLoader.js',
         cb,
         function() {
-          // Pas de loader, on crée un stub
           THREE.GLTFLoader = function(){};
           THREE.GLTFLoader.prototype.load = function(u,ok,p,err){ if(err) err(new Error('no loader')); };
           cb();
@@ -300,7 +207,6 @@ function onThreeReady() {
   if(threeLoaded) return;
   threeLoaded = true;
   if(typeof THREE === 'undefined') { showErr('THREE.js introuvable. Vérifiez votre connexion internet.'); return; }
-  // Vérifier WebGL
   try {
     var testCanvas = document.createElement('canvas');
     var gl = testCanvas.getContext('webgl') || testCanvas.getContext('experimental-webgl');
@@ -325,7 +231,6 @@ loadScript(
   }
 );
 
-// Safety timeout
 setTimeout(function() {
   if(!threeLoaded) showErr('Timeout chargement. Rechargez la page.');
 }, 12000);
@@ -415,7 +320,7 @@ function startGame() {
   const sun = new THREE.DirectionalLight(0xfff2d8, 2.0);
   sun.position.set(60,120,50); scene.add(sun);
 
-  // ===== TEXTURES 128px =====
+  // ===== TEXTURES =====
   function tx(fn,s){ s=s||128; const cv=document.createElement('canvas'); cv.width=cv.height=s; fn(cv.getContext('2d'),s); const t=new THREE.CanvasTexture(cv); t.wrapS=t.wrapT=THREE.RepeatWrapping; return t; }
   const tA=tx((ctx,s)=>{ ctx.fillStyle='#1c1c1c';ctx.fillRect(0,0,s,s); for(let i=0;i<1500;i++){const g=14+(Math.random()*22|0);ctx.fillStyle=`rgb(${g},${g},${g})`;ctx.fillRect(Math.random()*s|0,Math.random()*s|0,1,1);} },256); tA.repeat.set(16,16);
   const tSW=tx((ctx,s)=>{ ctx.fillStyle='#b0a8a0';ctx.fillRect(0,0,s,s); const t=22; for(let r=0;r*t<s;r++)for(let c=0;c*t<s;c++){const v=148+(Math.random()*20|0);ctx.fillStyle=`rgb(${v},${v-4},${v-8})`;ctx.fillRect(c*t+1,r*t+1,t-2,t-2);} }); tSW.repeat.set(5,5);
@@ -428,7 +333,7 @@ function startGame() {
   function mkSgn(col,txt,sub){ return tx((ctx,s)=>{ ctx.fillStyle=col;ctx.fillRect(0,0,s,s); ctx.fillStyle='rgba(0,0,0,.2)';ctx.fillRect(0,s*.65,s,s*.35); ctx.fillStyle='rgba(255,255,255,.9)'; ctx.font=`bold ${s*.28}px serif`;ctx.textAlign='center';ctx.textBaseline='middle'; ctx.fillText(txt,s/2,s*.4); if(sub){ctx.fillStyle='rgba(255,255,255,.5)';ctx.font=`bold ${s*.1}px sans-serif`;ctx.fillText(sub,s/2,s*.76);} }); }
   const SIGNS=[mkSgn('#c0392b','ラーメン','RAMEN'),mkSgn('#2c7a3a','定食','TEISHOKU'),mkSgn('#1a4a8a','居酒屋','IZAKAYA'),mkSgn('#7a2c8a','美容院','SALON'),mkSgn('#8a6a1a','薬局','PHARMA'),mkSgn('#2a6a8a','コンビニ','KONBINI'),mkSgn('#8a2a2a','銭湯','SENTO'),mkSgn('#3a7a6a','書店','BOOKS'),mkSgn('#c04020','消防署','FIRE'),mkSgn('#1a50a0','病院','HOSP'),mkSgn('#205080','警察署','POLICE'),mkSgn('#4a2a8a','パチンコ','PACHINKO')];
 
-  // ===== MATÉRIAUX (Lambert = rapide mobile) =====
+  // ===== MATÉRIAUX =====
   const mA=new THREE.MeshLambertMaterial({map:tA,color:0xcccccc});
   const mSW=new THREE.MeshLambertMaterial({map:tSW,color:0xe0e0e0});
   const mGr=new THREE.MeshLambertMaterial({map:tGr,color:0xdddddd});
@@ -766,11 +671,9 @@ function startGame() {
   function tickHint(){if(vhT>0){vhT--;if(!vhT)document.getElementById('vh').style.display='none';}}
 
   function updPlayer(dt){
-    // Joystick gauche = caméra
     if(cjst.act){cs.ty+=cjst.x*dt*2.2;cs.tp=Math.max(.1,Math.min(.88,cs.tp+cjst.y*dt*1.15));}
     cs.yaw+=(cs.ty-cs.yaw)*.11; cs.pitch+=(cs.tp-cs.pitch)*.1;
 
-    // Joystick droit = mouvement
     let dx=0,dz=0;
     const run=keys['ShiftLeft']||keys['ShiftRight'];
     if(jst.act){dx+=jst.x;dz+=jst.z;}
@@ -787,27 +690,23 @@ function startGame() {
       const nx2=wx/len,nz2=wz/len,spd=(run?SPDR:SPDN)*Math.min(len,1)*dt;
       const res=resolveC(ps.x+nx2*spd,ps.z+nz2*spd,ps.y,ps.sewer?scols:cols);
       ps.x=res.x;ps.z=res.z;ps.ang=Math.atan2(nx2,nz2);
-      if(!cjst.act) cs.ty=ps.ang; // caméra suit si joystick cam inactif
+      if(!cjst.act) cs.ty=ps.ang;
       moved=true;
     }
 
-    // Gravité
     if(!ps.onMetro&&ps.onBoat===null){
       const fy=ps.sewer?SY:0;
       ps.vy-=G*dt;ps.y+=ps.vy*dt;
       if(ps.y<=fy){ps.y=fy;ps.vy=0;ps.onG=true;}
     }
 
-    // Souterrain
     const dh=Math.sqrt((ps.x-hole.x)**2+(ps.z-hole.z)**2);
     if(dh<2.2&&!ps.sewer){showHint('[ E ] Descendre dans l\'égout');if(keys['KeyE']&&!sewT){sewT=true;showToast('⬇ Descente…');setTimeout(()=>{ps.sewer=true;ps.y=SY;ps.vy=0;ps.x=hole.x;ps.z=hole.z;sewT=false;scene.fog=new THREE.Fog(0x061206,6,32);scene.background=new THREE.Color(0x050e05);document.getElementById('zn').textContent='🐀 Souterrain';chkM('m2');},550);}
     }else if(dh<2.5&&ps.sewer){showHint('[ E ] Remonter');if(keys['KeyE']&&!sewT){sewT=true;showToast('⬆ Remontée…');setTimeout(()=>{ps.sewer=false;ps.y=.5;ps.vy=3;ps.x=hole.x;ps.z=hole.z;sewT=false;scene.fog=new THREE.Fog(0x8ab8d8,80,220);scene.background=new THREE.Color(0x6a9cc8);document.getElementById('zn').textContent='東京 Shinjuku';},550);}
     }
 
-    // Métro
     if(metro.grp&&!ps.sewer){const mp=metro.grp.position,dm=Math.sqrt((ps.x-mp.x)**2+(ps.z-mp.z)**2);if(dm<7&&!ps.onMetro&&ps.y>7){showHint('[ E ] Monter dans le métro');if(keys['KeyE']){ps.onMetro=true;showToast('🚇 Dans le métro !');chkM('m5');}}else if(ps.onMetro){showHint('[ E ] Descendre du métro');if(keys['KeyE']){ps.onMetro=false;ps.y=metro.grp.position.y-4;ps.vy=-1;showToast('🚇 Descendu');}}}
 
-    // Bateaux
     if(!ps.sewer&&!ps.onMetro){let nb=null;boats.forEach((b,i)=>{const bp=b.grp.position,d=Math.sqrt((ps.x-bp.x)**2+(ps.z-bp.z)**2);if(d<11)nb=i;});if(nb!==null&&ps.onBoat===null){showHint('[ E ] Monter sur le bateau');if(keys['KeyE']){ps.onBoat=nb;showToast('⛵ Sur le bateau !');chkM('m6');}}else if(ps.onBoat!==null){const b=boats[ps.onBoat];ps.x=b.grp.position.x;ps.z=b.grp.position.z;ps.y=b.grp.position.y+3;showHint('[ E ] Descendre');if(keys['KeyE']){ps.onBoat=null;ps.y=1;ps.vy=1;showToast('⛵ Descendu');}}}
 
     updZone();
