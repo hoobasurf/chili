@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -101,6 +100,9 @@ canvas{display:block;width:100%!important;height:100%!important;}
 @keyframes markerBounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
 #interact-prompt{position:fixed;top:50%;left:50%;transform:translate(-50%,60px);z-index:45;background:rgba(0,0,0,.8);border:1.5px solid var(--gold);border-radius:12px;padding:8px 18px;font-size:.75rem;font-weight:700;color:var(--gold);pointer-events:all;cursor:pointer;display:none;-webkit-tap-highlight-color:transparent;}
 #interact-prompt.show{display:block;}
+/* Altitude indicator */
+#altitude-hud{position:fixed;top:56px;left:14px;z-index:20;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:4px 9px;font-size:.62rem;font-weight:700;color:#fff;display:none;}
+#altitude-hud.show{display:block;}
 </style>
 </head>
 <body>
@@ -127,6 +129,7 @@ canvas{display:block;width:100%!important;height:100%!important;}
 </div>
 
 <div id="interact-prompt">⬆ Appuyer pour interagir</div>
+<div id="altitude-hud">📍 Alt: <span id="altitude-val">0</span>m</div>
 
 <div id="hud">
   <div class="hud-top">
@@ -188,103 +191,95 @@ const glbCache = {};
 const BASE = 'https://raw.githubusercontent.com/hoobasurf/chili/main/';
 const WALK_FILE = 'course.glb', IDLE_FILE = 'attend.glb';
 
-// ── VECTEURS RÉUTILISABLES (évite GC dans animate) ───────
-const _v3 = new THREE.Vector3();
+const _v3  = new THREE.Vector3();
 const _box = new THREE.Box3();
 const _sz  = new THREE.Vector3();
 
 // ── PROFIL ───────────────────────────────────────────────
 function loadProfile(){
   try{
-    const uid = localStorage.getItem('macadam_user_id') || ('p_'+Math.random().toString(36).slice(2,8));
-    localStorage.setItem('macadam_user_id', uid);
-    const saved = JSON.parse(localStorage.getItem('macadam_avatar_'+uid) || 'null');
-    return { pseudo: saved?.pseudo || 'Joueur' };
-  } catch(e){ return { pseudo:'Joueur' }; }
+    const uid = localStorage.getItem('macadam_user_id')||('p_'+Math.random().toString(36).slice(2,8));
+    localStorage.setItem('macadam_user_id',uid);
+    const saved=JSON.parse(localStorage.getItem('macadam_avatar_'+uid)||'null');
+    return{pseudo:saved?.pseudo||'Joueur'};
+  }catch(e){return{pseudo:'Joueur'};}
 }
-const profile = loadProfile();
-document.getElementById('hud-pseudo').textContent = profile.pseudo;
-document.getElementById('hud-pic').textContent = profile.pseudo.slice(0,2).toUpperCase();
+const profile=loadProfile();
+document.getElementById('hud-pseudo').textContent=profile.pseudo;
+document.getElementById('hud-pic').textContent=profile.pseudo.slice(0,2).toUpperCase();
 
 // ── LOADING ──────────────────────────────────────────────
-let loadPct = 0;
-const loadBar = document.getElementById('load-bar'), loadTxt = document.getElementById('load-txt');
-const ldMsgs = ['Chargement des textures…','Construction de Tokyo…','Pose du béton…','Construction du métro…','Mise à flot des bateaux…','Tour Eiffel en cours…','Presque prêt…'];
-let ldIdx = 0;
-const ldInt = setInterval(()=>{
-  loadPct += Math.random()*5; if(loadPct>85){ loadPct=85; clearInterval(ldInt); }
-  loadBar.style.width = loadPct+'%';
-  const idx = Math.min(Math.floor(loadPct/14), ldMsgs.length-1);
-  if(idx>ldIdx){ ldIdx=idx; loadTxt.textContent=ldMsgs[ldIdx]; }
-}, 180);
+let loadPct=0;
+const loadBar=document.getElementById('load-bar'),loadTxt=document.getElementById('load-txt');
+const ldMsgs=['Chargement des textures…','Construction de Tokyo…','Pose du béton…','Construction du métro…','Mise à flot des bateaux…','Tour Eiffel en cours…','Presque prêt…'];
+let ldIdx=0;
+const ldInt=setInterval(()=>{
+  loadPct+=Math.random()*5;if(loadPct>85){loadPct=85;clearInterval(ldInt);}
+  loadBar.style.width=loadPct+'%';
+  const idx=Math.min(Math.floor(loadPct/14),ldMsgs.length-1);
+  if(idx>ldIdx){ldIdx=idx;loadTxt.textContent=ldMsgs[ldIdx];}
+},180);
 function finishLoading(){
-  clearInterval(ldInt); loadBar.style.width='100%'; loadTxt.textContent='Bienvenue à Tokyo !';
-  setTimeout(()=>{ const l=document.getElementById('loading-screen'); l.classList.add('hidden'); setTimeout(()=>l.style.display='none',600); }, 400);
+  clearInterval(ldInt);loadBar.style.width='100%';loadTxt.textContent='Bienvenue à Tokyo !';
+  setTimeout(()=>{const l=document.getElementById('loading-screen');l.classList.add('hidden');setTimeout(()=>l.style.display='none',600);},400);
   addChat('☀️ Bienvenue à Tokyo, '+profile.pseudo+' !','Système');
-  addChat('🗼 Tour Eiffel • 🚇 Métro • ⛵ Port • 🏎 Alfa','Info');
-  swapAvatar(IDLE_FILE, true, null);
+  addChat('🚇 Montez les escaliers pour accéder au Métro !','Info');
+  addChat('🗼 3 étages de la Tour Eiffel à explorer !','Info');
+  swapAvatar(IDLE_FILE,true,null);
 }
 
-// ── UI HELPERS ───────────────────────────────────────────
-let toastTimer = null;
-function showToast(msg, type=''){
-  const t=document.getElementById('toast'); t.textContent=msg;
-  t.className='toast '+(type||''); t.classList.add('show');
-  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'), 3200);
+// ── UI ───────────────────────────────────────────────────
+let toastTimer=null;
+function showToast(msg,type=''){
+  const t=document.getElementById('toast');t.textContent=msg;
+  t.className='toast '+(type||'');t.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3200);
 }
-const bubbleEl = document.getElementById('speech-bubble'); let bubTimer = null;
-function showBubble(t){ bubbleEl.textContent=t; bubbleEl.style.opacity='1'; clearTimeout(bubTimer); bubTimer=setTimeout(()=>bubbleEl.style.opacity='0',4500); }
-function addChat(text, from){
-  const msgs=document.getElementById('chat-messages'); const d=document.createElement('div'); d.className='chat-msg';
-  d.innerHTML=`<span class="name">${from}</span>${text}`; msgs.appendChild(d); msgs.scrollTop=msgs.scrollHeight;
-  while(msgs.children.length>20) msgs.removeChild(msgs.firstChild);
+const bubbleEl=document.getElementById('speech-bubble');let bubTimer=null;
+function showBubble(t){bubbleEl.textContent=t;bubbleEl.style.opacity='1';clearTimeout(bubTimer);bubTimer=setTimeout(()=>bubbleEl.style.opacity='0',4500);}
+function addChat(text,from){
+  const msgs=document.getElementById('chat-messages');const d=document.createElement('div');d.className='chat-msg';
+  d.innerHTML=`<span class="name">${from}</span>${text}`;msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;
+  while(msgs.children.length>20)msgs.removeChild(msgs.firstChild);
 }
-function sendChat(){ const inp=document.getElementById('chat-input'); const m=inp.value.trim(); if(!m)return; inp.value=''; addChat(m,profile.pseudo); showBubble(m); }
-document.getElementById('chat-send').addEventListener('click', sendChat);
-document.getElementById('chat-input').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); sendChat(); } });
-
+function sendChat(){const inp=document.getElementById('chat-input');const m=inp.value.trim();if(!m)return;inp.value='';addChat(m,profile.pseudo);showBubble(m);}
+document.getElementById('chat-send').addEventListener('click',sendChat);
+document.getElementById('chat-input').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();sendChat();}});
 function toggleSidebar(){
-  const s=document.getElementById('sidebar'); const lbl=document.getElementById('sidebar-toggle-label');
-  s.classList.toggle('open'); lbl.textContent=s.classList.contains('open')?'FERMER':'MENU';
+  const s=document.getElementById('sidebar');const lbl=document.getElementById('sidebar-toggle-label');
+  s.classList.toggle('open');lbl.textContent=s.classList.contains('open')?'FERMER':'MENU';
 }
-document.addEventListener('touchstart', e=>{
-  const sb=document.getElementById('sidebar'); const tog=document.getElementById('sidebar-toggle');
+document.addEventListener('touchstart',e=>{
+  const sb=document.getElementById('sidebar'),tog=document.getElementById('sidebar-toggle');
   if(sb.classList.contains('open')&&!sb.contains(e.target)&&!tog.contains(e.target)){
-    sb.classList.remove('open'); document.getElementById('sidebar-toggle-label').textContent='MENU';
+    sb.classList.remove('open');document.getElementById('sidebar-toggle-label').textContent='MENU';
   }
-}, {passive:true});
+},{passive:true});
 
-// ── RENDERER — PATCH PERF ────────────────────────────────
-// pixelRatio=1 toujours (pas de Retina), ombres désactivées
-const renderer = new THREE.WebGLRenderer({ antialias:false, powerPreference:'high-performance' });
-renderer.setPixelRatio(1); // <!-- PATCH: était devicePixelRatio, très coûteux sur mobile -->
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.shadowMap.enabled = false; // <!-- PATCH: ombres désactivées -->
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.05;
-renderer.outputColorSpace = THREE.SRGBColorSpace;
+// ── RENDERER ────────────────────────────────────────────
+const renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'high-performance'});
+renderer.setPixelRatio(1);
+renderer.setSize(window.innerWidth,window.innerHeight);
+renderer.shadowMap.enabled=false;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure=1.05;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
 document.getElementById('canvas-container').appendChild(renderer.domElement);
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x7ab4d4);
+scene.fog=new THREE.FogExp2(0x9ec2dc,0.002);
+const camera=new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,0.1,500);
+window.addEventListener('resize',()=>{renderer.setSize(window.innerWidth,window.innerHeight);camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();});
 
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x7ab4d4);
-scene.fog = new THREE.FogExp2(0x9ec2dc, 0.002); // <!-- PATCH: était 0.0032, réduit pour moins de calculs -->
+// ── LUMIÈRES ─────────────────────────────────────────────
+scene.add(new THREE.HemisphereLight(0x87CEEB,0xc8b89a,1.2));
+const sun=new THREE.DirectionalLight(0xfff5e0,2.2);sun.position.set(80,150,60);scene.add(sun);
+const fillLight=new THREE.DirectionalLight(0xc8d8f0,0.5);fillLight.position.set(-50,80,-80);scene.add(fillLight);
 
-const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 500);
-window.addEventListener('resize', ()=>{ renderer.setSize(window.innerWidth,window.innerHeight); camera.aspect=window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); });
-
-// ── LUMIÈRES — simplifiées ────────────────────────────────
-scene.add(new THREE.HemisphereLight(0x87CEEB, 0xc8b89a, 1.2));
-const sun = new THREE.DirectionalLight(0xfff5e0, 2.2);
-sun.position.set(80, 150, 60);
-// castShadow désactivé <!-- PATCH -->
-scene.add(sun);
-const fillLight = new THREE.DirectionalLight(0xc8d8f0, 0.5);
-fillLight.position.set(-50, 80, -80); scene.add(fillLight);
-
-// ── TEXTURES (inchangées) ────────────────────────────────
-function procTex(fn, size=256){
-  const cv=document.createElement('canvas'); cv.width=cv.height=size; const ctx=cv.getContext('2d');
-  fn(ctx,size); const t=new THREE.CanvasTexture(cv); t.wrapS=t.wrapT=THREE.RepeatWrapping; return t;
+// ── TEXTURES ─────────────────────────────────────────────
+function procTex(fn,size=256){
+  const cv=document.createElement('canvas');cv.width=cv.height=size;const ctx=cv.getContext('2d');
+  fn(ctx,size);const t=new THREE.CanvasTexture(cv);t.wrapS=t.wrapT=THREE.RepeatWrapping;return t;
 }
 const asphaltTex=procTex((ctx,s)=>{ctx.fillStyle='#282828';ctx.fillRect(0,0,s,s);for(let i=0;i<2500;i++){const g=20+Math.random()*25|0;ctx.fillStyle=`rgb(${g},${g},${g})`;ctx.fillRect(Math.random()*s|0,Math.random()*s|0,1+(Math.random()*1.5|0),1);}});
 asphaltTex.repeat.set(12,12);
@@ -297,150 +292,99 @@ waterTex.repeat.set(8,8);
 const sewerTex=procTex((ctx,s)=>{ctx.fillStyle='#1a2a10';ctx.fillRect(0,0,s,s);for(let i=0;i<3000;i++){const g=20+Math.random()*20|0;ctx.fillStyle=`rgb(${g},${g+10},${g-5})`;ctx.fillRect(Math.random()*s|0,Math.random()*s|0,1+(Math.random()*2|0),1);}ctx.strokeStyle='rgba(40,60,20,0.5)';ctx.lineWidth=2;for(let y=0;y<s;y+=16){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(s,y);ctx.stroke();}});
 sewerTex.repeat.set(6,6);
 function makeBrick(br='#c07050',mo='#8a7a70'){return procTex((ctx,s)=>{ctx.fillStyle=mo;ctx.fillRect(0,0,s,s);const BW=32,BH=16;for(let row=0;row*BH<s+BH;row++){const off=(row%2)*BW/2;for(let col=-1;col*BW<s+BW;col++){const rr=parseInt(br.slice(1,3),16)+(Math.random()*22-11|0);const rg=parseInt(br.slice(3,5),16)+(Math.random()*22-11|0);const rb2=parseInt(br.slice(5,7),16)+(Math.random()*14-7|0);ctx.fillStyle=`rgb(${Math.max(0,Math.min(255,rr))},${Math.max(0,Math.min(255,rg))},${Math.max(0,Math.min(255,rb2))})`;ctx.fillRect(col*BW+off+1,row*BH+1,BW-2,BH-2);}}},256);}
-const brickA=makeBrick('#b87060','#8a7a70'), brickB=makeBrick('#9a9090','#787070'), brickC=makeBrick('#c8b888','#a09070');
+const brickA=makeBrick('#b87060','#8a7a70'),brickB=makeBrick('#9a9090','#787070'),brickC=makeBrick('#c8b888','#a09070');
 const concBuild=procTex((ctx,s)=>{ctx.fillStyle='#b0a8a0';ctx.fillRect(0,0,s,s);for(let i=0;i<4000;i++){const v=Math.random()*15|0;ctx.fillStyle=`rgba(${155+v},${150+v},${143+v},0.5)`;ctx.fillRect(Math.random()*s|0,Math.random()*s|0,1+(Math.random()*2|0),1);}ctx.strokeStyle='rgba(95,90,83,0.2)';ctx.lineWidth=1;for(let y=0;y<s;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(s,y);ctx.stroke();}});
 const roofTex=procTex((ctx,s)=>{ctx.fillStyle='#3a3530';ctx.fillRect(0,0,s,s);for(let y=0;y<s;y+=8){ctx.fillStyle=y%16===0?'#2e2a26':'#3f3a34';ctx.fillRect(0,y,s,7);}});
-
-// <!-- PATCH: glassTex unique partagé, makeWin() appelé une seule fois -->
-const glassTex=procTex((ctx,s)=>{
-  ctx.fillStyle='#1a2a3a';ctx.fillRect(0,0,s,s);
-  const grad=ctx.createLinearGradient(0,0,s,s);
-  grad.addColorStop(0,'rgba(80,140,200,0.3)');grad.addColorStop(0.5,'rgba(100,180,240,0.15)');grad.addColorStop(1,'rgba(60,100,160,0.35)');
-  ctx.fillStyle=grad;ctx.fillRect(0,0,s,s);
-  const cols=5,rows=8;const pw=s/cols,ph=s/rows;
-  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
-    const lit=Math.random()<0.7;
-    ctx.fillStyle=lit?`rgba(${180+Math.random()*40|0},${210+Math.random()*30|0},${240+Math.random()*15|0},0.55)`:'rgba(10,20,40,0.8)';
-    ctx.fillRect(c*pw+1,r*ph+1,pw-2,ph-2);
-  }
-},256);
+const glassTex=procTex((ctx,s)=>{ctx.fillStyle='#1a2a3a';ctx.fillRect(0,0,s,s);const grad=ctx.createLinearGradient(0,0,s,s);grad.addColorStop(0,'rgba(80,140,200,0.3)');grad.addColorStop(0.5,'rgba(100,180,240,0.15)');grad.addColorStop(1,'rgba(60,100,160,0.35)');ctx.fillStyle=grad;ctx.fillRect(0,0,s,s);const cols=5,rows=8;const pw=s/cols,ph=s/rows;for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){const lit=Math.random()<0.7;ctx.fillStyle=lit?`rgba(${180+Math.random()*40|0},${210+Math.random()*30|0},${240+Math.random()*15|0},0.55)`:'rgba(10,20,40,0.8)';ctx.fillRect(c*pw+1,r*ph+1,pw-2,ph-2);}},256);
 glassTex.repeat.set(2,4);
-
-// Une seule texture de fenêtre partagée <!-- PATCH: était 3 instances winA/winB/winC -->
 const winTex=procTex((ctx,s)=>{ctx.fillStyle='#1a2535';ctx.fillRect(0,0,s,s);const cols=4,rows=5,pw=s/cols,ph=s/rows;for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){const lit=Math.random()<0.72;ctx.fillStyle=lit?['#c8d8e8','#d0dce8','#e8e0c0','#d8c8a8'][Math.floor(Math.random()*4)]:'#0d1520';ctx.fillRect(c*pw+2,r*ph+2,pw-4,ph-4);}},256);
-
 function makeSign(col,txt,sub){return procTex((ctx,s)=>{ctx.fillStyle=col;ctx.fillRect(0,0,s,s);ctx.fillStyle='rgba(255,255,255,0.88)';ctx.font=`bold ${s*0.26}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(txt,s/2,s*0.44);if(sub){ctx.fillStyle='rgba(255,255,255,0.52)';ctx.font=`bold ${s*0.11}px sans-serif`;ctx.fillText(sub,s/2,s*0.73);}ctx.strokeStyle='rgba(255,255,255,0.22)';ctx.lineWidth=3;ctx.strokeRect(4,4,s-8,s-8);},256);}
 const signTex=[makeSign('#c0392b','ラーメン','RAMEN'),makeSign('#2c7a3a','定食','TEISHOKU'),makeSign('#1a4a8a','居酒屋','IZAKAYA'),makeSign('#7a2c8a','美容院','SALON'),makeSign('#2a6a8a','コンビニ','KONBINI'),makeSign('#8a2a2a','銭湯','SENTO')];
-
-// <!-- PATCH: MeshLambertMaterial partout (pas MeshStandard) = moins de shader -->
-const matA   = new THREE.MeshLambertMaterial({map:asphaltTex, color:0x888888});
-const matCon = new THREE.MeshLambertMaterial({map:concreteTex, color:0x999999});
-const matGr  = new THREE.MeshLambertMaterial({map:grassTex, color:0xaaaaaa});
-const matRoof= new THREE.MeshLambertMaterial({map:roofTex});
-const barkMat= new THREE.MeshLambertMaterial({color:0x4a3820});
-const sewerMat=new THREE.MeshLambertMaterial({map:sewerTex, color:0x556644, side:THREE.DoubleSide});
-const bArr   = [
-  new THREE.MeshLambertMaterial({map:brickA}),
-  new THREE.MeshLambertMaterial({map:brickB}),
-  new THREE.MeshLambertMaterial({map:brickC})
-];
+const matA=new THREE.MeshLambertMaterial({map:asphaltTex,color:0x888888});
+const matCon=new THREE.MeshLambertMaterial({map:concreteTex,color:0x999999});
+const matGr=new THREE.MeshLambertMaterial({map:grassTex,color:0xaaaaaa});
+const matRoof=new THREE.MeshLambertMaterial({map:roofTex});
+const barkMat=new THREE.MeshLambertMaterial({color:0x4a3820});
+const sewerMat=new THREE.MeshLambertMaterial({map:sewerTex,color:0x556644,side:THREE.DoubleSide});
+const bArr=[new THREE.MeshLambertMaterial({map:brickA}),new THREE.MeshLambertMaterial({map:brickB}),new THREE.MeshLambertMaterial({map:brickC})];
 
 // ── COLLIDERS ────────────────────────────────────────────
-const colliders = [];
-function addCol(cx,cz,hw,hd,mH=200){ colliders.push({minX:cx-hw,maxX:cx+hw,minZ:cz-hd,maxZ:cz+hd,mH}); }
-const PR = 0.55;
+const colliders=[];
+function addCol(cx,cz,hw,hd,mH=200){colliders.push({minX:cx-hw,maxX:cx+hw,minZ:cz-hd,maxZ:cz+hd,mH});}
+const PR=0.55;
 function resCol(nx,nz,py){
   for(const c of colliders){
-    if(py>=c.mH) continue;
-    const px=Math.max(c.minX,Math.min(c.maxX,nx)), pz=Math.max(c.minZ,Math.min(c.maxZ,nz));
-    const dx=nx-px, dz=nz-pz, d=Math.sqrt(dx*dx+dz*dz);
-    if(d<PR){ if(d<0.001){nx+=PR;}else{const p=PR-d;nx+=(dx/d)*p;nz+=(dz/d)*p;} }
+    if(py>=c.mH)continue;
+    const px=Math.max(c.minX,Math.min(c.maxX,nx)),pz=Math.max(c.minZ,Math.min(c.maxZ,nz));
+    const dx=nx-px,dz=nz-pz,d=Math.sqrt(dx*dx+dz*dz);
+    if(d<PR){if(d<0.001){nx+=PR;}else{const p=PR-d;nx+=(dx/d)*p;nz+=(dz/d)*p;}}
   }
-  return {x:nx,z:nz};
+  return{x:nx,z:nz};
 }
 
 // ── MONDE ────────────────────────────────────────────────
-const WORLD = 200;
-const gnd = new THREE.Mesh(new THREE.PlaneGeometry(500,500), matA);
-gnd.rotation.x = -Math.PI/2; scene.add(gnd);
-
-const waterMat = new THREE.MeshLambertMaterial({map:waterTex, transparent:true, opacity:0.82, color:0x1a5a80}); // <!-- PATCH: Lambert -->
+const WORLD=200;
+const gnd=new THREE.Mesh(new THREE.PlaneGeometry(500,500),matA);gnd.rotation.x=-Math.PI/2;scene.add(gnd);
+const waterMat=new THREE.MeshLambertMaterial({map:waterTex,transparent:true,opacity:0.82,color:0x1a5a80});
 waterTex.repeat.set(10,10);
-const sea = new THREE.Mesh(new THREE.PlaneGeometry(240,500), waterMat);
-sea.rotation.x=-Math.PI/2; sea.position.set(220,-.15,0); scene.add(sea);
-
-const quaiMat = new THREE.MeshLambertMaterial({map:concreteTex, color:0x888880});
-const quai = new THREE.Mesh(new THREE.BoxGeometry(30,1,80), quaiMat);
-quai.position.set(120,.5,-30); scene.add(quai); addCol(120,-30,15,40,1.5);
-
-const park = new THREE.Mesh(new THREE.PlaneGeometry(60,60), matGr);
-park.rotation.x=-Math.PI/2; park.position.set(0,0.01,0); scene.add(park);
-[[-110,-110],[110,-110],[-110,110],[110,110]].forEach(p=>{
-  const pk=new THREE.Mesh(new THREE.PlaneGeometry(40,40),matGr); pk.rotation.x=-Math.PI/2; pk.position.set(p[0],0.01,p[1]); scene.add(pk);
-});
-
-function sw(x,z,w,d){ const s=new THREE.Mesh(new THREE.BoxGeometry(w,0.1,d),matCon); s.position.set(x,0.05,z); scene.add(s); }
-sw(0,0,300,9); sw(0,0,9,300);
+const sea=new THREE.Mesh(new THREE.PlaneGeometry(240,500),waterMat);sea.rotation.x=-Math.PI/2;sea.position.set(220,-.15,0);scene.add(sea);
+const quaiMat=new THREE.MeshLambertMaterial({map:concreteTex,color:0x888880});
+const quai=new THREE.Mesh(new THREE.BoxGeometry(30,1,80),quaiMat);quai.position.set(120,.5,-30);scene.add(quai);addCol(120,-30,15,40,1.5);
+const park=new THREE.Mesh(new THREE.PlaneGeometry(60,60),matGr);park.rotation.x=-Math.PI/2;park.position.set(0,0.01,0);scene.add(park);
+[[-110,-110],[110,-110],[-110,110],[110,110]].forEach(p=>{const pk=new THREE.Mesh(new THREE.PlaneGeometry(40,40),matGr);pk.rotation.x=-Math.PI/2;pk.position.set(p[0],0.01,p[1]);scene.add(pk);});
+function sw(x,z,w,d){const s=new THREE.Mesh(new THREE.BoxGeometry(w,0.1,d),matCon);s.position.set(x,0.05,z);scene.add(s);}
+sw(0,0,300,9);sw(0,0,9,300);
 [-50,-25,25,50,-75,75,-100,100,-125,125].forEach(z=>sw(0,z,300,6));
 [-50,-25,25,50,-75,75,-100,100,-125,125].forEach(x=>sw(x,0,6,300));
 sw(120,-30,6,80);
 const lm=new THREE.MeshBasicMaterial({color:0xddddcc});
 for(let i=-140;i<140;i+=14){
-  const l=new THREE.Mesh(new THREE.PlaneGeometry(0.22,5.5),lm); l.rotation.x=-Math.PI/2; l.position.set(0,0.025,i); scene.add(l);
-  const l2=new THREE.Mesh(new THREE.PlaneGeometry(5.5,0.22),lm); l2.rotation.x=-Math.PI/2; l2.position.set(i,0.025,0); scene.add(l2);
+  const l=new THREE.Mesh(new THREE.PlaneGeometry(0.22,5.5),lm);l.rotation.x=-Math.PI/2;l.position.set(0,0.025,i);scene.add(l);
+  const l2=new THREE.Mesh(new THREE.PlaneGeometry(5.5,0.22),lm);l2.rotation.x=-Math.PI/2;l2.position.set(i,0.025,0);scene.add(l2);
 }
 
-// ── VOITURES PROCÉDURALES ────────────────────────────────
-// <!-- PATCH: MeshLambertMaterial, moins de géométrie, pas d'essieus -->
-const cwM = new THREE.MeshLambertMaterial({color:0x151515});
-const crM = new THREE.MeshLambertMaterial({color:0x888890});
-const carPaint = [0x2a3040,0x1a1a20,0x3a2010,0x0a2040,0x302010,0x1a3020,0xcc2222,0x1155aa,0xffcc00,0x22aa44];
-
+// ── VOITURES ─────────────────────────────────────────────
+const cwM=new THREE.MeshLambertMaterial({color:0x151515});
+const carPaint=[0x2a3040,0x1a1a20,0x3a2010,0x0a2040,0x302010,0x1a3020,0xcc2222,0x1155aa,0xffcc00,0x22aa44];
 function makeCar(colorHex){
-  const g = new THREE.Group();
-  const pM = new THREE.MeshLambertMaterial({color:colorHex});
-  const body = new THREE.Mesh(new THREE.BoxGeometry(1.9,0.65,4.3), pM); body.position.y=0.48; g.add(body);
-  const top  = new THREE.Mesh(new THREE.BoxGeometry(1.6,0.52,2.4), pM); top.position.y=0.97; g.add(top);
-  // Roues simplifiées
-  [[0.92,0.34,1.4],[-0.92,0.34,1.4],[0.92,0.34,-1.4],[-0.92,0.34,-1.4]].forEach(w=>{
-    const wh=new THREE.Mesh(new THREE.CylinderGeometry(0.32,0.32,0.22,8),cwM); wh.rotation.z=Math.PI/2; wh.position.set(w[0],w[1],w[2]); g.add(wh);
-  });
+  const g=new THREE.Group();const pM=new THREE.MeshLambertMaterial({color:colorHex});
+  const body=new THREE.Mesh(new THREE.BoxGeometry(1.9,0.65,4.3),pM);body.position.y=0.48;g.add(body);
+  const top=new THREE.Mesh(new THREE.BoxGeometry(1.6,0.52,2.4),pM);top.position.y=0.97;g.add(top);
+  [[0.92,0.34,1.4],[-0.92,0.34,1.4],[0.92,0.34,-1.4],[-0.92,0.34,-1.4]].forEach(w=>{const wh=new THREE.Mesh(new THREE.CylinderGeometry(0.32,0.32,0.22,8),cwM);wh.rotation.z=Math.PI/2;wh.position.set(w[0],w[1],w[2]);g.add(wh);});
   return g;
 }
-
 const CAR_ROUTES=[
-  {axis:'x',fixedZ:-4,  min:-150,max:150, dir:1,  speed:14, paint:0x2a3040},
-  {axis:'x',fixedZ:-4,  min:-150,max:150, dir:1,  speed:11, paint:0xcc2222},
-  {axis:'x',fixedZ:4,   min:150, max:-150,dir:-1, speed:13, paint:0x1a3020},
-  {axis:'x',fixedZ:4,   min:150, max:-150,dir:-1, speed:10, paint:0x0a2040},
-  {axis:'x',fixedZ:-54, min:-150,max:150, dir:1,  speed:12, paint:0x104a30},
-  {axis:'x',fixedZ:54,  min:150, max:-150,dir:-1, speed:11, paint:0x3a2010},
-  {axis:'z',fixedX:-4,  min:-150,max:150, dir:1,  speed:12, paint:0x302010},
-  {axis:'z',fixedX:4,   min:150, max:-150,dir:-1, speed:14, paint:0x8a1a1a},
-  {axis:'z',fixedX:-54, min:-150,max:150, dir:1,  speed:11, paint:0x2a3040},
-  {axis:'z',fixedX:54,  min:150, max:-150,dir:-1, speed:12, paint:0x22aa44},
-  {axis:'x',fixedZ:-28, min:-100,max:100, dir:1,  speed:10, paint:0xffcc00},
-  {axis:'z',fixedX:28,  min:100, max:-100,dir:-1, speed:11, paint:0x333344},
+  {axis:'x',fixedZ:-4,  min:-150,max:150, dir:1, speed:14,paint:0x2a3040},
+  {axis:'x',fixedZ:-4,  min:-150,max:150, dir:1, speed:11,paint:0xcc2222},
+  {axis:'x',fixedZ:4,   min:150, max:-150,dir:-1,speed:13,paint:0x1a3020},
+  {axis:'x',fixedZ:4,   min:150, max:-150,dir:-1,speed:10,paint:0x0a2040},
+  {axis:'x',fixedZ:-54, min:-150,max:150, dir:1, speed:12,paint:0x104a30},
+  {axis:'x',fixedZ:54,  min:150, max:-150,dir:-1,speed:11,paint:0x3a2010},
+  {axis:'z',fixedX:-4,  min:-150,max:150, dir:1, speed:12,paint:0x302010},
+  {axis:'z',fixedX:4,   min:150, max:-150,dir:-1,speed:14,paint:0x8a1a1a},
+  {axis:'z',fixedX:-54, min:-150,max:150, dir:1, speed:11,paint:0x2a3040},
+  {axis:'z',fixedX:54,  min:150, max:-150,dir:-1,speed:12,paint:0x22aa44},
+  {axis:'x',fixedZ:-28, min:-100,max:100, dir:1, speed:10,paint:0xffcc00},
+  {axis:'z',fixedX:28,  min:100, max:-100,dir:-1,speed:11,paint:0x333344},
 ];
-const drivingCars = [];
+const drivingCars=[];
 CAR_ROUTES.forEach((route,i)=>{
-  const car = makeCar(route.paint); scene.add(car);
-  const range = Math.abs(route.max-route.min);
-  const offset = (i*37)%range;
-  const laneOff = 2.3;
-  let sx,sz,rot;
-  if(route.axis==='x'){
-    sx=route.min+offset*(route.dir>0?1:-1);
-    sz=route.fixedZ+(route.dir>0?-laneOff:laneOff);
-    rot=route.dir>0?Math.PI/2:-Math.PI/2;
-  } else {
-    sx=route.fixedX+(route.dir>0?laneOff:-laneOff);
-    sz=route.min+offset*(route.dir>0?1:-1);
-    rot=route.dir>0?0:Math.PI;
-  }
-  car.position.set(sx,0,sz); car.rotation.y=rot;
-  drivingCars.push({mesh:car, route});
+  const car=makeCar(route.paint);scene.add(car);
+  const range=Math.abs(route.max-route.min);const offset=(i*37)%range;
+  const laneOff=2.3;let sx,sz,rot;
+  if(route.axis==='x'){sx=route.min+offset*(route.dir>0?1:-1);sz=route.fixedZ+(route.dir>0?-laneOff:laneOff);rot=route.dir>0?Math.PI/2:-Math.PI/2;}
+  else{sx=route.fixedX+(route.dir>0?laneOff:-laneOff);sz=route.min+offset*(route.dir>0?1:-1);rot=route.dir>0?0:Math.PI;}
+  car.position.set(sx,0,sz);car.rotation.y=rot;
+  drivingCars.push({mesh:car,route});
 });
 function updateCars(dt){
   drivingCars.forEach(dc=>{
-    const r=dc.route;
-    const lo=r.axis==='x'?dc.mesh.position.x:dc.mesh.position.z;
+    const r=dc.route;const lo=r.axis==='x'?dc.mesh.position.x:dc.mesh.position.z;
     let nlo=lo+r.dir*r.speed*dt;
-    if(r.dir>0&&nlo>r.max) nlo=r.min;
-    if(r.dir<0&&nlo<r.max) nlo=r.min;
+    if(r.dir>0&&nlo>r.max)nlo=r.min;if(r.dir<0&&nlo<r.max)nlo=r.min;
     const laneOff=2.3;
-    if(r.axis==='x'){ dc.mesh.position.x=nlo; dc.mesh.position.z=r.fixedZ+(r.dir>0?-laneOff:laneOff); }
-    else{ dc.mesh.position.z=nlo; dc.mesh.position.x=r.fixedX+(r.dir>0?laneOff:-laneOff); }
+    if(r.axis==='x'){dc.mesh.position.x=nlo;dc.mesh.position.z=r.fixedZ+(r.dir>0?-laneOff:laneOff);}
+    else{dc.mesh.position.z=nlo;dc.mesh.position.x=r.fixedX+(r.dir>0?laneOff:-laneOff);}
   });
 }
 
@@ -448,667 +392,707 @@ function updateCars(dt){
 (()=>{
   const sm=new THREE.MeshLambertMaterial({color:0x8a8278});
   const wm=new THREE.MeshLambertMaterial({color:0x4488aa,transparent:true,opacity:0.75});
-  const b=new THREE.Mesh(new THREE.CylinderGeometry(4.5,5,0.8,16),sm); b.position.set(0,0.4,0); scene.add(b);
-  const w=new THREE.Mesh(new THREE.CylinderGeometry(4,4,0.1,16),wm); w.position.set(0,0.85,0); scene.add(w);
-  const c=new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.28,3.5,8),sm); c.position.set(0,2.55,0); scene.add(c);
+  const b=new THREE.Mesh(new THREE.CylinderGeometry(4.5,5,0.8,16),sm);b.position.set(0,0.4,0);scene.add(b);
+  const w=new THREE.Mesh(new THREE.CylinderGeometry(4,4,0.1,16),wm);w.position.set(0,0.85,0);scene.add(w);
+  const c=new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.28,3.5,8),sm);c.position.set(0,2.55,0);scene.add(c);
   addCol(0,0,5,5,5);
 })();
 
 // ── BÂTIMENTS ────────────────────────────────────────────
-// <!-- PATCH: MeshLambertMaterial, une fenêtre par façade seulement, pas d'essieus/rivets -->
+// Liste des meshes clignotants (antennes) pour les mettre à jour proprement
+const blinkMeshes=[];
+
 function glassTower(x,z,w,h,d){
-  const mat=new THREE.MeshLambertMaterial({map:glassTex, color:0xaaddff, transparent:true, opacity:0.9});
-  const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat); b.position.set(x,h/2,z); scene.add(b);
+  const mat=new THREE.MeshLambertMaterial({map:glassTex,color:0xaaddff,transparent:true,opacity:0.9});
+  const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);b.position.set(x,h/2,z);scene.add(b);
   const antM=new THREE.MeshLambertMaterial({color:0x5a6070});
-  const ant=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.1,h*0.18,6),antM); ant.position.set(x,h+h*0.09,z); scene.add(ant);
-  const blink=new THREE.Mesh(new THREE.SphereGeometry(0.18,6,4),new THREE.MeshLambertMaterial({color:0xff0000,emissive:new THREE.Color(0xff0000),emissiveIntensity:0.8}));
-  blink.position.set(x,h+h*0.19,z); scene.add(blink); blink.userData.blink=true; blink.userData.t=Math.random()*6.28;
+  const ant=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.1,h*0.18,6),antM);ant.position.set(x,h+h*0.09,z);scene.add(ant);
+  // Lumière clignotante rouge (pas blanc)
+  const blinkMat=new THREE.MeshLambertMaterial({color:0xff2200,emissive:new THREE.Color(0xff0000),emissiveIntensity:0.8});
+  const blink=new THREE.Mesh(new THREE.SphereGeometry(0.18,6,4),blinkMat);
+  blink.position.set(x,h+h*0.19,z);scene.add(blink);
+  blinkMeshes.push({mesh:blink,t:Math.random()*6.28});
   addCol(x,z,w/2+0.15,d/2+0.15);
 }
 function building(x,z,w,h,d,style=0){
-  const wM = style===0 ? bArr[Math.abs(x+z)%3] : new THREE.MeshLambertMaterial({map:concBuild,color:style===1?0xccc8c0:0xbec0c4});
-  const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),wM); b.position.set(x,h/2,z); scene.add(b);
-  const rM=new THREE.Mesh(new THREE.BoxGeometry(w+0.2,0.5,d+0.2),matRoof); rM.position.set(x,h+0.25,z); scene.add(rM);
-  // Une seule face de fenêtres (façade avant) <!-- PATCH: était toutes les faces -->
-  const wm=new THREE.MeshLambertMaterial({map:winTex, color:0xaaccee});
-  const wf=new THREE.Mesh(new THREE.PlaneGeometry(w*0.85,h*0.8),wm); wf.position.set(x,h*0.45,z+d/2+0.05); scene.add(wf);
+  const wM=style===0?bArr[Math.abs(x+z)%3]:new THREE.MeshLambertMaterial({map:concBuild,color:style===1?0xccc8c0:0xbec0c4});
+  const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),wM);b.position.set(x,h/2,z);scene.add(b);
+  const rM=new THREE.Mesh(new THREE.BoxGeometry(w+0.2,0.5,d+0.2),matRoof);rM.position.set(x,h+0.25,z);scene.add(rM);
+  const wm=new THREE.MeshLambertMaterial({map:winTex,color:0xaaccee});
+  const wf=new THREE.Mesh(new THREE.PlaneGeometry(w*0.85,h*0.8),wm);wf.position.set(x,h*0.45,z+d/2+0.05);scene.add(wf);
   const sM=new THREE.MeshLambertMaterial({map:signTex[Math.abs(Math.round(x*z))%signTex.length]});
-  const sw2=Math.min(w*0.55,5); const sh=sw2*1.4;
-  const sign=new THREE.Mesh(new THREE.BoxGeometry(sw2,sh,0.12),sM); sign.position.set(x,h*0.3,z+d/2+0.08); scene.add(sign);
+  const sw2=Math.min(w*0.55,5);const sh=sw2*1.4;
+  const sign=new THREE.Mesh(new THREE.BoxGeometry(sw2,sh,0.12),sM);sign.position.set(x,h*0.3,z+d/2+0.08);scene.add(sign);
   addCol(x,z,w/2+0.15,d/2+0.15);
 }
-
-glassTower(32,-32,12,90,12); glassTower(50,-20,14,110,13); glassTower(32,-55,10,70,10);
-glassTower(-32,-32,13,95,13); glassTower(-50,-20,11,80,11); glassTower(-32,-55,10,68,10);
-glassTower(60,-55,11,75,11); glassTower(-60,-55,10,72,10);
-glassTower(44,-42,9,55,9); glassTower(-44,-42,9,58,9);
-glassTower(95,-20,13,85,12); glassTower(95,-50,11,65,11);
-
-building(32,-72,9,35,9,0); building(50,-38,10,50,10,1); building(18,-48,8,28,8,1);
-building(62,-28,9,32,9,2); building(62,-50,11,40,11,0);
-building(-18,-48,8,24,8,1); building(-62,-28,9,28,9,0); building(-62,-50,11,36,11,1);
-building(32,32,9,24,9,2); building(46,24,11,34,11,0); building(32,48,10,22,10,1);
-building(-32,32,10,28,10,0); building(-46,24,9,24,9,1); building(-32,48,9,26,9,2);
-building(80,-30,14,55,13,1); building(80,-80,14,38,14,2);
-building(-80,-30,13,55,13,2); building(-100,-20,11,72,11,0); building(-80,-80,13,36,13,0);
-building(80,30,12,42,12,0); building(80,80,13,32,13,1);
-building(-80,30,11,38,11,1); building(-80,80,12,30,12,2);
-building(30,-90,10,32,10,0); building(-30,-90,10,28,10,1);
-building(30,90,10,36,10,2); building(-30,90,10,32,10,0);
-
+glassTower(32,-32,12,90,12);glassTower(50,-20,14,110,13);glassTower(32,-55,10,70,10);
+glassTower(-32,-32,13,95,13);glassTower(-50,-20,11,80,11);glassTower(-32,-55,10,68,10);
+glassTower(60,-55,11,75,11);glassTower(-60,-55,10,72,10);
+glassTower(44,-42,9,55,9);glassTower(-44,-42,9,58,9);
+glassTower(95,-20,13,85,12);glassTower(95,-50,11,65,11);
+building(32,-72,9,35,9,0);building(50,-38,10,50,10,1);building(18,-48,8,28,8,1);
+building(62,-28,9,32,9,2);building(62,-50,11,40,11,0);
+building(-18,-48,8,24,8,1);building(-62,-28,9,28,9,0);building(-62,-50,11,36,11,1);
+building(32,32,9,24,9,2);building(46,24,11,34,11,0);building(32,48,10,22,10,1);
+building(-32,32,10,28,10,0);building(-46,24,9,24,9,1);building(-32,48,9,26,9,2);
+building(80,-30,14,55,13,1);building(80,-80,14,38,14,2);
+building(-80,-30,13,55,13,2);building(-100,-20,11,72,11,0);building(-80,-80,13,36,13,0);
+building(80,30,12,42,12,0);building(80,80,13,32,13,1);
+building(-80,30,11,38,11,1);building(-80,80,12,30,12,2);
+building(30,-90,10,32,10,0);building(-30,-90,10,28,10,1);
+building(30,90,10,36,10,2);building(-30,90,10,32,10,0);
 // Hôpital
 (()=>{
   const hM=new THREE.MeshLambertMaterial({color:0xeeeae0});
-  const b=new THREE.Mesh(new THREE.BoxGeometry(18,28,16),hM); b.position.set(-68,14,15); scene.add(b);
+  const b=new THREE.Mesh(new THREE.BoxGeometry(18,28,16),hM);b.position.set(-68,14,15);scene.add(b);
   const cM=new THREE.MeshLambertMaterial({color:0xcc1111,emissive:new THREE.Color(0x110000),emissiveIntensity:0.3});
   [new THREE.BoxGeometry(2.2,6,0.25),new THREE.BoxGeometry(6.5,2.2,0.25)].forEach(g=>{const m=new THREE.Mesh(g,cM);m.position.set(-68,19,23.1);scene.add(m);});
   addCol(-68,15,9.1,8.1);
 })();
 
 // ── GLB TOUR EIFFEL ───────────────────────────────────────
-function loadSceneGLB(file, px, py, pz, targetHeight, rotY, onLoaded){
-  gltfLoader.load(BASE+file, gltf=>{
+// FIXE : forcer emissive=black sur tous les meshes du GLB pour éviter le clignotement blanc
+function loadSceneGLB(file,px,py,pz,targetHeight,rotY,onLoaded){
+  gltfLoader.load(BASE+file,gltf=>{
     const model=gltf.scene;
     model.traverse(n=>{
       if(n.isMesh){
-        n.castShadow=false; n.receiveShadow=false; // <!-- PATCH: pas d'ombres -->
-        n.frustumCulled=true;
-        // Convertir en Lambert si le matériau est Standard <!-- PATCH perf -->
-        if(n.material && n.material.isMeshStandardMaterial){
+        n.castShadow=false;n.receiveShadow=false;n.frustumCulled=true;
+        if(n.material&&n.material.isMeshStandardMaterial){
           const old=n.material;
           n.material=new THREE.MeshLambertMaterial({
-            color:old.color, map:old.map||null,
-            transparent:old.transparent, opacity:old.opacity
+            color:old.color,map:old.map||null,
+            transparent:old.transparent,opacity:old.opacity
+            // PAS d'emissive transmise — évite le clignotement blanc
           });
+        }else if(n.material){
+          // Forcer emissive à zéro pour tout matériau existant
+          if(n.material.emissive) n.material.emissive.set(0,0,0);
+          if(n.material.emissiveIntensity!==undefined) n.material.emissiveIntensity=0;
         }
       }
     });
-    if(targetHeight&&targetHeight>0){
-      _box.setFromObject(model); _box.getSize(_sz);
-      if(_sz.y>0) model.scale.setScalar(targetHeight/_sz.y);
-    }
-    _box.setFromObject(model);
-    model.position.set(px, py-_box.min.y, pz);
-    if(rotY) model.rotation.y=rotY;
+    if(targetHeight&&targetHeight>0){_box.setFromObject(model);_box.getSize(_sz);if(_sz.y>0)model.scale.setScalar(targetHeight/_sz.y);}
+    _box.setFromObject(model);model.position.set(px,py-_box.min.y,pz);
+    if(rotY)model.rotation.y=rotY;
     scene.add(model);
-    if(onLoaded) onLoaded(model);
-  }, undefined, err=>console.warn('GLB load error:',file,err));
+    if(onLoaded)onLoaded(model);
+  },undefined,err=>console.warn('GLB load error:',file,err));
 }
 
-// Tour Eiffel seulement — city GLB supprimés <!-- PATCH: city.glb, city1.glb, city3.glb retirés -->
-loadSceneGLB('tour_eiffel_eiffel_tower.glb', 0, 0, -200, 330, 0, ()=>{
-  addCol(0,-200,28,28,0.5); addCol(0,-200,15,15,55);
-  addCol(0,-200,6,6,115);   addCol(0,-200,3,3,245);
+// Tour Eiffel à Z=-200, hauteur 330
+// Les 3 étages sont à Y≈55 (étage 1), Y≈110 (étage 2), Y≈165 (étage 3/sommet)
+// On crée des escaliers hélicoïdaux + plateformes pour chaque étage
+const EX=0,EZ=-200; // position Tour Eiffel
+const EiffelFloors=[
+  {y:55,  label:'🗼 Étage 1 (55m)', r:18},
+  {y:110, label:'🗼 Étage 2 (110m)',r:8},
+  {y:165, label:'🗼 Sommet (165m)', r:3},
+];
+
+loadSceneGLB('tour_eiffel_eiffel_tower.glb',EX,0,EZ,330,0,()=>{
+  addCol(EX,EZ,28,28,0.5);
+  addCol(EX,EZ,14,14,55);
+  addCol(EX,EZ,5,5,110);
+  addCol(EX,EZ,2.5,2.5,165);
 });
 
-// Statue de la Liberté
-loadSceneGLB('statue_of_liberty.glb', 185, 0, -70, 93, Math.PI, ()=>{
-  addCol(185,-70,10,10,93);
+// Escaliers Tour Eiffel — 3 étages montant en spirale
+(()=>{
+  const stepMat=new THREE.MeshLambertMaterial({color:0x7a7040});
+  // Escalier extérieur Est de la tour (rayon ~20 au sol, converge vers le centre)
+  // 3 spirales pour les 3 étages
+  const spirals=[
+    {yStart:0,  yEnd:55,  rStart:20, rEnd:14, steps:28, stX: EX+20, stZ: EZ},
+    {yStart:55, yEnd:110, rStart:14, rEnd:6,  steps:22, stX: EX,    stZ: EZ+14},
+    {yStart:110,yEnd:165, rStart:6,  rEnd:2,  steps:18, stX: EX-6,  stZ: EZ},
+  ];
+  spirals.forEach((sp,si)=>{
+    for(let i=0;i<sp.steps;i++){
+      const t=i/sp.steps;
+      const angle=t*Math.PI*2*(si%2===0?1:-1) + si*Math.PI*0.5;
+      const r=sp.rStart+(sp.rEnd-sp.rStart)*t;
+      const y=sp.yStart+(sp.yEnd-sp.yStart)*t;
+      const sx=EX+Math.cos(angle)*r;
+      const sz=EZ+Math.sin(angle)*r;
+      const step=new THREE.Mesh(new THREE.BoxGeometry(1.8,0.3,1.8),stepMat);
+      step.position.set(sx,y,sz);
+      scene.add(step);
+    }
+  });
+// Plateformes aux 3 étages
+  const platMat=new THREE.MeshLambertMaterial({color:0x5a5030});
+  EiffelFloors.forEach(fl=>{
+    // Plateforme annulaire (simulée avec 8 dalles)
+    for(let i=0;i<8;i++){
+      const ang=i/8*Math.PI*2;
+      const pr=fl.r+2;
+      const plat=new THREE.Mesh(new THREE.BoxGeometry(3,0.25,3),platMat);
+      plat.position.set(EX+Math.cos(ang)*pr,fl.y,EZ+Math.sin(ang)*pr);
+      scene.add(plat);
+    }
+    // Sol central de la plateforme
+    const floor=new THREE.Mesh(new THREE.CylinderGeometry(fl.r+4,fl.r+4,0.25,12),platMat);
+    floor.position.set(EX,fl.y,EZ);scene.add(floor);
+    // Rambarde (ring)
+    const railMat=new THREE.MeshLambertMaterial({color:0x8a8a60});
+    for(let i=0;i<16;i++){const ang=i/16*Math.PI*2;const bar=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,1.2,5),railMat);bar.position.set(EX+Math.cos(ang)*(fl.r+4.2),fl.y+0.6,EZ+Math.sin(ang)*(fl.r+4.2));scene.add(bar);}
+  });
+})();
+
+// Statue de la Liberté à x=185, z=-70, hauteur=93
+const SLX=185,SLZ=-70,SL_TOP=93;
+loadSceneGLB('statue_of_liberty.glb',SLX,0,SLZ,93,Math.PI,()=>{
+  addCol(SLX,SLZ,10,10,93);
 });
+
+// Escalier + plateforme sommet Statue de la Liberté
+(()=>{
+  const stepMat=new THREE.MeshLambertMaterial({color:0x5a8a50});
+  const steps=32;
+  for(let i=0;i<steps;i++){
+    const t=i/steps;
+    const angle=t*Math.PI*4; // 2 tours
+    const r=9-t*6; // rétrécit de 9 à 3
+    const y=t*(SL_TOP-5);
+    const sx=SLX+Math.cos(angle)*r;
+    const sz=SLZ+Math.sin(angle)*r;
+    const step=new THREE.Mesh(new THREE.BoxGeometry(1.6,0.3,1.6),stepMat);
+    step.position.set(sx,y,sz);scene.add(step);
+  }
+  // Plateforme au sommet (couronne)
+  const platMat=new THREE.MeshLambertMaterial({color:0x4a7a44});
+  const plat=new THREE.Mesh(new THREE.CylinderGeometry(4,4,0.4,10),platMat);
+  plat.position.set(SLX,SL_TOP-4,SLZ);scene.add(plat);
+  // Rambarde
+  const railMat=new THREE.MeshLambertMaterial({color:0x3a5a38});
+  for(let i=0;i<10;i++){
+    const ang=i/10*Math.PI*2;
+    const bar=new THREE.Mesh(new THREE.CylinderGeometry(0.08,0.08,1.4,5),railMat);
+    bar.position.set(SLX+Math.cos(ang)*4.2,SL_TOP-3.3,SLZ+Math.sin(ang)*4.2);scene.add(bar);
+  }
+})();
 
 // ── MÉTRO AÉRIEN ──────────────────────────────────────────
-const METRO_ELEV = 18;
+const METRO_ELEV=18;
 const METRO_STATIONS=[
-  {id:'shinjuku',  name:'🏙 Shinjuku',   x:-60, z:-30, label:'東京 Shinjuku'},
-  {id:'akihabara', name:'⚡ Akihabara',  x: 60, z:-30, label:'東京 Akihabara'},
-  {id:'shibuya',   name:'🌸 Shibuya',    x: 60, z: 60, label:'東京 Shibuya'},
-  {id:'asakusa',   name:'⛩ Asakusa',    x:-60, z: 60, label:'東京 Asakusa'},
-  {id:'port',      name:'⚓ Port',       x:110, z:-40, label:'Port de Tokyo'},
+  {id:'shinjuku',  name:'🏙 Shinjuku',  x:-60,z:-30,label:'東京 Shinjuku'},
+  {id:'akihabara', name:'⚡ Akihabara', x: 60,z:-30,label:'東京 Akihabara'},
+  {id:'shibuya',   name:'🌸 Shibuya',   x: 60,z: 60,label:'東京 Shibuya'},
+  {id:'asakusa',   name:'⛩ Asakusa',   x:-60,z: 60,label:'東京 Asakusa'},
+  {id:'port',      name:'⚓ Port',      x:110,z:-40,label:'Port de Tokyo'},
 ];
 const METRO_TRACK=[{x:-60,z:-30},{x:60,z:-30},{x:60,z:60},{x:-60,z:60},{x:-60,z:-30}];
-
-const deckMat = new THREE.MeshLambertMaterial({color:0x555560});
-const pilMat  = new THREE.MeshLambertMaterial({color:0x666676});
+const deckMat=new THREE.MeshLambertMaterial({color:0x555560});
+const pilMat=new THREE.MeshLambertMaterial({color:0x666676});
 for(let i=0;i<METRO_TRACK.length-1;i++){
-  const a=METRO_TRACK[i], b=METRO_TRACK[i+1];
-  const dx=b.x-a.x, dz=b.z-a.z; const len=Math.sqrt(dx*dx+dz*dz);
-  const cx=(a.x+b.x)/2, cz=(a.z+b.z)/2; const ang=Math.atan2(dx,dz);
-  const deck=new THREE.Mesh(new THREE.BoxGeometry(3.5,0.4,len),deckMat);
-  deck.position.set(cx,METRO_ELEV,cz); deck.rotation.y=ang; scene.add(deck);
+  const a=METRO_TRACK[i],b=METRO_TRACK[i+1];
+  const dx=b.x-a.x,dz=b.z-a.z;const len=Math.sqrt(dx*dx+dz*dz);
+  const cx=(a.x+b.x)/2,cz=(a.z+b.z)/2;const ang=Math.atan2(dx,dz);
+  const deck=new THREE.Mesh(new THREE.BoxGeometry(3.5,0.4,len),deckMat);deck.position.set(cx,METRO_ELEV,cz);deck.rotation.y=ang;scene.add(deck);
   const nb=Math.floor(len/15);
   for(let k=1;k<nb;k++){
-    const t=k/nb; const px=a.x+dx*t, pz=a.z+dz*t;
-    const pil=new THREE.Mesh(new THREE.CylinderGeometry(0.4,0.55,METRO_ELEV,8),pilMat);
-    pil.position.set(px,METRO_ELEV/2,pz); scene.add(pil); addCol(px,pz,0.65,0.65,METRO_ELEV+0.5);
+    const t=k/nb;const px=a.x+dx*t,pz=a.z+dz*t;
+    const pil=new THREE.Mesh(new THREE.CylinderGeometry(0.4,0.55,METRO_ELEV,8),pilMat);pil.position.set(px,METRO_ELEV/2,pz);scene.add(pil);addCol(px,pz,0.65,0.65,METRO_ELEV+0.5);
   }
 }
 const statMat=new THREE.MeshLambertMaterial({color:0x3a3a5a});
 METRO_STATIONS.forEach(st=>{
-  const q=new THREE.Mesh(new THREE.BoxGeometry(12,0.5,5),statMat);
-  q.position.set(st.x,METRO_ELEV+0.25,st.z); scene.add(q);
-  const rf=new THREE.Mesh(new THREE.BoxGeometry(13,0.2,6),new THREE.MeshLambertMaterial({color:0x1a1a2a,transparent:true,opacity:0.85}));
-  rf.position.set(st.x,METRO_ELEV+3.5,st.z); scene.add(rf);
+  const q=new THREE.Mesh(new THREE.BoxGeometry(12,0.5,5),statMat);q.position.set(st.x,METRO_ELEV+0.25,st.z);scene.add(q);
+  const rf=new THREE.Mesh(new THREE.BoxGeometry(13,0.2,6),new THREE.MeshLambertMaterial({color:0x1a1a2a,transparent:true,opacity:0.85}));rf.position.set(st.x,METRO_ELEV+3.5,st.z);scene.add(rf);
   addCol(st.x,st.z,6.1,2.6,METRO_ELEV+0.5);
+
+  // ── ESCALIERS MÉTRO ── CORRECTION PRINCIPALE ──
+  // Escalier depuis le sol (Y=0) jusqu'au quai (Y=18)
+  // Position : côté avant de la station (z+3), à gauche (x-4)
+  const stepMat2=new THREE.MeshLambertMaterial({color:0x555570});
+  const NSTEPS=12;
+  for(let s=0;s<NSTEPS;s++){
+    const sy=s*(METRO_ELEV/NSTEPS);
+    const sz2=st.z+3.5+(s*1.2); // chaque marche avance de 1.2 en Z
+    const step=new THREE.Mesh(new THREE.BoxGeometry(4,0.3,1.1),stepMat2);
+    step.position.set(st.x,sy+0.15,sz2);scene.add(step);
+  }
+  // Garde-corps escalier
+  const railMat2=new THREE.MeshLambertMaterial({color:0x888899});
+  [-1.8,1.8].forEach(sx2=>{
+    const rail=new THREE.Mesh(new THREE.BoxGeometry(0.1,METRO_ELEV+0.5,NSTEPS*1.2),railMat2);
+    rail.position.set(st.x+sx2,METRO_ELEV/2+0.25,st.z+3.5+(NSTEPS*0.6));scene.add(rail);
+  });
+  // Panneau d'entrée
+  const signMat=new THREE.MeshLambertMaterial({color:0x2255aa,emissive:new THREE.Color(0x001133),emissiveIntensity:0.3});
+  const signMesh=new THREE.Mesh(new THREE.BoxGeometry(3,1.2,0.15),signMat);signMesh.position.set(st.x,2.2,st.z+3.5);scene.add(signMesh);
+  const signTextMat=new THREE.MeshLambertMaterial({color:0xffffff});
+  const textPlane=new THREE.Mesh(new THREE.PlaneGeometry(2.5,0.9),new THREE.MeshLambertMaterial({
+    map:procTex((ctx,s)=>{ctx.fillStyle='#1a44aa';ctx.fillRect(0,0,s,s);ctx.fillStyle='#ffffff';ctx.font=`bold ${s*0.22}px sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🚇 MÉTRO',s/2,s*0.35);ctx.font=`bold ${s*0.13}px sans-serif`;ctx.fillText(st.name.replace(/[^\w\s]/gu,'').trim()||'Station',s/2,s*0.7);},256)
+  }));
+  textPlane.position.set(st.x,2.2,st.z+3.58);scene.add(textPlane);
+
+  // Zone de détection au bas des escaliers (au sol, Y≈0)
+  // stockée pour interaction dans la boucle principale
+  st.stairsBaseX=st.x;
+  st.stairsBaseZ=st.z+3.5+(NSTEPS*1.2*0.5); // milieu des escaliers
+  st.stairsTopZ=st.z+3.5+NSTEPS*1.2;
 });
 
-// Train GLB avec fallback procédural
-const metroTrain={group:new THREE.Group(), trackIdx:0, progress:0, speed:22, atStation:null, waitTimer:0};
-scene.add(metroTrain.group);
-metroTrain.group.position.set(METRO_TRACK[0].x, METRO_ELEV+0.6, METRO_TRACK[0].z);
-gltfLoader.load(BASE+'train.glb', gltf=>{
-  const model=gltf.scene;
-  model.traverse(n=>{ if(n.isMesh){ n.castShadow=false; n.receiveShadow=false; } });
-  _box.setFromObject(model); _box.getSize(_sz);
-  const s=Math.min(27/_sz.z, 4/_sz.y, 6/_sz.x);
-  model.scale.setScalar(s); _box.setFromObject(model); model.position.y=-_box.min.y;
-  metroTrain.group.add(model);
-}, undefined, ()=>{
+// Train métro
+const metroTrain={group:new THREE.Group(),trackIdx:0,progress:0,speed:22,atStation:null,waitTimer:0};
+scene.add(metroTrain.group);metroTrain.group.position.set(METRO_TRACK[0].x,METRO_ELEV+0.6,METRO_TRACK[0].z);
+gltfLoader.load(BASE+'train.glb',gltf=>{
+  const model=gltf.scene;model.traverse(n=>{if(n.isMesh){n.castShadow=false;n.receiveShadow=false;}});
+  _box.setFromObject(model);_box.getSize(_sz);const s=Math.min(27/_sz.z,4/_sz.y,6/_sz.x);model.scale.setScalar(s);_box.setFromObject(model);model.position.y=-_box.min.y;metroTrain.group.add(model);
+},undefined,()=>{
   const bodyMat=new THREE.MeshLambertMaterial({color:0x2266cc});
-  const body=new THREE.Mesh(new THREE.BoxGeometry(3,2.5,26),bodyMat); body.position.y=1.25; metroTrain.group.add(body);
-  const strip=new THREE.Mesh(new THREE.BoxGeometry(3.05,0.35,26),new THREE.MeshLambertMaterial({color:0xffffff})); strip.position.y=1.2; metroTrain.group.add(strip);
+  const body=new THREE.Mesh(new THREE.BoxGeometry(3,2.5,26),bodyMat);body.position.y=1.25;metroTrain.group.add(body);
+  const strip=new THREE.Mesh(new THREE.BoxGeometry(3.05,0.35,26),new THREE.MeshLambertMaterial({color:0xffffff}));strip.position.y=1.2;metroTrain.group.add(strip);
 });
 function updateMetroTrain(dt){
-  if(metroTrain.waitTimer>0){ metroTrain.waitTimer-=dt; return; }
-  const from=METRO_TRACK[metroTrain.trackIdx];
-  const to=METRO_TRACK[(metroTrain.trackIdx+1)%METRO_TRACK.length];
-  const dx=to.x-from.x, dz=to.z-from.z; const segLen=Math.sqrt(dx*dx+dz*dz);
+  if(metroTrain.waitTimer>0){metroTrain.waitTimer-=dt;return;}
+  const from=METRO_TRACK[metroTrain.trackIdx];const to=METRO_TRACK[(metroTrain.trackIdx+1)%METRO_TRACK.length];
+  const dx=to.x-from.x,dz=to.z-from.z;const segLen=Math.sqrt(dx*dx+dz*dz);
   metroTrain.progress+=metroTrain.speed*dt;
   if(metroTrain.progress>=segLen){
-    metroTrain.trackIdx=(metroTrain.trackIdx+1)%(METRO_TRACK.length-1); metroTrain.progress=0;
+    metroTrain.trackIdx=(metroTrain.trackIdx+1)%(METRO_TRACK.length-1);metroTrain.progress=0;
     const np=METRO_TRACK[metroTrain.trackIdx];
     const foundSt=METRO_STATIONS.find(s=>Math.abs(s.x-np.x)<2&&Math.abs(s.z-np.z)<2);
-    if(foundSt){ metroTrain.waitTimer=4; metroTrain.atStation=foundSt.id; }
-    return;
+    if(foundSt){metroTrain.waitTimer=4;metroTrain.atStation=foundSt.id;}return;
   }
   const t=metroTrain.progress/segLen;
-  metroTrain.group.position.set(from.x+dx*t, METRO_ELEV+0.6, from.z+dz*t);
-  metroTrain.group.rotation.y=Math.atan2(dx,dz);
+  metroTrain.group.position.set(from.x+dx*t,METRO_ELEV+0.6,from.z+dz*t);metroTrain.group.rotation.y=Math.atan2(dx,dz);
 }
 
-// ── VOITURES GLB — 3 seulement <!-- PATCH: était 9 routes GLB --> ──
+// ── VOITURES GLB ─────────────────────────────────────────
 const glbCars=[];
 const GLB_CAR_ROUTES=[
-  {file:'1965_alfa_romeo_giulia_sprint_gta_1600.glb',           len:4.2, axis:'x', fixedZ:-4,   min:-140, max:140,  dir:1,  speed:13},
-  {file:'1967_alfa_romeo_giulia_sprint_zagato_sacalino.glb',    len:4.0, axis:'z', fixedX:-4,   min:-140, max:140,  dir:1,  speed:11},
-  {file:'renault_5_tl_1974.glb',                                 len:3.5, axis:'x', fixedZ:-28,  min:-100, max:100,  dir:1,  speed:9},
+  {file:'1965_alfa_romeo_giulia_sprint_gta_1600.glb',          len:4.2,axis:'x',fixedZ:-4,  min:-140,max:140, dir:1, speed:13},
+  {file:'1967_alfa_romeo_giulia_sprint_zagato_sacalino.glb',   len:4.0,axis:'z',fixedX:-4,  min:-140,max:140, dir:1, speed:11},
+  {file:'renault_5_tl_1974.glb',                               len:3.5,axis:'x',fixedZ:-28, min:-100,max:100, dir:1, speed:9},
 ];
 const carGLBCache={};
-function loadCarGLB(file, targetLength, cb){
-  if(carGLBCache[file]){ cb(carGLBCache[file].clone()); return; }
-  gltfLoader.load(BASE+file, gltf=>{
-    const model=gltf.scene;
-    model.traverse(n=>{
-      if(n.isMesh){
-        n.castShadow=false; n.receiveShadow=false;
-        // Lambert si possible <!-- PATCH -->
-        if(n.material&&n.material.isMeshStandardMaterial){
-          const old=n.material;
-          n.material=new THREE.MeshLambertMaterial({color:old.color,map:old.map||null,transparent:old.transparent,opacity:old.opacity});
-        }
-      }
-    });
-    _box.setFromObject(model); _box.getSize(_sz);
-    const longestAxis=Math.max(_sz.x,_sz.y,_sz.z);
-    if(longestAxis>0) model.scale.setScalar(targetLength/longestAxis);
-    _box.setFromObject(model); model.position.y=-_box.min.y;
-    carGLBCache[file]=model;
-    cb(model.clone());
-  }, undefined, ()=>{});
+function loadCarGLB(file,targetLength,cb){
+  if(carGLBCache[file]){cb(carGLBCache[file].clone());return;}
+  gltfLoader.load(BASE+file,gltf=>{
+    const model=gltf.scene;model.traverse(n=>{if(n.isMesh){n.castShadow=false;n.receiveShadow=false;if(n.material&&n.material.isMeshStandardMaterial){const old=n.material;n.material=new THREE.MeshLambertMaterial({color:old.color,map:old.map||null,transparent:old.transparent,opacity:old.opacity});}}});
+    _box.setFromObject(model);_box.getSize(_sz);const longestAxis=Math.max(_sz.x,_sz.y,_sz.z);if(longestAxis>0)model.scale.setScalar(targetLength/longestAxis);_box.setFromObject(model);model.position.y=-_box.min.y;carGLBCache[file]=model;cb(model.clone());
+  },undefined,()=>{});
 }
 GLB_CAR_ROUTES.forEach((route,i)=>{
-  loadCarGLB(route.file, route.len, model=>{
-    const g=new THREE.Group(); g.add(model); scene.add(g);
-    const range=Math.abs(route.max-route.min); const offset=(i*53)%range;
-    const laneOff=2.5;
-    let sx,sz,rot;
-    if(route.axis==='x'){ sx=route.min+offset; sz=route.fixedZ-laneOff; rot=Math.PI/2; }
-    else{ sx=route.fixedX+laneOff; sz=route.min+offset; rot=0; }
-    g.position.set(sx,0,sz); g.rotation.y=rot;
-    glbCars.push({mesh:g,route});
+  loadCarGLB(route.file,route.len,model=>{
+    const g=new THREE.Group();g.add(model);scene.add(g);
+    const range=Math.abs(route.max-route.min);const offset=(i*53)%range;
+    const laneOff=2.5;let sx,sz,rot;
+    if(route.axis==='x'){sx=route.min+offset;sz=route.fixedZ-laneOff;rot=Math.PI/2;}
+    else{sx=route.fixedX+laneOff;sz=route.min+offset;rot=0;}
+    g.position.set(sx,0,sz);g.rotation.y=rot;glbCars.push({mesh:g,route});
   });
 });
-function updateGLBCars(dt){
-  glbCars.forEach(dc=>{
-    const r=dc.route;
-    const lo=r.axis==='x'?dc.mesh.position.x:dc.mesh.position.z;
-    let nlo=lo+r.dir*r.speed*dt;
-    if(r.dir>0&&nlo>r.max) nlo=r.min;
-    if(r.dir<0&&nlo<r.max) nlo=r.min;
-    if(r.axis==='x'){ dc.mesh.position.x=nlo; }
-    else{ dc.mesh.position.z=nlo; }
-  });
-}
+function updateGLBCars(dt){glbCars.forEach(dc=>{const r=dc.route;const lo=r.axis==='x'?dc.mesh.position.x:dc.mesh.position.z;let nlo=lo+r.dir*r.speed*dt;if(r.dir>0&&nlo>r.max)nlo=r.min;if(r.dir<0&&nlo<r.max)nlo=r.min;if(r.axis==='x'){dc.mesh.position.x=nlo;}else{dc.mesh.position.z=nlo;}});}
 
 // ── BATEAUX ───────────────────────────────────────────────
 function makeBoat(type='cargo'){
   const g=new THREE.Group();
   const hullMat=new THREE.MeshLambertMaterial({color:type==='ferry'?0x2244aa:type==='tanker'?0xaa2200:0x2a2a2a});
   const deckBtMat=new THREE.MeshLambertMaterial({color:0x8a7040});
-  const whMat=new THREE.MeshLambertMaterial({color:0xeeeeee});
-  const hull=new THREE.Mesh(new THREE.BoxGeometry(type==='tanker'?10:8,type==='tanker'?4:3,type==='tanker'?35:type==='ferry'?28:22),hullMat);
-  hull.position.y=type==='tanker'?2:1.5; g.add(hull);
-  const deck=new THREE.Mesh(new THREE.BoxGeometry(hull.geometry.parameters.width-0.5,0.35,hull.geometry.parameters.depth-1),deckBtMat);
-  deck.position.y=hull.geometry.parameters.height+hull.position.y-0.1; g.add(deck);
-  const bridge=new THREE.Mesh(new THREE.BoxGeometry(5,3.5,7),whMat); bridge.position.set(0,deck.position.y+2.25,-2); g.add(bridge);
-  const chimney=new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.65,3.5,8),new THREE.MeshLambertMaterial({color:0x222222}));
-  chimney.position.set(0,deck.position.y+5,-3); g.add(chimney);
+  const hull=new THREE.Mesh(new THREE.BoxGeometry(type==='tanker'?10:8,type==='tanker'?4:3,type==='tanker'?35:type==='ferry'?28:22),hullMat);hull.position.y=type==='tanker'?2:1.5;g.add(hull);
+  const deck=new THREE.Mesh(new THREE.BoxGeometry(hull.geometry.parameters.width-0.5,0.35,hull.geometry.parameters.depth-1),deckBtMat);deck.position.y=hull.geometry.parameters.height+hull.position.y-0.1;g.add(deck);
+  const bridge=new THREE.Mesh(new THREE.BoxGeometry(5,3.5,7),new THREE.MeshLambertMaterial({color:0xeeeeee}));bridge.position.set(0,deck.position.y+2.25,-2);g.add(bridge);
+  const chimney=new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.65,3.5,8),new THREE.MeshLambertMaterial({color:0x222222}));chimney.position.set(0,deck.position.y+5,-3);g.add(chimney);
   return g;
 }
 const mooredBoats=[];
-const b1=makeBoat('cargo');  b1.position.set(135,-1.5,-15); b1.rotation.y=Math.PI/2; scene.add(b1); addCol(135,-15,11,5,6); mooredBoats.push({mesh:b1,z:-15});
-const b2=makeBoat('ferry');  b2.position.set(140,-1.5,-50); b2.rotation.y=Math.PI/2; scene.add(b2); addCol(140,-50,14,4,8); mooredBoats.push({mesh:b2,z:-50});
-const b3=makeBoat('tanker'); b3.position.set(145,-1.5,-80); b3.rotation.y=Math.PI/2; scene.add(b3); addCol(145,-80,17,6,7); mooredBoats.push({mesh:b3,z:-80});
-
-const playerBoat=makeBoat('ferry'); playerBoat.position.set(150,-1.5,-30); scene.add(playerBoat);
-let inBoat=false, boatX=150, boatZ=-30, boatRot=0, boatVel=0;
-document.getElementById('boat-exit').addEventListener('click',()=>{
-  if(!inBoat)return; inBoat=false; document.getElementById('boat-hud').classList.remove('show');
-  pp.x=boatX-8; pp.z=boatZ; pp.y=0; showToast('🏊 Tu as quitté le bateau.');
-});
+const b1=makeBoat('cargo');b1.position.set(135,-1.5,-15);b1.rotation.y=Math.PI/2;scene.add(b1);addCol(135,-15,11,5,6);mooredBoats.push({mesh:b1});
+const b2=makeBoat('ferry');b2.position.set(140,-1.5,-50);b2.rotation.y=Math.PI/2;scene.add(b2);addCol(140,-50,14,4,8);mooredBoats.push({mesh:b2});
+const b3=makeBoat('tanker');b3.position.set(145,-1.5,-80);b3.rotation.y=Math.PI/2;scene.add(b3);addCol(145,-80,17,6,7);mooredBoats.push({mesh:b3});
+const playerBoat=makeBoat('ferry');playerBoat.position.set(150,-1.5,-30);scene.add(playerBoat);
+let inBoat=false,boatX=150,boatZ=-30,boatRot=0,boatVel=0;
+document.getElementById('boat-exit').addEventListener('click',()=>{if(!inBoat)return;inBoat=false;document.getElementById('boat-hud').classList.remove('show');pp.x=boatX-8;pp.z=boatZ;pp.y=0;showToast('🏊 Tu as quitté le bateau.');});
 function updateBoat(dt){
   if(!inBoat)return;
-  const mz2=-joy.y;
-  if(Math.abs(mz2)>0.05) boatVel+=mz2*8*dt; else boatVel*=0.92;
+  const mz2=-joy.y;if(Math.abs(mz2)>0.05)boatVel+=mz2*8*dt;else boatVel*=0.92;
   boatVel=Math.max(-10,Math.min(20,boatVel));
-  if(camJoy.active&&Math.abs(camJoy.x)>0.04) boatRot-=camJoy.x*1.2*dt;
-  if(Math.abs(joy.x)>0.05) boatRot-=joy.x*1.0*dt;
-  boatX+=Math.sin(boatRot)*boatVel*dt; boatZ+=Math.cos(boatRot)*boatVel*dt;
-  boatX=Math.max(100,Math.min(300,boatX)); boatZ=Math.max(-200,Math.min(100,boatZ));
-  playerBoat.position.set(boatX,-1.5+Math.sin(time*0.8)*0.18,boatZ); playerBoat.rotation.y=boatRot;
-  pp.x=boatX; pp.z=boatZ; pp.y=4; cameraYaw=boatRot;
+  if(camJoy.active&&Math.abs(camJoy.x)>0.04)boatRot-=camJoy.x*1.2*dt;
+  if(Math.abs(joy.x)>0.05)boatRot-=joy.x*1.0*dt;
+  boatX+=Math.sin(boatRot)*boatVel*dt;boatZ+=Math.cos(boatRot)*boatVel*dt;
+  boatX=Math.max(100,Math.min(300,boatX));boatZ=Math.max(-200,Math.min(100,boatZ));
+  playerBoat.position.set(boatX,-1.5+Math.sin(time*0.8)*0.18,boatZ);playerBoat.rotation.y=boatRot;
+  pp.x=boatX;pp.z=boatZ;pp.y=4;cameraYaw=boatRot;
   document.getElementById('boat-info').textContent=`⚓ Vitesse: ${Math.abs(boatVel).toFixed(1)} nœuds`;
 }
-
-// Grues (simplifiées)
 const craneMat=new THREE.MeshLambertMaterial({color:0xf5a000});
 [{x:108,z:-20},{x:108,z:-50},{x:108,z:-75}].forEach(p=>{
-  const tower=new THREE.Mesh(new THREE.BoxGeometry(1.2,30,1.2),craneMat); tower.position.set(p.x,15,p.z); scene.add(tower);
-  const arm=new THREE.Mesh(new THREE.BoxGeometry(20,0.8,1.2),craneMat); arm.position.set(p.x+2,30,p.z); scene.add(arm);
-  addCol(p.x,p.z,1.8,2.2);
+  const tower=new THREE.Mesh(new THREE.BoxGeometry(1.2,30,1.2),craneMat);tower.position.set(p.x,15,p.z);scene.add(tower);
+  const arm=new THREE.Mesh(new THREE.BoxGeometry(20,0.8,1.2),craneMat);arm.position.set(p.x+2,30,p.z);scene.add(arm);addCol(p.x,p.z,1.8,2.2);
 });
 const contColors=[0xcc4400,0x1144cc,0x22aa44,0xcc8800,0x664488,0x446688];
 [[105,-25],[105,-35],[105,-55],[105,-65],[105,-75],[105,-85]].forEach((p,i)=>{
   const ctM=new THREE.MeshLambertMaterial({color:contColors[i%6]});
-  const ct=new THREE.Mesh(new THREE.BoxGeometry(3,2.5,8),ctM); ct.position.set(p[0],1.25,p[1]); scene.add(ct); addCol(p[0],p[1],1.6,4.2);
+  const ct=new THREE.Mesh(new THREE.BoxGeometry(3,2.5,8),ctM);ct.position.set(p[0],1.25,p[1]);scene.add(ct);addCol(p[0],p[1],1.6,4.2);
 });
 
 // ── ARBRES ───────────────────────────────────────────────
 function makeTree(px,pz,idx=0){
   const h=3.8+Math.random()*2.2;
-  const tr=new THREE.Mesh(new THREE.CylinderGeometry(0.14,0.22,h,6),barkMat); tr.position.set(px,h/2,pz); scene.add(tr);
+  const tr=new THREE.Mesh(new THREE.CylinderGeometry(0.14,0.22,h,6),barkMat);tr.position.set(px,h/2,pz);scene.add(tr);
   const lc=new THREE.MeshLambertMaterial({color:new THREE.Color(['#2d5a1e','#3a6a22','#254d18','#4a7828'][idx%4])});
-  const l=new THREE.Mesh(new THREE.SphereGeometry(1.7+Math.random()*0.8,6,4),lc); l.position.set(px,h+1.4,pz); scene.add(l);
+  const l=new THREE.Mesh(new THREE.SphereGeometry(1.7+Math.random()*0.8,6,4),lc);l.position.set(px,h+1.4,pz);scene.add(l);
   addCol(px,pz,0.28,0.28);
 }
 [[-10,-11],[10,-11],[-10,11],[10,11],[-15,-15],[15,-15],[-15,15],[15,15],[0,-18],[0,18],[-18,0],[18,0]].forEach((p,i)=>makeTree(p[0],p[1],i));
-for(let x=-130;x<=130;x+=25) for(let z=-130;z<=130;z+=25){
-  if(Math.abs(x)>10&&Math.abs(z)>10&&Math.abs(x)<100&&Math.random()<0.35) makeTree(x+(Math.random()*4-2),z+(Math.random()*4-2),Math.floor(Math.random()*4));
-}
-
-// LAMPADAIRES
+for(let x=-130;x<=130;x+=25)for(let z=-130;z<=130;z+=25){if(Math.abs(x)>10&&Math.abs(z)>10&&Math.abs(x)<100&&Math.random()<0.35)makeTree(x+(Math.random()*4-2),z+(Math.random()*4-2),Math.floor(Math.random()*4));}
 const lpM=new THREE.MeshLambertMaterial({color:0x4a5060});
 const lgM=new THREE.MeshLambertMaterial({color:0xfffce0,emissive:new THREE.Color(0xfffce0),emissiveIntensity:0.12});
-function lamp(x,z){
-  const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.1,7,6),lpM); pole.position.set(x,3.5,z); scene.add(pole);
-  const gl=new THREE.Mesh(new THREE.BoxGeometry(0.42,0.09,0.24),lgM); gl.position.set(x+1.88,6.93,z); scene.add(gl);
-}
-for(let x=-120;x<=120;x+=25) for(let z=-130;z<=120;z+=25) lamp(x,z);
+function lamp(x,z){const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.1,7,6),lpM);pole.position.set(x,3.5,z);scene.add(pole);const gl=new THREE.Mesh(new THREE.BoxGeometry(0.42,0.09,0.24),lgM);gl.position.set(x+1.88,6.93,z);scene.add(gl);}
+for(let x=-120;x<=120;x+=25)for(let z=-130;z<=120;z+=25)lamp(x,z);
 
 // ── ZONES DE MISSION ──────────────────────────────────────
-const ladderZones=[], puddleZones=[], wallPassZones=[], sewerZones=[], missionZones=[];
-
+const ladderZones=[],puddleZones=[],wallPassZones=[],sewerZones=[],missionZones=[];
 // Échelle
 (()=>{
   const BX=44,BZ=-24,LH=60;
   const ladderMat=new THREE.MeshLambertMaterial({color:0x8a8a70});
-  for(let y=1;y<LH;y+=0.9){ const rung=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,1.6,6),ladderMat); rung.rotation.z=Math.PI/2; rung.position.set(BX+0.5,y,BZ+5.6); scene.add(rung); }
-  [-0.7,0.7].forEach(sx=>{ const rail=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,LH,6),ladderMat); rail.position.set(BX+0.5+sx,LH/2,BZ+5.6); scene.add(rail); });
-  const plat=new THREE.Mesh(new THREE.BoxGeometry(6,0.2,4),new THREE.MeshLambertMaterial({color:0x606068})); plat.position.set(BX,LH+0.1,BZ); scene.add(plat);
-  const chest=new THREE.Mesh(new THREE.BoxGeometry(1.2,0.9,0.9),new THREE.MeshLambertMaterial({color:0xc8a020,emissive:new THREE.Color(0x402000),emissiveIntensity:0.5})); chest.position.set(BX,LH+0.55,BZ-1); scene.add(chest);
+  for(let y=1;y<LH;y+=0.9){const rung=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,1.6,6),ladderMat);rung.rotation.z=Math.PI/2;rung.position.set(BX+0.5,y,BZ+5.6);scene.add(rung);}
+  [-0.7,0.7].forEach(sx=>{const rail=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,LH,6),ladderMat);rail.position.set(BX+0.5+sx,LH/2,BZ+5.6);scene.add(rail);});
+  const plat=new THREE.Mesh(new THREE.BoxGeometry(6,0.2,4),new THREE.MeshLambertMaterial({color:0x606068}));plat.position.set(BX,LH+0.1,BZ);scene.add(plat);
+  const chest=new THREE.Mesh(new THREE.BoxGeometry(1.2,0.9,0.9),new THREE.MeshLambertMaterial({color:0xc8a020,emissive:new THREE.Color(0x402000),emissiveIntensity:0.5}));chest.position.set(BX,LH+0.55,BZ-1);scene.add(chest);
   ladderZones.push({x:BX+0.5,z:BZ+5.6,topY:LH,platX:BX,platZ:BZ});
 })();
-
-// Flaque + égout tunnel
+// Flaque
 (()=>{
   const PX=-45,PZ=45;
   const puddleMat=new THREE.MeshLambertMaterial({color:0x2255aa,transparent:true,opacity:0.7});
-  const puddle=new THREE.Mesh(new THREE.CylinderGeometry(2.2,2.2,0.06,16),puddleMat); puddle.position.set(PX,0.04,PZ); scene.add(puddle);
+  const puddle=new THREE.Mesh(new THREE.CylinderGeometry(2.2,2.2,0.06,16),puddleMat);puddle.position.set(PX,0.04,PZ);scene.add(puddle);
   const arrowMat=new THREE.MeshLambertMaterial({color:0x88ccff,emissive:new THREE.Color(0x002244),emissiveIntensity:0.8});
-  const arrow=new THREE.Mesh(new THREE.CylinderGeometry(0,0.4,0.8,3),arrowMat); arrow.position.set(PX,1.2,PZ); scene.add(arrow);
+  const arrow=new THREE.Mesh(new THREE.CylinderGeometry(0,0.4,0.8,3),arrowMat);arrow.position.set(PX,1.2,PZ);scene.add(arrow);
   puddleZones.push({x:PX,z:PZ,r:2.5,arrow});
   const sm=new THREE.MeshLambertMaterial({color:0x445533,side:THREE.DoubleSide});
-  const tunnel=new THREE.Mesh(new THREE.CylinderGeometry(2,2,30,10,1,true),sm); tunnel.rotation.z=Math.PI/2; tunnel.position.set(PX+15,-3,PZ); scene.add(tunnel);
-  const tfloor=new THREE.Mesh(new THREE.BoxGeometry(30,0.2,3.5),new THREE.MeshLambertMaterial({color:0x334422})); tfloor.position.set(PX+15,-4.9,PZ); scene.add(tfloor);
+  const tunnel=new THREE.Mesh(new THREE.CylinderGeometry(2,2,30,10,1,true),sm);tunnel.rotation.z=Math.PI/2;tunnel.position.set(PX+15,-3,PZ);scene.add(tunnel);
+  const tfloor=new THREE.Mesh(new THREE.BoxGeometry(30,0.2,3.5),new THREE.MeshLambertMaterial({color:0x334422}));tfloor.position.set(PX+15,-4.9,PZ);scene.add(tfloor);
   const coinMat=new THREE.MeshLambertMaterial({color:0xf5c842,emissive:new THREE.Color(0x403010),emissiveIntensity:0.5});
-  const coin=new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,0.12,10),coinMat); coin.rotation.z=Math.PI/2; coin.position.set(PX+15,-3.5,PZ); scene.add(coin);
+  const coin=new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,0.12,10),coinMat);coin.rotation.z=Math.PI/2;coin.position.set(PX+15,-3.5,PZ);scene.add(coin);
   sewerZones.push({entryX:PX,entryZ:PZ,exitX:PX+30,exitZ:PZ,coin,coinCollected:false});
 })();
-
 // Mur magique
 (()=>{
   const WX=60,WZ=-80;
   const wallMat=new THREE.MeshLambertMaterial({color:0x4488cc,transparent:true,opacity:0.45,emissive:new THREE.Color(0x001144),emissiveIntensity:0.5,side:THREE.DoubleSide});
-  const wall=new THREE.Mesh(new THREE.BoxGeometry(8,12,0.4),wallMat); wall.position.set(WX,6,WZ); scene.add(wall);
+  const wall=new THREE.Mesh(new THREE.BoxGeometry(8,12,0.4),wallMat);wall.position.set(WX,6,WZ);scene.add(wall);
   const tMat=new THREE.MeshLambertMaterial({color:0xddaa00,emissive:new THREE.Color(0x442200),emissiveIntensity:0.8});
-  const treasure=new THREE.Mesh(new THREE.SphereGeometry(0.7,10,8),tMat); treasure.position.set(WX-8,0.8,WZ); scene.add(treasure);
+  const treasure=new THREE.Mesh(new THREE.SphereGeometry(0.7,10,8),tMat);treasure.position.set(WX-8,0.8,WZ);scene.add(treasure);
   wallPassZones.push({x:WX,z:WZ,halfW:4.1,halfD:0.6,treasure,treasureCollected:false});
 })();
-
 // Égouts mission 4
 (()=>{
-  const EX=-90,EZ=-70;
+  const EX2=-90,EZ2=-70;
   const arrowMat=new THREE.MeshLambertMaterial({color:0x80ff40,emissive:new THREE.Color(0x204010),emissiveIntensity:1.0});
-  const arrow=new THREE.Mesh(new THREE.CylinderGeometry(0,0.5,1,3),arrowMat); arrow.position.set(EX,1.5,EZ); scene.add(arrow);
+  const arrow=new THREE.Mesh(new THREE.CylinderGeometry(0,0.5,1,3),arrowMat);arrow.position.set(EX2,1.5,EZ2);scene.add(arrow);
   const sf=new THREE.MeshLambertMaterial({map:sewerTex,color:0x2a3a18});
-  const floor1=new THREE.Mesh(new THREE.BoxGeometry(40,0.2,4),sf); floor1.position.set(EX,-6,EZ); scene.add(floor1);
+  const floor1=new THREE.Mesh(new THREE.BoxGeometry(40,0.2,4),sf);floor1.position.set(EX2,-6,EZ2);scene.add(floor1);
   const coinMat=new THREE.MeshLambertMaterial({color:0x40ff40,emissive:new THREE.Color(0x103010),emissiveIntensity:0.6});
   const sewerCoins=[];
-  [[-5,0],[-10,0],[-15,0],[-18,8],[-18,16]].forEach(offset=>{
-    const c=new THREE.Mesh(new THREE.CylinderGeometry(0.35,0.35,0.1,8),coinMat); c.rotation.x=Math.PI/2; c.position.set(EX+offset[0],-4,EZ+1.5+offset[1]); scene.add(c); sewerCoins.push({mesh:c,collected:false});
-  });
-  missionZones.push({type:'sewer',entryX:EX,entryZ:EZ,floorY:-6,arrow,sewerCoins});
+  [[-5,0],[-10,0],[-15,0],[-18,8],[-18,16]].forEach(offset=>{const c=new THREE.Mesh(new THREE.CylinderGeometry(0.35,0.35,0.1,8),coinMat);c.rotation.x=Math.PI/2;c.position.set(EX2+offset[0],-4,EZ2+1.5+offset[1]);scene.add(c);sewerCoins.push({mesh:c,collected:false});});
+  missionZones.push({type:'sewer',entryX:EX2,entryZ:EZ2,floorY:-6,arrow,sewerCoins});
 })();
 
 // ── MISSIONS ──────────────────────────────────────────────
 const missions=[
-  {id:'ladder', title:'🪜 Grimpeur Urbain',    desc:'Montez en haut du gratte-ciel par l\'échelle', progress:0,total:1,done:false},
-  {id:'puddle', title:'💧 Passage Secret',      desc:'Sautez dans la flaque magique',                progress:0,total:1,done:false},
-  {id:'wall',   title:'🔮 Mur Magique',         desc:'Traversez le mur magique pour rétrécir',       progress:0,total:1,done:false},
-  {id:'sewer',  title:'🐀 Explorateur Égouts',  desc:'Collectez les 5 capsules dans les égouts',    progress:0,total:5,done:false},
-  {id:'metro',  title:'🚇 Touriste du Métro',   desc:'Prenez le métro à 3 stations',                progress:0,total:3,done:false},
-  {id:'boat',   title:'⛵ Capitaine du Port',   desc:'Pilotez le bateau dans la baie',              progress:0,total:1,done:false},
+  {id:'ladder',  title:'🪜 Grimpeur Urbain',   desc:'Montez en haut du gratte-ciel',           progress:0,total:1,done:false},
+  {id:'puddle',  title:'💧 Passage Secret',     desc:'Sautez dans la flaque magique',           progress:0,total:1,done:false},
+  {id:'wall',    title:'🔮 Mur Magique',        desc:'Traversez le mur pour rétrécir',          progress:0,total:1,done:false},
+  {id:'sewer',   title:'🐀 Explorateur Égouts', desc:'Collectez les 5 capsules',                progress:0,total:5,done:false},
+  {id:'metro',   title:'🚇 Touriste du Métro',  desc:'Prenez le métro à 3 stations',            progress:0,total:3,done:false},
+  {id:'boat',    title:'⛵ Capitaine du Port',  desc:'Pilotez le bateau dans la baie',          progress:0,total:1,done:false},
+  {id:'eiffel1', title:'🗼 Étage 1 Eiffel',    desc:'Montez au 1er étage de la Tour Eiffel',   progress:0,total:1,done:false},
+  {id:'eiffel2', title:'🗼 Étage 2 Eiffel',    desc:'Montez au 2e étage de la Tour Eiffel',    progress:0,total:1,done:false},
+  {id:'eiffel3', title:'🗼 Sommet Eiffel',      desc:'Atteignez le sommet de la Tour Eiffel',   progress:0,total:1,done:false},
+  {id:'statue',  title:'🗽 Sommet Statue',      desc:'Montez au sommet de la Statue de Liberté',progress:0,total:1,done:false},
 ];
 function renderMissions(){
-  const hud=document.getElementById('mission-hud'); hud.innerHTML='';
+  const hud=document.getElementById('mission-hud');hud.innerHTML='';
   missions.forEach(m=>{
-    const card=document.createElement('div'); card.className='mission-card '+(m.done?'done':'active');
+    const card=document.createElement('div');card.className='mission-card '+(m.done?'done':'active');
     card.innerHTML=`<div class="mission-title">${m.title}${m.done?'<span class="mission-badge">✓</span>':''}</div><div class="mission-desc">${m.desc}</div>${!m.done?`<div class="mission-progress"><div class="mission-bar" style="width:${(m.progress/m.total)*100}%"></div></div>`:''}`;
     hud.appendChild(card);
   });
 }
-function completeMission(id,msg){ const m=missions.find(x=>x.id===id); if(!m||m.done)return; m.done=true; m.progress=m.total; showToast('🎉 MISSION : '+m.title,'mission'); addChat('🏆 '+msg,'Système'); renderMissions(); }
-function updateMissionProgress(id,val){ const m=missions.find(x=>x.id===id); if(!m||m.done)return; m.progress=val; renderMissions(); }
+function completeMission(id,msg){const m=missions.find(x=>x.id===id);if(!m||m.done)return;m.done=true;m.progress=m.total;showToast('🎉 MISSION : '+m.title,'mission');addChat('🏆 '+msg,'Système');renderMissions();}
+function updateMissionProgress(id,val){const m=missions.find(x=>x.id===id);if(!m||m.done)return;m.progress=val;renderMissions();}
 
 // ── AVATAR ────────────────────────────────────────────────
-const avatarGroup=new THREE.Group(); avatarGroup.position.set(0,0,8); scene.add(avatarGroup);
-let avatarMixer=null, emoteTimer=null, lastWalking=false;
-function loadGLB(url,cb){ if(glbCache[url]){cb(glbCache[url]);return;} gltfLoader.load(url,gltf=>{glbCache[url]=gltf;cb(gltf);},undefined,()=>{}); }
+const avatarGroup=new THREE.Group();avatarGroup.position.set(0,0,8);scene.add(avatarGroup);
+let avatarMixer=null,emoteTimer=null,lastWalking=false;
+function loadGLB(url,cb){if(glbCache[url]){cb(glbCache[url]);return;}gltfLoader.load(url,gltf=>{glbCache[url]=gltf;cb(gltf);},undefined,()=>{});}
 function swapAvatar(file,loop,onDone){
   const url=BASE+file;
   loadGLB(url,gltf=>{
-    while(avatarGroup.children.length) avatarGroup.remove(avatarGroup.children[0]);
-    if(avatarMixer){ avatarMixer.stopAllAction(); avatarMixer=null; }
-    const model=gltf.scene; model.traverse(n=>{ if(n.isMesh){ n.castShadow=false; n.receiveShadow=false; } });
-    _box.setFromObject(model); _box.getSize(_sz); if(_sz.y>0) model.scale.setScalar(1.75/_sz.y);
-    _box.setFromObject(model); model.position.y=-_box.min.y; avatarGroup.add(model);
+    while(avatarGroup.children.length)avatarGroup.remove(avatarGroup.children[0]);
+    if(avatarMixer){avatarMixer.stopAllAction();avatarMixer=null;}
+    const model=gltf.scene;model.traverse(n=>{if(n.isMesh){n.castShadow=false;n.receiveShadow=false;}});
+    _box.setFromObject(model);_box.getSize(_sz);if(_sz.y>0)model.scale.setScalar(1.75/_sz.y);
+    _box.setFromObject(model);model.position.y=-_box.min.y;avatarGroup.add(model);
     if(gltf.animations&&gltf.animations.length){
-      avatarMixer=new THREE.AnimationMixer(model);
-      const action=avatarMixer.clipAction(gltf.animations[0]);
-      action.setLoop(loop?THREE.LoopRepeat:THREE.LoopOnce,loop?Infinity:1);
-      action.clampWhenFinished=!loop; action.play();
-      if(onDone) onDone(gltf.animations[0].duration);
+      avatarMixer=new THREE.AnimationMixer(model);const action=avatarMixer.clipAction(gltf.animations[0]);
+      action.setLoop(loop?THREE.LoopRepeat:THREE.LoopOnce,loop?Infinity:1);action.clampWhenFinished=!loop;action.play();
+      if(onDone)onDone(gltf.animations[0].duration);
     }
   });
 }
-loadGLB(BASE+IDLE_FILE,()=>{}); loadGLB(BASE+WALK_FILE,()=>{});
-function setWalkSwap(w){ if(w===lastWalking)return; lastWalking=w; clearTimeout(emoteTimer); emoteTimer=null; swapAvatar(w?WALK_FILE:IDLE_FILE,true,null); }
-function playEmote(file,label){ clearTimeout(emoteTimer); emoteTimer=null; swapAvatar(file,false,duration=>{ showToast('▶ '+label); emoteTimer=setTimeout(()=>{ emoteTimer=null; lastWalking=false; swapAvatar(IDLE_FILE,true,null); },duration*1000+350); }); }
-
-// ANIM PANEL
-const ANIMS=[
-  {label:'Attend',file:IDLE_FILE},{label:'Course',file:WALK_FILE},{label:'Danse 1',file:'danse1.glb'},
-  {label:'Danse 2',file:'danse2.glb'},{label:'Danse 3',file:'danse3.glb'},
-  {label:'Coup poing',file:'coup%20de%20poing.glb'},{label:'King Kong',file:'king%20kong.glb'},
-  {label:'Salto',file:'salto%20avant.glb'},{label:'Costaud',file:'costaud.glb'},
-];
-const animScroll=document.getElementById('anim-scroll'); let activeBtn=null;
+loadGLB(BASE+IDLE_FILE,()=>{});loadGLB(BASE+WALK_FILE,()=>{});
+function setWalkSwap(w){if(w===lastWalking)return;lastWalking=w;clearTimeout(emoteTimer);emoteTimer=null;swapAvatar(w?WALK_FILE:IDLE_FILE,true,null);}
+function playEmote(file,label){clearTimeout(emoteTimer);emoteTimer=null;swapAvatar(file,false,duration=>{showToast('▶ '+label);emoteTimer=setTimeout(()=>{emoteTimer=null;lastWalking=false;swapAvatar(IDLE_FILE,true,null);},duration*1000+350);});}
+const ANIMS=[{label:'Attend',file:IDLE_FILE},{label:'Course',file:WALK_FILE},{label:'Danse 1',file:'danse1.glb'},{label:'Danse 2',file:'danse2.glb'},{label:'Danse 3',file:'danse3.glb'},{label:'Coup poing',file:'coup%20de%20poing.glb'},{label:'King Kong',file:'king%20kong.glb'},{label:'Salto',file:'salto%20avant.glb'},{label:'Costaud',file:'costaud.glb'}];
+const animScroll=document.getElementById('anim-scroll');let activeBtn=null;
 ANIMS.forEach((anim,i)=>{
-  const btn=document.createElement('div'); btn.className='anim-btn'; if(i===0) btn.classList.add('active');
+  const btn=document.createElement('div');btn.className='anim-btn';if(i===0)btn.classList.add('active');
   const C='#f5c842';
   const svg=`<svg viewBox="0 0 56 72" xmlns="http://www.w3.org/2000/svg"><circle cx="28" cy="9" r="6" fill="none" stroke="${C}" stroke-width="2.5"/><line x1="28" y1="15" x2="28" y2="46" stroke="${C}" stroke-width="3" stroke-linecap="round"/><line x1="28" y1="24" x2="16" y2="36" stroke="${C}" stroke-width="3" stroke-linecap="round"/><line x1="28" y1="24" x2="40" y2="36" stroke="${C}" stroke-width="3" stroke-linecap="round"/><line x1="26" y1="46" x2="20" y2="66" stroke="${C}" stroke-width="3" stroke-linecap="round"/><line x1="30" y1="46" x2="36" y2="66" stroke="${C}" stroke-width="3" stroke-linecap="round"/></svg>`;
   btn.innerHTML=`<div class="anim-icon">${svg}</div><span class="anim-label">${anim.label}</span>`;
   btn.addEventListener('click',()=>{
-    if(activeBtn) activeBtn.classList.remove('active'); btn.classList.add('active'); activeBtn=btn;
-    if(anim.file===IDLE_FILE){ clearTimeout(emoteTimer);emoteTimer=null;lastWalking=false;swapAvatar(IDLE_FILE,true,null); }
-    else if(anim.file===WALK_FILE){ clearTimeout(emoteTimer);emoteTimer=null;lastWalking=true;swapAvatar(WALK_FILE,true,null); }
-    else{ lastWalking=false; playEmote(anim.file,anim.label); }
+    if(activeBtn)activeBtn.classList.remove('active');btn.classList.add('active');activeBtn=btn;
+    if(anim.file===IDLE_FILE){clearTimeout(emoteTimer);emoteTimer=null;lastWalking=false;swapAvatar(IDLE_FILE,true,null);}
+    else if(anim.file===WALK_FILE){clearTimeout(emoteTimer);emoteTimer=null;lastWalking=true;swapAvatar(WALK_FILE,true,null);}
+    else{lastWalking=false;playEmote(anim.file,anim.label);}
   });
-  animScroll.appendChild(btn); if(i===0) activeBtn=btn;
+  animScroll.appendChild(btn);if(i===0)activeBtn=btn;
 });
 
 // ── JOYSTICKS ─────────────────────────────────────────────
-const joyBase=document.getElementById('joy-base'), joyKnob=document.getElementById('joy-knob');
-const JR=40; const joy={active:false,x:0,y:0,id:null};
-function getJC(){ const r=joyBase.getBoundingClientRect(); return{x:r.left+r.width/2,y:r.top+r.height/2}; }
-function updateJoy(cx,cy){ const c=getJC(); let dx=cx-c.x,dy=cy-c.y; const d=Math.sqrt(dx*dx+dy*dy); if(d>JR){dx=dx/d*JR;dy=dy/d*JR;} joy.x=dx/JR; joy.y=dy/JR; joyKnob.style.transform=`translate(${dx}px,${dy}px)`; }
-joyBase.addEventListener('touchstart',e=>{ e.preventDefault(); const t=e.changedTouches[0]; joy.active=true; joy.id=t.identifier; updateJoy(t.clientX,t.clientY); },{passive:false});
-document.addEventListener('touchmove',e=>{ if(!joy.active)return; for(const t of e.changedTouches) if(t.identifier===joy.id){ e.preventDefault(); updateJoy(t.clientX,t.clientY); } },{passive:false});
-document.addEventListener('touchend',e=>{ for(const t of e.changedTouches) if(t.identifier===joy.id){ joy.active=false; joy.x=0; joy.y=0; joyKnob.style.transform='translate(0,0)'; } });
-const camBase=document.getElementById('cam-joy-base'), camKnob=document.getElementById('cam-joy-knob');
+const joyBase=document.getElementById('joy-base'),joyKnob=document.getElementById('joy-knob');
+const JR=40;const joy={active:false,x:0,y:0,id:null};
+function getJC(){const r=joyBase.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2};}
+function updateJoy(cx,cy){const c=getJC();let dx=cx-c.x,dy=cy-c.y;const d=Math.sqrt(dx*dx+dy*dy);if(d>JR){dx=dx/d*JR;dy=dy/d*JR;}joy.x=dx/JR;joy.y=dy/JR;joyKnob.style.transform=`translate(${dx}px,${dy}px)`;}
+joyBase.addEventListener('touchstart',e=>{e.preventDefault();const t=e.changedTouches[0];joy.active=true;joy.id=t.identifier;updateJoy(t.clientX,t.clientY);},{passive:false});
+document.addEventListener('touchmove',e=>{if(!joy.active)return;for(const t of e.changedTouches)if(t.identifier===joy.id){e.preventDefault();updateJoy(t.clientX,t.clientY);}},{passive:false});
+document.addEventListener('touchend',e=>{for(const t of e.changedTouches)if(t.identifier===joy.id){joy.active=false;joy.x=0;joy.y=0;joyKnob.style.transform='translate(0,0)';}});
+const camBase=document.getElementById('cam-joy-base'),camKnob=document.getElementById('cam-joy-knob');
 const camJoy={active:false,x:0,id:null};
-function getCamC(){ const r=camBase.getBoundingClientRect(); return{x:r.left+r.width/2,y:r.top+r.height/2}; }
-function updateCamJoy(cx,cy){ const c=getCamC(); let dx=cx-c.x,dy=cy-c.y; const d=Math.sqrt(dx*dx+dy*dy); if(d>JR){dx=dx/d*JR;dy=dy/d*JR;} camJoy.x=dx/JR; camKnob.style.transform=`translate(${dx}px,${dy}px)`; }
-camBase.addEventListener('touchstart',e=>{ e.preventDefault(); const t=e.changedTouches[0]; camJoy.active=true; camJoy.id=t.identifier; updateCamJoy(t.clientX,t.clientY); },{passive:false});
-document.addEventListener('touchmove',e=>{ if(!camJoy.active)return; for(const t of e.changedTouches) if(t.identifier===camJoy.id){ e.preventDefault(); updateCamJoy(t.clientX,t.clientY); } },{passive:false});
-document.addEventListener('touchend',e=>{ for(const t of e.changedTouches) if(t.identifier===camJoy.id){ camJoy.active=false; camJoy.x=0; camKnob.style.transform='translate(0,0)'; } });
+function getCamC(){const r=camBase.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2};}
+function updateCamJoy(cx,cy){const c=getCamC();let dx=cx-c.x,dy=cy-c.y;const d=Math.sqrt(dx*dx+dy*dy);if(d>JR){dx=dx/d*JR;dy=dy/d*JR;}camJoy.x=dx/JR;camKnob.style.transform=`translate(${dx}px,${dy}px)`;}
+camBase.addEventListener('touchstart',e=>{e.preventDefault();const t=e.changedTouches[0];camJoy.active=true;camJoy.id=t.identifier;updateCamJoy(t.clientX,t.clientY);},{passive:false});
+document.addEventListener('touchmove',e=>{if(!camJoy.active)return;for(const t of e.changedTouches)if(t.identifier===camJoy.id){e.preventDefault();updateCamJoy(t.clientX,t.clientY);}},{passive:false});
+document.addEventListener('touchend',e=>{for(const t of e.changedTouches)if(t.identifier===camJoy.id){camJoy.active=false;camJoy.x=0;camKnob.style.transform='translate(0,0)';}});
 let mDrag={active:false,lastX:0};
-renderer.domElement.addEventListener('mousedown',e=>{ mDrag.active=true; mDrag.lastX=e.clientX; });
-document.addEventListener('mousemove',e=>{ if(!mDrag.active)return; cameraYaw-=(e.clientX-mDrag.lastX)*0.005; mDrag.lastX=e.clientX; });
+renderer.domElement.addEventListener('mousedown',e=>{mDrag.active=true;mDrag.lastX=e.clientX;});
+document.addEventListener('mousemove',e=>{if(!mDrag.active)return;cameraYaw-=(e.clientX-mDrag.lastX)*0.005;mDrag.lastX=e.clientX;});
 document.addEventListener('mouseup',()=>mDrag.active=false);
-const keys={};
-document.addEventListener('keydown',e=>keys[e.key]=true);
-document.addEventListener('keyup',e=>keys[e.key]=false);
+const keys={};document.addEventListener('keydown',e=>keys[e.key]=true);document.addEventListener('keyup',e=>keys[e.key]=false);
 const JVN=9,JVS=20,GR=28;
-let jumpVel=0, onGround=true, jtc=0, jtt=null;
-function doJump(){ if(!onGround)return; jtc++; clearTimeout(jtt); if(jtc>=2){ jtc=0; jumpVel=JVS; onGround=false; showToast('🚀 SUPER SAUT !'); } else { jtt=setTimeout(()=>{ if(jtc===1&&onGround){ jumpVel=JVN; onGround=false; } jtc=0; },280); } }
-document.getElementById('jump-btn').addEventListener('touchstart',e=>{ e.preventDefault(); doJump(); },{passive:false});
+let jumpVel=0,onGround=true,jtc=0,jtt=null;
+function doJump(){if(!onGround)return;jtc++;clearTimeout(jtt);if(jtc>=2){jtc=0;jumpVel=JVS;onGround=false;showToast('🚀 SUPER SAUT!');}else{jtt=setTimeout(()=>{if(jtc===1&&onGround){jumpVel=JVN;onGround=false;}jtc=0;},280);}}
+document.getElementById('jump-btn').addEventListener('touchstart',e=>{e.preventDefault();doJump();},{passive:false});
 document.getElementById('jump-btn').addEventListener('click',doJump);
-document.getElementById('super-jump-btn').addEventListener('touchstart',e=>{ e.preventDefault(); if(!onGround)return; jtc=0; clearTimeout(jtt); jumpVel=JVS; onGround=false; showToast('🚀 SUPER SAUT !'); },{passive:false});
-document.getElementById('super-jump-btn').addEventListener('click',()=>{ if(!onGround)return; jtc=0; clearTimeout(jtt); jumpVel=JVS; onGround=false; showToast('🚀 SUPER SAUT !'); });
+document.getElementById('super-jump-btn').addEventListener('touchstart',e=>{e.preventDefault();if(!onGround)return;jtc=0;clearTimeout(jtt);jumpVel=JVS;onGround=false;showToast('🚀 SUPER SAUT!');},{passive:false});
+document.getElementById('super-jump-btn').addEventListener('click',()=>{if(!onGround)return;jtc=0;clearTimeout(jtt);jumpVel=JVS;onGround=false;showToast('🚀 SUPER SAUT!');});
 
 // ── MÉTRO UI ──────────────────────────────────────────────
-let inMetro=false, metroStationsVisited=new Set(), metroMenuOpen=false;
+let inMetro=false,metroStationsVisited=new Set(),metroMenuOpen=false;
 function openMetroMenu(fromStation){
-  metroMenuOpen=true; document.getElementById('metro-hud').classList.add('show');
-  const stDiv=document.getElementById('metro-stations'); stDiv.innerHTML='';
+  metroMenuOpen=true;document.getElementById('metro-hud').classList.add('show');
+  const stDiv=document.getElementById('metro-stations');stDiv.innerHTML='';
   METRO_STATIONS.filter(s=>s.id!==fromStation).forEach(st=>{
-    const btn=document.createElement('button'); btn.className='metro-station-btn'; btn.textContent=st.name;
-    btn.onclick=()=>rideMetroTo(st); stDiv.appendChild(btn);
+    const btn=document.createElement('button');btn.className='metro-station-btn';btn.textContent=st.name;
+    btn.onclick=()=>rideMetroTo(st);stDiv.appendChild(btn);
   });
 }
-document.getElementById('metro-close').addEventListener('click',()=>{ metroMenuOpen=false; document.getElementById('metro-hud').classList.remove('show'); });
+document.getElementById('metro-close').addEventListener('click',()=>{metroMenuOpen=false;document.getElementById('metro-hud').classList.remove('show');});
 function rideMetroTo(targetStation){
-  metroMenuOpen=false; document.getElementById('metro-hud').classList.remove('show');
-  inMetro=true; showToast('🚇 En route vers '+targetStation.name,'boat'); addChat('🚇 Direction '+targetStation.name+'…','Métro');
+  metroMenuOpen=false;document.getElementById('metro-hud').classList.remove('show');
+  inMetro=true;showToast('🚇 En route vers '+targetStation.name,'boat');addChat('🚇 Direction '+targetStation.name+'…','Métro');
   setTimeout(()=>{
-    inMetro=false; pp.x=targetStation.x; pp.z=targetStation.z+3; pp.y=METRO_ELEV+0.6;
+    inMetro=false;
+    // Arriver au bas des escaliers de la station cible
+    pp.x=targetStation.x;pp.z=targetStation.stairsTopZ||targetStation.z+3;pp.y=METRO_ELEV+0.6;
     document.getElementById('zone-label').textContent=targetStation.label;
     showToast('✅ Arrivée à '+targetStation.name,'mission');
     metroStationsVisited.add(targetStation.id);
     updateMissionProgress('metro',metroStationsVisited.size);
-    if(metroStationsVisited.size>=3) completeMission('metro','Tu as visité 3 stations de métro !');
-  }, 3500);
+    if(metroStationsVisited.size>=3)completeMission('metro','Tu as visité 3 stations !');
+  },3500);
 }
 
 // INTERACT PROMPT
-const interactPrompt=document.getElementById('interact-prompt'); let interactAction=null;
-function setInteractPrompt(text,action){ interactPrompt.textContent=text; interactPrompt.classList.add('show'); interactAction=action; }
-function clearInteractPrompt(){ interactPrompt.classList.remove('show'); interactAction=null; }
-interactPrompt.addEventListener('click',()=>{ if(interactAction) interactAction(); });
-interactPrompt.addEventListener('touchstart',e=>{ e.preventDefault(); if(interactAction) interactAction(); },{passive:false});
-document.addEventListener('keydown',e=>{ if((e.key==='f'||e.key==='F'||e.key==='Enter')&&interactAction) interactAction(); });
+const interactPrompt=document.getElementById('interact-prompt');let interactAction=null;
+function setInteractPrompt(text,action){interactPrompt.textContent=text;interactPrompt.classList.add('show');interactAction=action;}
+function clearInteractPrompt(){interactPrompt.classList.remove('show');interactAction=null;}
+interactPrompt.addEventListener('click',()=>{if(interactAction)interactAction();});
+interactPrompt.addEventListener('touchstart',e=>{e.preventDefault();if(interactAction)interactAction();},{passive:false});
+document.addEventListener('keydown',e=>{if((e.key==='f'||e.key==='F'||e.key==='Enter')&&interactAction)interactAction();});
 
 // ── ÉTATS RUNTIME ─────────────────────────────────────────
-let isShrunk=false, shrunkTimer=null;
-let isInSewer=false, sewerFloorY=-6;
-let isOnLadder=false, ladderTopY=0, ladderLX=0, ladderLZ=0;
+let isShrunk=false,shrunkTimer=null;
+let isInSewer=false,sewerFloorY=-6;
+let isOnLadder=false,ladderTopY=0,ladderLX=0,ladderLZ=0;
 let sewerCoinsCollected=0;
-function enterShrink(){ if(isShrunk)return; isShrunk=true; document.getElementById('shrink-overlay').classList.add('active'); document.getElementById('zone-label').textContent='🔬 Zone Micro'; showToast('🔬 Tu as rétrécis !','secret'); completeMission('wall','Tu as traversé le mur magique !'); clearTimeout(shrunkTimer); shrunkTimer=setTimeout(()=>exitShrink(),15000); }
-function exitShrink(){ if(!isShrunk)return; isShrunk=false; document.getElementById('shrink-overlay').classList.remove('active'); document.getElementById('zone-label').textContent='東京 Shinjuku'; }
-function enterSewer(){ if(isInSewer)return; isInSewer=true; document.getElementById('sewer-overlay').classList.add('active'); document.getElementById('zone-label').textContent='🐀 Égouts de Tokyo'; }
-function exitSewer(){ if(!isInSewer)return; isInSewer=false; document.getElementById('sewer-overlay').classList.remove('active'); document.getElementById('zone-label').textContent='東京 Shinjuku'; }
+function enterShrink(){if(isShrunk)return;isShrunk=true;document.getElementById('shrink-overlay').classList.add('active');document.getElementById('zone-label').textContent='🔬 Zone Micro';showToast('🔬 Tu as rétrécis!','secret');completeMission('wall','Tu as traversé le mur magique!');clearTimeout(shrunkTimer);shrunkTimer=setTimeout(()=>exitShrink(),15000);}
+function exitShrink(){if(!isShrunk)return;isShrunk=false;document.getElementById('shrink-overlay').classList.remove('active');document.getElementById('zone-label').textContent='東京 Shinjuku';}
+function enterSewer(){if(isInSewer)return;isInSewer=true;document.getElementById('sewer-overlay').classList.add('active');document.getElementById('zone-label').textContent='🐀 Égouts de Tokyo';}
+function exitSewer(){if(!isInSewer)return;isInSewer=false;document.getElementById('sewer-overlay').classList.remove('active');document.getElementById('zone-label').textContent='東京 Shinjuku';}
 
 // MARKERS
 const markersDiv=document.getElementById('markers');
 const markerDefs=[
-  {id:'m1',icon:'🪜',label:'Grimpe!', color:'#f5c842'},{id:'m2',icon:'💧',label:'Secret',  color:'#4488ff'},
-  {id:'m3',icon:'🔮',label:'Magie',   color:'#88ccff'},{id:'m4',icon:'🐀',label:'Égouts',  color:'#80ff40'},
-  {id:'m5',icon:'🚇',label:'Métro',   color:'#2266cc'},{id:'m6',icon:'⛵',label:'Bateau',  color:'#3498db'},
-  {id:'m7',icon:'🗼',label:'Eiffel',  color:'#f5c000'},
+  {id:'m1',icon:'🪜',label:'Grimpe!',color:'#f5c842'},{id:'m2',icon:'💧',label:'Secret',color:'#4488ff'},
+  {id:'m3',icon:'🔮',label:'Magie',color:'#88ccff'},{id:'m4',icon:'🐀',label:'Égouts',color:'#80ff40'},
+  {id:'m5',icon:'🚇',label:'Métro',color:'#2266cc'},{id:'m6',icon:'⛵',label:'Bateau',color:'#3498db'},
+  {id:'m7',icon:'🗼',label:'Eiffel',color:'#f5c000'},{id:'m8',icon:'🗽',label:'Statue',color:'#44cc88'},
 ];
 const markerEls={};
-markerDefs.forEach(d=>{
-  const el=document.createElement('div'); el.className='marker';
-  el.innerHTML=`<div class="marker-icon" style="background:rgba(0,0,0,.7);border:2px solid ${d.color}">${d.icon}</div><span class="marker-label" style="color:${d.color}">${d.label}</span>`;
-  markersDiv.appendChild(el); markerEls[d.id]=el;
-});
+markerDefs.forEach(d=>{const el=document.createElement('div');el.className='marker';el.innerHTML=`<div class="marker-icon" style="background:rgba(0,0,0,.7);border:2px solid ${d.color}">${d.icon}</div><span class="marker-label" style="color:${d.color}">${d.label}</span>`;markersDiv.appendChild(el);markerEls[d.id]=el;});
 const MARKER_WORLD={
-  m1:new THREE.Vector3(44.5,1,-18.4), m2:new THREE.Vector3(-45,1.5,45),
-  m3:new THREE.Vector3(60,1.5,-80),   m4:new THREE.Vector3(-90,1.5,-70),
-  m5:new THREE.Vector3(-60,METRO_ELEV,-30), m6:new THREE.Vector3(135,4,-30),
-  m7:new THREE.Vector3(0,80,-200)
+  m1:new THREE.Vector3(44.5,1,-18.4),m2:new THREE.Vector3(-45,1.5,45),
+  m3:new THREE.Vector3(60,1.5,-80),m4:new THREE.Vector3(-90,1.5,-70),
+  m5:new THREE.Vector3(-60,METRO_ELEV,-30),m6:new THREE.Vector3(135,4,-30),
+  m7:new THREE.Vector3(EX,80,EZ),m8:new THREE.Vector3(SLX,50,SLZ),
 };
 function updateMarkers(){
   Object.entries(MARKER_WORLD).forEach(([id,pos3])=>{
-    const el=markerEls[id]; if(!el)return;
-    _v3.copy(pos3).project(camera); // <!-- PATCH: réutilise _v3, pas de clone() -->
-    const behind=(_v3.z>1); const x=(_v3.x+1)/2*window.innerWidth; const y=(1-_v3.y)/2*window.innerHeight;
+    const el=markerEls[id];if(!el)return;
+    _v3.copy(pos3).project(camera);const behind=_v3.z>1;
+    const x=(_v3.x+1)/2*window.innerWidth,y=(1-_v3.y)/2*window.innerHeight;
     const dist=pos3.distanceTo(pp);
-    if(!behind&&dist<120&&dist>3){ el.classList.add('visible'); el.style.left=x+'px'; el.style.top=y+'px'; }
+    if(!behind&&dist<150&&dist>3){el.classList.add('visible');el.style.left=x+'px';el.style.top=y+'px';}
     else el.classList.remove('visible');
   });
 }
-
-// Ombre joueur
 const blob=new THREE.Mesh(new THREE.CircleGeometry(0.5,12),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:0.2,depthWrite:false}));
-blob.rotation.x=-Math.PI/2; blob.position.y=0.012; scene.add(blob);
+blob.rotation.x=-Math.PI/2;blob.position.y=0.012;scene.add(blob);
 
 // ── BOUCLE ────────────────────────────────────────────────
-const SPEED=6, BOUND=WORLD-4;
+const SPEED=6,BOUND=WORLD-4;
 const pp=new THREE.Vector3(0,0,8);
-let pRot=0, cameraYaw=Math.PI;
-const clock=new THREE.Clock(); let time=0;
-// Vecteur position bubble réutilisé
+let pRot=0,cameraYaw=Math.PI;
+const clock=new THREE.Clock();let time=0;
 const _bubV=new THREE.Vector3();
+const altHud=document.getElementById('altitude-hud'),altVal=document.getElementById('altitude-val');
 
-finishLoading();
-renderMissions();
+finishLoading();renderMissions();
 
 function animate(){
   requestAnimationFrame(animate);
-  const dt=Math.min(clock.getDelta(),0.08);
-  time+=dt;
-  if(avatarMixer) avatarMixer.update(dt);
+  const dt=Math.min(clock.getDelta(),0.08);time+=dt;
+  if(avatarMixer)avatarMixer.update(dt);
+  waterTex.offset.x=time*0.008;waterTex.offset.y=time*0.006;
+  mooredBoats.forEach((b,i)=>{b.mesh.rotation.z=Math.sin(time*0.6+i)*0.025;b.mesh.position.y=-1.5+Math.sin(time*0.7+i)*0.1;});
+  if(puddleZones.length){const pz=puddleZones[0];pz.arrow.rotation.y=time*2;pz.arrow.position.y=1.2+0.2*Math.sin(time*2);}
+  if(missionZones.length){const sz2=missionZones[0];sz2.arrow.rotation.y=time*1.5;sz2.arrow.position.y=1.5+0.25*Math.sin(time*1.8);sz2.sewerCoins.forEach(c=>{if(!c.collected)c.mesh.rotation.z=time*2;});}
+  if(wallPassZones.length&&!wallPassZones[0].treasureCollected)wallPassZones[0].treasure.rotation.y=time;
 
-  // Eau (offset texture seulement, pas recalcul matériau)
-  waterTex.offset.x=time*0.008; waterTex.offset.y=time*0.006;
+  // Clignotement antennes (liste propre, pas scene.children.forEach)
+  blinkMeshes.forEach(b=>{b.mesh.material.emissiveIntensity=0.4+0.4*Math.sin(time*4+(b.t||0));});
 
-  // Bateaux amarrés : tangage léger
-  mooredBoats.forEach((b,i)=>{ b.mesh.rotation.z=Math.sin(time*0.6+i)*0.025; b.mesh.position.y=-1.5+Math.sin(time*0.7+i)*0.1; });
-
-  // Animations missions
-  if(puddleZones.length){ const pz=puddleZones[0]; pz.arrow.rotation.y=time*2; pz.arrow.position.y=1.2+0.2*Math.sin(time*2); }
-  if(missionZones.length){
-    const sz2=missionZones[0]; sz2.arrow.rotation.y=time*1.5; sz2.arrow.position.y=1.5+0.25*Math.sin(time*1.8);
-    sz2.sewerCoins.forEach(c=>{ if(!c.collected){ c.mesh.rotation.z=time*2; } });
-  }
-  if(wallPassZones.length&&!wallPassZones[0].treasureCollected) wallPassZones[0].treasure.rotation.y=time;
-
-  // Clignotement antennes <!-- PATCH: itération sur userData.blink seulement -->
-  scene.children.forEach(obj=>{ if(obj.userData.blink) obj.material.emissiveIntensity=0.4+0.4*Math.sin(time*4+(obj.userData.t||0)); });
-
-  // Métro + voitures
-  updateMetroTrain(dt);
-  updateGLBCars(dt);
-  updateCars(dt);
-
-  // Bateau
-  if(inBoat){ updateBoat(dt); setWalkSwap(false); }
+  updateMetroTrain(dt);updateGLBCars(dt);updateCars(dt);
+  if(inBoat){updateBoat(dt);setWalkSwap(false);}
 
   // Input
-  let mx=joy.x, mz=-joy.y;
-  if(keys['ArrowUp']  ||keys['w']||keys['W']) mz= 1;
-  if(keys['ArrowDown']||keys['s']||keys['S']) mz=-1;
-  if(keys['ArrowLeft']||keys['a']||keys['A']) mx=-1;
-  if(keys['ArrowRight']||keys['d']||keys['D']) mx= 1;
-  if(keys[' ']&&onGround&&!inBoat) doJump();
-  if(camJoy.active&&Math.abs(camJoy.x)>0.04&&!inBoat) cameraYaw-=camJoy.x*2.2*dt;
-  if(keys['q']||keys['Q']) cameraYaw+=1.8*dt;
-  if(keys['e']||keys['E']) cameraYaw-=1.8*dt;
+  let mx=joy.x,mz=-joy.y;
+  if(keys['ArrowUp']||keys['w']||keys['W'])mz=1;if(keys['ArrowDown']||keys['s']||keys['S'])mz=-1;
+  if(keys['ArrowLeft']||keys['a']||keys['A'])mx=-1;if(keys['ArrowRight']||keys['d']||keys['D'])mx=1;
+  if(keys[' ']&&onGround&&!inBoat)doJump();
+  if(camJoy.active&&Math.abs(camJoy.x)>0.04&&!inBoat)cameraYaw-=camJoy.x*2.2*dt;
+  if(keys['q']||keys['Q'])cameraYaw+=1.8*dt;if(keys['e']||keys['E'])cameraYaw-=1.8*dt;
   const moving=Math.abs(mx)>0.05||Math.abs(mz)>0.05;
-  if(moving&&emoteTimer){ clearTimeout(emoteTimer); emoteTimer=null; }
+  if(moving&&emoteTimer){clearTimeout(emoteTimer);emoteTimer=null;}
+
+  // Altitude HUD
+  if(pp.y>5){altHud.classList.add('show');altVal.textContent=Math.round(pp.y);}else altHud.classList.remove('show');
 
   // Interactions proximité
   if(!inBoat&&!inMetro&&!metroMenuOpen){
     const dBoat=Math.sqrt((pp.x-boatX)**2+(pp.z-boatZ)**2);
-    const nearStation=METRO_STATIONS.find(s=>Math.sqrt((pp.x-s.x)**2+(pp.z-s.z)**2)<5);
-    if(nearStation&&Math.abs(pp.y-METRO_ELEV)<3&&pp.y>METRO_ELEV-2){
-      setInteractPrompt('🚇 Prendre le métro à '+nearStation.name,()=>{ openMetroMenu(nearStation.id); clearInteractPrompt(); });
-    } else if(dBoat<8&&pp.y<3){
+    // Station métro : détection au pied des escaliers (au sol ou sur le quai)
+    const nearStation=METRO_STATIONS.find(s=>{
+      const d=Math.sqrt((pp.x-s.x)**2+(pp.z-s.z)**2);
+      // Au sol près des escaliers OU sur le quai
+      const onQuai=Math.abs(pp.y-METRO_ELEV)<2;
+      const atBase=d<8&&pp.y<3;
+      return (atBase||onQuai)&&d<9;
+    });
+    if(nearStation){
+      setInteractPrompt('🚇 Prendre le métro — '+nearStation.name,()=>{openMetroMenu(nearStation.id);clearInteractPrompt();});
+    }else if(dBoat<8&&pp.y<3){
       setInteractPrompt('⛵ Monter sur le bateau',()=>{
-        inBoat=true; boatX=playerBoat.position.x; boatZ=playerBoat.position.z; boatVel=0;
-        document.getElementById('boat-hud').classList.add('show'); clearInteractPrompt();
-        showToast('⛵ Tu pilotes le bateau !','boat'); completeMission('boat','Capitaine de la baie de Tokyo !');
+        inBoat=true;boatX=playerBoat.position.x;boatZ=playerBoat.position.z;boatVel=0;
+        document.getElementById('boat-hud').classList.add('show');clearInteractPrompt();
+        showToast('⛵ Tu pilotes le bateau!','boat');completeMission('boat','Capitaine de la baie !');
       });
-    } else clearInteractPrompt();
+    }else clearInteractPrompt();
   }
 
   // Physique
   if(!inBoat){
     const lz=ladderZones[0];
     const distLadder=Math.sqrt((pp.x-lz.x)**2+(pp.z-lz.z)**2);
-    if(distLadder<1.5&&!isOnLadder&&mz>0.3){ isOnLadder=true; ladderLX=lz.x; ladderLZ=lz.z; ladderTopY=lz.topY; showToast('🪜 Monte avec ↑'); }
+    if(distLadder<1.5&&!isOnLadder&&mz>0.3){isOnLadder=true;ladderLX=lz.x;ladderLZ=lz.z;ladderTopY=lz.topY;showToast('🪜 Monte avec ↑');}
     if(isOnLadder){
-      pp.x=ladderLX; pp.z=ladderLZ; onGround=false; jumpVel=0;
-      if(mz>0.2) pp.y=Math.min(pp.y+4*dt,ladderTopY+0.2);
-      else if(mz<-0.2) pp.y=Math.max(pp.y-4*dt,0);
-      if(pp.y<=0.1){ isOnLadder=false; pp.y=0; onGround=true; }
-      if(pp.y>=ladderTopY-0.5){ isOnLadder=false; onGround=true; pp.x=lz.platX; pp.z=lz.platZ; pp.y=ladderTopY+0.2; completeMission('ladder','Sommet du gratte-ciel atteint !'); updateMissionProgress('ladder',1); }
+      pp.x=ladderLX;pp.z=ladderLZ;onGround=false;jumpVel=0;
+      if(mz>0.2)pp.y=Math.min(pp.y+4*dt,ladderTopY+0.2);else if(mz<-0.2)pp.y=Math.max(pp.y-4*dt,0);
+      if(pp.y<=0.1){isOnLadder=false;pp.y=0;onGround=true;}
+      if(pp.y>=ladderTopY-0.5){isOnLadder=false;onGround=true;pp.x=lz.platX;pp.z=lz.platZ;pp.y=ladderTopY+0.2;completeMission('ladder','Sommet du gratte-ciel!');updateMissionProgress('ladder',1);}
       setWalkSwap(false);
-    } else if(!isInSewer){
+    }else if(!isInSewer){
       if(moving){
-        const sc=Math.sin(cameraYaw), cc=Math.cos(cameraYaw);
+        const sc=Math.sin(cameraYaw),cc=Math.cos(cameraYaw);
         const spd=isShrunk?SPEED*0.4:SPEED;
-        const dx=(sc*(-mz)+cc*mx)*spd*dt, dz=(cc*(-mz)-sc*mx)*spd*dt;
-        let nx=pp.x+dx, nz=pp.z+dz;
-        if(!isShrunk){ const res=resCol(nx,nz,pp.y); nx=res.x; nz=res.z; }
-        pp.x=Math.max(-BOUND,Math.min(BOUND,nx)); pp.z=Math.max(-BOUND,Math.min(BOUND,nz));
+        const dx=(sc*(-mz)+cc*mx)*spd*dt,dz=(cc*(-mz)-sc*mx)*spd*dt;
+        let nx=pp.x+dx,nz=pp.z+dz;
+        if(!isShrunk){const res=resCol(nx,nz,pp.y);nx=res.x;nz=res.z;}
+        pp.x=Math.max(-BOUND,Math.min(BOUND,nx));pp.z=Math.max(-BOUND,Math.min(BOUND,nz));
         pRot=Math.atan2(dx,dz);
-        const tY=pRot+Math.PI; let diff=tY-cameraYaw;
-        while(diff>Math.PI) diff-=2*Math.PI; while(diff<-Math.PI) diff+=2*Math.PI;
+        const tY=pRot+Math.PI;let diff=tY-cameraYaw;
+        while(diff>Math.PI)diff-=2*Math.PI;while(diff<-Math.PI)diff+=2*Math.PI;
         cameraYaw+=diff*Math.min(4*dt,1.0);
       }
-      if(!onGround){ jumpVel-=GR*dt; pp.y+=jumpVel*dt; if(pp.y<=0){ pp.y=0; jumpVel=0; onGround=true; } }
-      if(onGround&&!isOnLadder) setWalkSwap(moving);
-    } else {
+      if(!onGround){jumpVel-=GR*dt;pp.y+=jumpVel*dt;if(pp.y<=0){pp.y=0;jumpVel=0;onGround=true;}}
+      if(onGround&&!isOnLadder)setWalkSwap(moving);
+    }else{
       if(moving){
-        const sc=Math.sin(cameraYaw), cc=Math.cos(cameraYaw);
-        const dx=(sc*(-mz)+cc*mx)*SPEED*0.7*dt, dz=(cc*(-mz)-sc*mx)*SPEED*0.7*dt;
-        pp.x=Math.max(-BOUND,Math.min(BOUND,pp.x+dx)); pp.z=Math.max(-BOUND,Math.min(BOUND,pp.z+dz));
-        pRot=Math.atan2(dx,dz);
-        const tY=pRot+Math.PI; let diff=tY-cameraYaw;
-        while(diff>Math.PI) diff-=2*Math.PI; while(diff<-Math.PI) diff+=2*Math.PI;
+        const sc=Math.sin(cameraYaw),cc=Math.cos(cameraYaw);
+        const dx=(sc*(-mz)+cc*mx)*SPEED*0.7*dt,dz=(cc*(-mz)-sc*mx)*SPEED*0.7*dt;
+        pp.x=Math.max(-BOUND,Math.min(BOUND,pp.x+dx));pp.z=Math.max(-BOUND,Math.min(BOUND,pp.z+dz));
+        pRot=Math.atan2(dx,dz);const tY=pRot+Math.PI;let diff=tY-cameraYaw;
+        while(diff>Math.PI)diff-=2*Math.PI;while(diff<-Math.PI)diff+=2*Math.PI;
         cameraYaw+=diff*Math.min(4*dt,1.0);
       }
-      pp.y=sewerFloorY+0.1; onGround=true; jumpVel=0; setWalkSwap(moving);
+      pp.y=sewerFloorY+0.1;onGround=true;jumpVel=0;setWalkSwap(moving);
       const sz2=missionZones[0];
-      sz2.sewerCoins.forEach(c=>{ if(!c.collected){ const d2=Math.sqrt((pp.x-c.mesh.position.x)**2+(pp.z-c.mesh.position.z)**2); if(d2<1.2){ c.collected=true; c.mesh.visible=false; sewerCoinsCollected++; showToast(`💚 Capsule ${sewerCoinsCollected}/5 !`,'mission'); updateMissionProgress('sewer',sewerCoinsCollected); if(sewerCoinsCollected>=5) completeMission('sewer','Toutes les capsules collectées !'); } } });
-      if(Math.sqrt((pp.x-(-90))**2+(pp.z-(-70))**2)<2.5) exitSewer();
+      sz2.sewerCoins.forEach(c=>{if(!c.collected){const d2=Math.sqrt((pp.x-c.mesh.position.x)**2+(pp.z-c.mesh.position.z)**2);if(d2<1.2){c.collected=true;c.mesh.visible=false;sewerCoinsCollected++;showToast(`💚 Capsule ${sewerCoinsCollected}/5!`,'mission');updateMissionProgress('sewer',sewerCoinsCollected);if(sewerCoinsCollected>=5)completeMission('sewer','Toutes les capsules!');}}});
+      if(Math.sqrt((pp.x-(-90))**2+(pp.z-(-70))**2)<2.5)exitSewer();
     }
 
     // Zones
-    if(puddleZones.length){ const pud=puddleZones[0]; const dPud=Math.sqrt((pp.x-pud.x)**2+(pp.z-pud.z)**2); if(dPud<pud.r&&!isInSewer&&onGround&&!missions.find(x=>x.id==='puddle')?.done){ missions.find(x=>x.id==='puddle').done=true; missions.find(x=>x.id==='puddle').progress=1; enterSewer(); pp.x=-90; pp.z=-70; pp.y=sewerFloorY+0.1; showToast('🌊 Aspiré !','secret'); renderMissions(); } }
-    if(wallPassZones.length){ const wp=wallPassZones[0]; const inZone=Math.abs(pp.x-wp.x)<wp.halfW+1&&Math.abs(pp.z-wp.z)<wp.halfD+0.8; if(inZone&&!isShrunk) enterShrink(); if(!wp.treasureCollected){ const dT=Math.sqrt((pp.x-(wp.x-8))**2+(pp.z-wp.z)**2); if(dT<1.5&&isShrunk){ wp.treasureCollected=true; wp.treasure.visible=false; showToast('💎 Trésor secret !','mission'); } } if(isShrunk&&Math.abs(pp.x-wp.x)>20) exitShrink(); }
-    if(missionZones.length){ const sz2=missionZones[0]; const dSewer=Math.sqrt((pp.x-sz2.entryX)**2+(pp.z-sz2.entryZ)**2); if(dSewer<2&&!isInSewer&&onGround){ enterSewer(); pp.y=sewerFloorY+0.1; } }
-    if(sewerZones.length&&isInSewer){ const sv=sewerZones[0]; const dExit=Math.sqrt((pp.x-sv.exitX)**2+(pp.z-sv.exitZ)**2); if(dExit<2){ exitSewer(); pp.y=0.1; } if(!sv.coinCollected){ const dCoin=Math.sqrt((pp.x-sv.coin.position.x)**2+(pp.z-sv.coin.position.z)**2); if(dCoin<1.5){ sv.coinCollected=true; sv.coin.visible=false; showToast('🪙 Pièce du tunnel !','mission'); } } }
+    if(puddleZones.length){const pud=puddleZones[0];const dPud=Math.sqrt((pp.x-pud.x)**2+(pp.z-pud.z)**2);if(dPud<pud.r&&!isInSewer&&onGround&&!missions.find(x=>x.id==='puddle')?.done){missions.find(x=>x.id==='puddle').done=true;missions.find(x=>x.id==='puddle').progress=1;enterSewer();pp.x=-90;pp.z=-70;pp.y=sewerFloorY+0.1;showToast('🌊 Aspiré!','secret');renderMissions();}}
+    if(wallPassZones.length){const wp=wallPassZones[0];const inZone=Math.abs(pp.x-wp.x)<wp.halfW+1&&Math.abs(pp.z-wp.z)<wp.halfD+0.8;if(inZone&&!isShrunk)enterShrink();if(!wp.treasureCollected){const dT=Math.sqrt((pp.x-(wp.x-8))**2+(pp.z-wp.z)**2);if(dT<1.5&&isShrunk){wp.treasureCollected=true;wp.treasure.visible=false;showToast('💎 Trésor secret!','mission');}}if(isShrunk&&Math.abs(pp.x-wp.x)>20)exitShrink();}
+    if(missionZones.length){const sz2=missionZones[0];const dSewer=Math.sqrt((pp.x-sz2.entryX)**2+(pp.z-sz2.entryZ)**2);if(dSewer<2&&!isInSewer&&onGround){enterSewer();pp.y=sewerFloorY+0.1;}}
+    if(sewerZones.length&&isInSewer){const sv=sewerZones[0];const dExit=Math.sqrt((pp.x-sv.exitX)**2+(pp.z-sv.exitZ)**2);if(dExit<2){exitSewer();pp.y=0.1;}if(!sv.coinCollected){const dCoin=Math.sqrt((pp.x-sv.coin.position.x)**2+(pp.z-sv.coin.position.z)**2);if(dCoin<1.5){sv.coinCollected=true;sv.coin.visible=false;showToast('🪙 Pièce du tunnel!','mission');}}}
+
+    // ── MISSIONS TOUR EIFFEL ──
+    const dEiffel=Math.sqrt((pp.x-EX)**2+(pp.z-EZ)**2);
+    if(dEiffel<30){
+      if(pp.y>=50&&pp.y<105)completeMission('eiffel1','1er étage de la Tour Eiffel !');
+      if(pp.y>=105&&pp.y<155)completeMission('eiffel2','2e étage de la Tour Eiffel !');
+      if(pp.y>=155)completeMission('eiffel3','Sommet de la Tour Eiffel !');
+    }
+
+    // ── MISSION STATUE ──
+    const dStatue=Math.sqrt((pp.x-SLX)**2+(pp.z-SLZ)**2);
+    if(dStatue<15&&pp.y>=SL_TOP-8)completeMission('statue','Sommet de la Statue de la Liberté !');
   }
 
   // Avatar
   avatarGroup.scale.setScalar(isShrunk?0.35:1);
-  if(!inBoat){ avatarGroup.position.set(pp.x,pp.y,pp.z); avatarGroup.rotation.y=pRot; }
-  else{ avatarGroup.position.set(boatX,5,boatZ); avatarGroup.rotation.y=boatRot; }
-  blob.position.x=pp.x; blob.position.z=pp.z; blob.position.y=isInSewer?sewerFloorY+0.02:0.012;
+  if(!inBoat){avatarGroup.position.set(pp.x,pp.y,pp.z);avatarGroup.rotation.y=pRot;}
+  else{avatarGroup.position.set(boatX,5,boatZ);avatarGroup.rotation.y=boatRot;}
+  blob.position.x=pp.x;blob.position.z=pp.z;blob.position.y=isInSewer?sewerFloorY+0.02:0.012;
 
-  // Caméra
+  // Caméra — distance augmentée en hauteur pour voir les tours
   const camDist=inBoat?20:isShrunk?3:isInSewer?4:8;
-  const camH    =inBoat?10:isShrunk?1:isInSewer?1.5:2.6;
-  const camLookY=inBoat?4: isShrunk?.5:isInSewer?.5:1.2;
-  camera.position.set(pp.x+Math.sin(cameraYaw)*camDist, pp.y+camH, pp.z+Math.cos(cameraYaw)*camDist);
-  camera.lookAt(pp.x, pp.y+camLookY, pp.z);
+  const camH=inBoat?10:isShrunk?1:isInSewer?1.5:2.6;
+  const camLookY=inBoat?4:isShrunk?.5:isInSewer?.5:1.2;
+  camera.position.set(pp.x+Math.sin(cameraYaw)*camDist,pp.y+camH,pp.z+Math.cos(cameraYaw)*camDist);
+  camera.lookAt(pp.x,pp.y+camLookY,pp.z);
 
   // Bulle
   if(bubbleEl.style.opacity!=='0'){
-    _bubV.set(pp.x,pp.y+2.3,pp.z).project(camera); // <!-- PATCH: réutilise _bubV -->
+    _bubV.set(pp.x,pp.y+2.3,pp.z).project(camera);
     bubbleEl.style.left=((_bubV.x+1)/2*window.innerWidth)+'px';
     bubbleEl.style.top=((1-_bubV.y)/2*window.innerHeight-44)+'px';
   }
@@ -1118,6 +1102,5 @@ function animate(){
 }
 animate();
 </script>
-
 </body>
 </html>
