@@ -277,7 +277,7 @@ window.addEventListener('resize',()=>{renderer.setSize(window.innerWidth,window.
 // ── LUMIÈRES ──────────────────────────────────────────────────
 scene.add(new THREE.HemisphereLight(0x87CEEB,0xc8b89a,1.1));
 const sun=new THREE.DirectionalLight(0xfff5e0,2.4);sun.position.set(80,150,60);sun.castShadow=true;
-sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-200;sun.shadow.camera.bottom=-200;
+sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-200;sun.shadow.camera.bottom=-200;
 sun.shadow.camera.right=200;sun.shadow.camera.top=200;sun.shadow.camera.far=500;sun.shadow.bias=-0.001;scene.add(sun);
 const fillLight=new THREE.DirectionalLight(0xc8d8f0,0.55);fillLight.position.set(-50,80,-80);scene.add(fillLight);
 
@@ -783,20 +783,26 @@ function updateMetroTrain(dt){
 }
 
 // ─────────────────────────────────────────────────────────
-// VOITURES GLB — Alfa + Renault sur les routes
+// VOITURES GLB — échelle réelle 1 unité = 1 mètre
+// Alfa ~4.2m long, Renault 5 ~3.5m long
+// On réduit le nombre pour limiter la RAM
 // ─────────────────────────────────────────────────────────
-// Cache des modèles GLB voitures (on clone pour performances)
 const carGLBCache={};
-function loadCarGLB(file, cb){
-  if(carGLBCache[file]){cb(carGLBCache[file].clone());return;}
+function loadCarGLB(file, targetLength, cb){
+  if(carGLBCache[file]){
+    const clone=carGLBCache[file].clone();cb(clone);return;
+  }
   gltfLoader.load(BASE+file, gltf=>{
     const model=gltf.scene;
-    model.traverse(n=>{if(n.isMesh){n.castShadow=true;n.receiveShadow=true;}});
-    // Normaliser à ~4.5 unités de long
+    model.traverse(n=>{
+      if(n.isMesh){n.castShadow=true;n.receiveShadow=true;n.frustumCulled=true;}
+    });
     const bb=new THREE.Box3().setFromObject(model);
     const sz=new THREE.Vector3();bb.getSize(sz);
-    const s=4.5/Math.max(sz.x,sz.z,0.1);
-    model.scale.setScalar(s);
+    // Scale pour atteindre la longueur cible (axe le plus long = longueur voiture)
+    const longestAxis=Math.max(sz.x,sz.y,sz.z);
+    if(longestAxis>0)model.scale.setScalar(targetLength/longestAxis);
+    // Poser au sol
     const bb2=new THREE.Box3().setFromObject(model);
     model.position.y=-bb2.min.y;
     carGLBCache[file]=model;
@@ -804,60 +810,60 @@ function loadCarGLB(file, cb){
   }, undefined, ()=>{});
 }
 
-// Routes pour voitures GLB réalistes
+// Seulement 6 voitures GLB par modèle (3 fichiers × 6 = 18 voitures max) pour la RAM
 const GLB_CAR_ROUTES=[
-  // Alfa 65 — grande route horizontale nord
-  {file:'1965_alfa_romeo_giulia_sprint_gta_1600.glb', axis:'x', fixedZ:-4,  min:-150, max:150, dir:1,  speed:13, lane:0},
-  {file:'1965_alfa_romeo_giulia_sprint_gta_1600.glb', axis:'x', fixedZ:4,   min:150,  max:-150,dir:-1, speed:11, lane:0},
-  {file:'1965_alfa_romeo_giulia_sprint_gta_1600.glb', axis:'z', fixedX:-4,  min:-150, max:150, dir:1,  speed:12, lane:0},
-  {file:'1965_alfa_romeo_giulia_sprint_gta_1600.glb', axis:'z', fixedX:4,   min:150,  max:-150,dir:-1, speed:10, lane:0},
-  // Alfa 67 — routes secondaires
-  {file:'1967_alfa_romeo_giulia_sprint_zagato_sacalino.glb', axis:'x', fixedZ:-54, min:-120, max:120, dir:1,  speed:11, lane:0},
-  {file:'1967_alfa_romeo_giulia_sprint_zagato_sacalino.glb', axis:'x', fixedZ:54,  min:120,  max:-120,dir:-1, speed:10, lane:0},
-  {file:'1967_alfa_romeo_giulia_sprint_zagato_sacalino.glb', axis:'z', fixedX:-54, min:-120, max:120, dir:1,  speed:9,  lane:0},
-  {file:'1967_alfa_romeo_giulia_sprint_zagato_sacalino.glb', axis:'z', fixedX:54,  min:120,  max:-120,dir:-1, speed:12, lane:0},
-  // Renault 5 — routes tertiaires
-  {file:'renault_5_tl_1974.glb', axis:'x', fixedZ:-28, min:-100, max:100, dir:1,  speed:9,  lane:0},
-  {file:'renault_5_tl_1974.glb', axis:'x', fixedZ:28,  min:100,  max:-100,dir:-1, speed:10, lane:0},
-  {file:'renault_5_tl_1974.glb', axis:'z', fixedX:-28, min:-100, max:100, dir:1,  speed:8,  lane:0},
-  {file:'renault_5_tl_1974.glb', axis:'z', fixedX:28,  min:100,  max:-100,dir:-1, speed:11, lane:0},
+  // Alfa 65 ~4.2m — 2 sens sur route principale X
+  {file:'1965_alfa_romeo_giulia_sprint_gta_1600.glb', len:4.2, axis:'x', fixedZ:-4,   min:-140, max:140,  dir:1,  speed:13},
+  {file:'1965_alfa_romeo_giulia_sprint_gta_1600.glb', len:4.2, axis:'x', fixedZ:4,    min:140,  max:-140, dir:-1, speed:11},
+  // Alfa 65 — 2 sens sur route principale Z
+  {file:'1965_alfa_romeo_giulia_sprint_gta_1600.glb', len:4.2, axis:'z', fixedX:-4,   min:-140, max:140,  dir:1,  speed:12},
+  {file:'1965_alfa_romeo_giulia_sprint_gta_1600.glb', len:4.2, axis:'z', fixedX:4,    min:140,  max:-140, dir:-1, speed:10},
+  // Alfa 67 ~4.0m — routes secondaires
+  {file:'1967_alfa_romeo_giulia_sprint_zagato_sacalino.glb', len:4.0, axis:'x', fixedZ:-54, min:-120, max:120,  dir:1,  speed:11},
+  {file:'1967_alfa_romeo_giulia_sprint_zagato_sacalino.glb', len:4.0, axis:'z', fixedX:54,  min:-120, max:120,  dir:1,  speed:10},
+  // Renault 5 ~3.5m — routes tertiaires
+  {file:'renault_5_tl_1974.glb', len:3.5, axis:'x', fixedZ:-28, min:-100, max:100,  dir:1,  speed:9},
+  {file:'renault_5_tl_1974.glb', len:3.5, axis:'x', fixedZ:28,  min:100,  max:-100, dir:-1, speed:10},
+  {file:'renault_5_tl_1974.glb', len:3.5, axis:'z', fixedX:-28, min:-100, max:100,  dir:1,  speed:8},
 ];
 
 const glbCars=[];
 GLB_CAR_ROUTES.forEach((route,i)=>{
-  loadCarGLB(route.file, model=>{
-    const g=new THREE.Group();
-    g.add(model);
-    scene.add(g);
-    // Position initiale décalée pour éviter regroupement
+  loadCarGLB(route.file, route.len, model=>{
+    const g=new THREE.Group();g.add(model);scene.add(g);
     const range=Math.abs(route.max-route.min);
-    const offset=(i*41)%range;
+    const offset=(i*53)%range;
+    const laneOff=2.5; // 2.5m du centre = file de droite
     let sx,sz,rot;
-    const laneOff=route.lane?-2.2:2.2;
     if(route.axis==='x'){
       sx=route.min+offset*(route.dir>0?1:-1);
-      sz=route.fixedZ+laneOff*route.dir;
+      sz=route.fixedZ+(route.dir>0?-laneOff:laneOff);
       rot=route.dir>0?Math.PI/2:-Math.PI/2;
     }else{
-      sx=route.fixedX+laneOff*route.dir;
+      sx=route.fixedX+(route.dir>0?laneOff:-laneOff);
       sz=route.min+offset*(route.dir>0?1:-1);
       rot=route.dir>0?0:Math.PI;
     }
     g.position.set(sx,0,sz);g.rotation.y=rot;
-    glbCars.push({mesh:g,route,pos:offset});
+    glbCars.push({mesh:g,route});
   });
 });
 
 function updateGLBCars(dt){
   glbCars.forEach(dc=>{
-    const r=dc.route;const s=r.speed*dt;
+    const r=dc.route;
     const lo=r.axis==='x'?dc.mesh.position.x:dc.mesh.position.z;
-    let nlo=lo+r.dir*s;
+    let nlo=lo+r.dir*r.speed*dt;
     if(r.dir>0&&nlo>r.max)nlo=r.min;
     if(r.dir<0&&nlo<r.max)nlo=r.min;
-    const laneOff=r.lane?-2.2:2.2;
-    if(r.axis==='x'){dc.mesh.position.x=nlo;dc.mesh.position.z=r.fixedZ+laneOff*r.dir;}
-    else{dc.mesh.position.z=nlo;dc.mesh.position.x=r.fixedX+laneOff*r.dir;}
+    const laneOff=2.5;
+    if(r.axis==='x'){
+      dc.mesh.position.x=nlo;
+      dc.mesh.position.z=r.fixedZ+(r.dir>0?-laneOff:laneOff);
+    }else{
+      dc.mesh.position.z=nlo;
+      dc.mesh.position.x=r.fixedX+(r.dir>0?laneOff:-laneOff);
+    }
   });
 }
 
@@ -1261,7 +1267,7 @@ markerDefs.forEach(d=>{
   el.innerHTML=`<div class="marker-icon" style="background:rgba(0,0,0,.7);border:2px solid ${d.color}">${d.icon}</div><span class="marker-label" style="color:${d.color}">${d.label}</span>`;
   markersDiv.appendChild(el);markerEls[d.id]=el;
 });
-const MARKER_WORLD={m1:new THREE.Vector3(44.5,1,-18.4),m2:new THREE.Vector3(-45,1.5,45),m3:new THREE.Vector3(60,1.5,-80),m4:new THREE.Vector3(-90,1.5,-70),m5:new THREE.Vector3(-60,METRO_ELEV,-30),m6:new THREE.Vector3(135,4,-30),m7:new THREE.Vector3(0,50,-150)};
+const MARKER_WORLD={m1:new THREE.Vector3(44.5,1,-18.4),m2:new THREE.Vector3(-45,1.5,45),m3:new THREE.Vector3(60,1.5,-80),m4:new THREE.Vector3(-90,1.5,-70),m5:new THREE.Vector3(-60,METRO_ELEV,-30),m6:new THREE.Vector3(135,4,-30),m7:new THREE.Vector3(0,80,-200)};
 function updateMarkers(){
   Object.entries(MARKER_WORLD).forEach(([id,pos3])=>{
     const el=markerEls[id];if(!el)return;
