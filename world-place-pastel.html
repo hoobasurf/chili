@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -100,7 +101,6 @@ canvas{display:block;width:100%!important;height:100%!important;}
 @keyframes markerBounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
 #interact-prompt{position:fixed;top:50%;left:50%;transform:translate(-50%,60px);z-index:45;background:rgba(0,0,0,.8);border:1.5px solid var(--gold);border-radius:12px;padding:8px 18px;font-size:.75rem;font-weight:700;color:var(--gold);pointer-events:all;cursor:pointer;display:none;-webkit-tap-highlight-color:transparent;}
 #interact-prompt.show{display:block;}
-/* Altitude indicator */
 #altitude-hud{position:fixed;top:56px;left:14px;z-index:20;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:4px 9px;font-size:.62rem;font-weight:700;color:#fff;display:none;}
 #altitude-hud.show{display:block;}
 </style>
@@ -223,8 +223,8 @@ function finishLoading(){
   clearInterval(ldInt);loadBar.style.width='100%';loadTxt.textContent='Bienvenue à Tokyo !';
   setTimeout(()=>{const l=document.getElementById('loading-screen');l.classList.add('hidden');setTimeout(()=>l.style.display='none',600);},400);
   addChat('☀️ Bienvenue à Tokyo, '+profile.pseudo+' !','Système');
-  addChat('🚇 Montez les escaliers pour accéder au Métro !','Info');
-  addChat('🗼 3 étages de la Tour Eiffel à explorer !','Info');
+  addChat('🚇 Approche les kiosques verts pour prendre le métro !','Info');
+  addChat('🗼 Escaliers de la Tour Eiffel → 3 étages à explorer !','Info');
   swapAvatar(IDLE_FILE,true,null);
 }
 
@@ -321,6 +321,9 @@ function resCol(nx,nz,py){
   }
   return{x:nx,z:nz};
 }
+
+// ── PLATEFORMES (sol dynamique) ───────────────────────────
+// AJOUT : système de plateformes pour étages Eiffel + stations métro
 const platforms=[];
 function addPlatform(cx,cz,hw,hd,y){
   platforms.push({minX:cx-hw,maxX:cx+hw,minZ:cz-hd,maxZ:cz+hd,y});
@@ -328,7 +331,7 @@ function addPlatform(cx,cz,hw,hd,y){
 function getFloorY(x,z,curY){
   let best=0;
   for(const p of platforms){
-    if(x>=p.minX&&x<=p.maxX&&z>=p.minZ&&z<=p.maxZ&&p.y<=curY+1.5&&p.y>best) best=p.y;
+    if(x>=p.minX&&x<=p.maxX&&z>=p.minZ&&z<=p.maxZ&&p.y<=curY+1.6&&p.y>best) best=p.y;
   }
   return best;
 }
@@ -410,7 +413,6 @@ function updateCars(dt){
 })();
 
 // ── BÂTIMENTS ────────────────────────────────────────────
-// Liste des meshes clignotants (antennes) pour les mettre à jour proprement
 const blinkMeshes=[];
 
 function glassTower(x,z,w,h,d){
@@ -418,7 +420,6 @@ function glassTower(x,z,w,h,d){
   const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);b.position.set(x,h/2,z);scene.add(b);
   const antM=new THREE.MeshLambertMaterial({color:0x5a6070});
   const ant=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.1,h*0.18,6),antM);ant.position.set(x,h+h*0.09,z);scene.add(ant);
-  // Lumière clignotante rouge (pas blanc)
   const blinkMat=new THREE.MeshLambertMaterial({color:0xff2200,emissive:new THREE.Color(0xff0000),emissiveIntensity:0.8});
   const blink=new THREE.Mesh(new THREE.SphereGeometry(0.18,6,4),blinkMat);
   blink.position.set(x,h+h*0.19,z);scene.add(blink);
@@ -452,7 +453,6 @@ building(80,30,12,42,12,0);building(80,80,13,32,13,1);
 building(-80,30,11,38,11,1);building(-80,80,12,30,12,2);
 building(30,-90,10,32,10,0);building(-30,-90,10,28,10,1);
 building(30,90,10,36,10,2);building(-30,90,10,32,10,0);
-// Hôpital
 (()=>{
   const hM=new THREE.MeshLambertMaterial({color:0xeeeae0});
   const b=new THREE.Mesh(new THREE.BoxGeometry(18,28,16),hM);b.position.set(-68,14,15);scene.add(b);
@@ -461,392 +461,339 @@ building(30,90,10,36,10,2);building(-30,90,10,32,10,0);
   addCol(-68,15,9.1,8.1);
 })();
 
-// ═══════════════════════════════════════════════════════════════════
-//  PATCH — TOUR EIFFEL ACCESSIBLE + METRO STATION INTÉRIEURE
-//  Remplace les sections correspondantes dans macadam_tokyo.html
-// ═══════════════════════════════════════════════════════════════════
+// ── GLB LOADER ───────────────────────────────────────────
+function loadSceneGLB(file,px,py,pz,targetHeight,rotY,onLoaded){
+  gltfLoader.load(BASE+file,gltf=>{
+    const model=gltf.scene;
+    model.traverse(n=>{
+      if(n.isMesh){
+        n.castShadow=false;n.receiveShadow=false;n.frustumCulled=true;
+        if(n.material&&n.material.isMeshStandardMaterial){
+          const old=n.material;
+          n.material=new THREE.MeshLambertMaterial({color:old.color,map:old.map||null,transparent:old.transparent,opacity:old.opacity});
+        }else if(n.material){
+          if(n.material.emissive) n.material.emissive.set(0,0,0);
+          if(n.material.emissiveIntensity!==undefined) n.material.emissiveIntensity=0;
+        }
+      }
+    });
+    if(targetHeight&&targetHeight>0){_box.setFromObject(model);_box.getSize(_sz);if(_sz.y>0)model.scale.setScalar(targetHeight/_sz.y);}
+    _box.setFromObject(model);model.position.set(px,py-_box.min.y,pz);
+    if(rotY)model.rotation.y=rotY;
+    scene.add(model);
+    if(onLoaded)onLoaded(model);
+  },undefined,err=>console.warn('GLB load error:',file,err));
+}
 
-// ────────────────────────────────────────────────────────────────────
-//  SYSTÈME DE PLATEFORMES (à ajouter juste après la déclaration colliders)
-// ────────────────────────────────────────────────────────────────────
-/*
-const platforms = [];   // {minX,maxX,minZ,maxZ,y}
-function addPlatform(cx,cz,hw,hd,y){
-platforms.push({minX:cx-hw,maxX:cx+hw,minZ:cz-hd,maxZ:cz+hd,y});
-}
-function getFloorY(x,z,currentY){
-let best = 0; // sol par défaut
-for(const p of platforms){
-if(x>=p.minX&&x<=p.maxX&&z>=p.minZ&&z<=p.maxZ){
-if(p.y<=currentY+1.2 && p.y>best) best=p.y;
-}
-}
-return best;
-}
-*/
-// ────────────────────────────────────────────────────────────────────
-//  TOUR EIFFEL — remplace tout le bloc loadSceneGLB + spirals
-// ────────────────────────────────────────────────────────────────────
-const EX=0, EZ=-200;
+// ── TOUR EIFFEL ──────────────────────────────────────────
+// AJOUT : escaliers droits + plateformes physiques aux 3 étages
+const EX=0,EZ=-200;
 
-loadSceneGLB(‘tour_eiffel_eiffel_tower.glb’, EX, 0, EZ, 330, 0, ()=>{
-// Colliders pied de tour
-addCol(EX,    EZ,    28, 28, 0.5);
-addCol(EX,    EZ,    14, 14, 54);
-addCol(EX,    EZ,    5,  5,  109);
-addCol(EX,    EZ,    2.5,2.5,164);
+loadSceneGLB('tour_eiffel_eiffel_tower.glb',EX,0,EZ,330,0,()=>{
+  addCol(EX,EZ,28,28,0.5);
+  addCol(EX,EZ,14,14,54);
+  addCol(EX,EZ,5,5,109);
+  addCol(EX,EZ,2.5,2.5,164);
 });
 
-// ── Plateformes d’étage ─────────────────────────────────
-const stepMat   = new THREE.MeshLambertMaterial({color:0x7a7040,side:THREE.DoubleSide});
-const platMat   = new THREE.MeshLambertMaterial({color:0x6a6030});
-const railMat   = new THREE.MeshLambertMaterial({color:0x4a3a20});
-const floorDefs = [
-{y:55,  r:14, label:‘🗼 Étage 1 — 55m’},
-{y:110, r:6,  label:‘🗼 Étage 2 — 110m’},
-{y:165, r:2,  label:‘🗼 Sommet — 165m’},
+(()=>{
+  const stepMat   = new THREE.MeshLambertMaterial({color:0x7a7040});
+  const platMat   = new THREE.MeshLambertMaterial({color:0x6a6030});
+  const railMat   = new THREE.MeshLambertMaterial({color:0x4a3a20});
+  const gemMat    = new THREE.MeshLambertMaterial({color:0xffdd44,emissive:new THREE.Color(0xffaa00),emissiveIntensity:0.8});
+
+  // Définition des 3 étages
+  const eiffelFloors=[
+    {y:55,  r:14, id:'eiffel1'},
+    {y:110, r:6,  id:'eiffel2'},
+    {y:165, r:2,  id:'eiffel3'},
+  ];
+
+  // Plateformes de plancher à chaque étage (4 dalles couvrant le carré central)
+  eiffelFloors.forEach(fl=>{
+    const hw=fl.r+2;
+    // Plateforme centrale pleine
+    const floorMesh=new THREE.Mesh(new THREE.BoxGeometry(hw*2,0.3,hw*2),platMat);
+    floorMesh.position.set(EX,fl.y,EZ);scene.add(floorMesh);
+    addPlatform(EX,EZ,hw,hw,fl.y+0.15);
+    // Rambardes
+    for(let i=0;i<12;i++){
+      const a=i/12*Math.PI*2;
+      const rx=EX+Math.cos(a)*(hw+0.1);
+      const rz=EZ+Math.sin(a)*(hw+0.1);
+      const rail=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,1.1,5),railMat);
+      rail.position.set(rx,fl.y+0.7,rz);scene.add(rail);
+    }
+    // Gemme lumineuse au centre de l'étage (repère visuel)
+    const gem=new THREE.Mesh(new THREE.OctahedronGeometry(0.55,0),gemMat);
+    gem.position.set(EX+fl.r+1,fl.y+0.8,EZ);scene.add(gem);
+    blinkMeshes.push({mesh:gem,t:fl.y*0.1}); // réutilise le tableau blink pour faire pulser
+    // PointLight douce
+    const pl=new THREE.PointLight(0xffcc55,1.2,22);
+    pl.position.set(EX,fl.y+2,EZ);scene.add(pl);
+  });
+
+  // ESCALIERS — 3 volées droites, une par face cardinale
+  // Volée 1 : Sol (Y=0) → Étage 1 (Y=55), côté Est (angle 0)
+  // Volée 2 : Étage 1 (Y=55) → Étage 2 (Y=110), côté Nord (angle PI/2)
+  // Volée 3 : Étage 2 (Y=110) → Sommet (Y=165), côté Ouest (angle PI)
+  const rampDefs=[
+    {yBot:0,   yTop:55,  rStart:22, rEnd:14, angle:0,          nSteps:30},
+    {yBot:55,  yTop:110, rStart:14, rEnd:6,  angle:Math.PI/2,  nSteps:24},
+    {yBot:110, yTop:165, rStart:6,  rEnd:2,  angle:Math.PI,    nSteps:20},
+  ];
+
+  rampDefs.forEach(rd=>{
+    for(let i=0;i<=rd.nSteps;i++){
+      const t=i/rd.nSteps;
+      const y=rd.yBot+(rd.yTop-rd.yBot)*t;
+      const r=rd.rStart+(rd.rEnd-rd.rStart)*t;
+      const sx=EX+Math.cos(rd.angle)*r;
+      const sz=EZ+Math.sin(rd.angle)*r;
+      // Marche individuelle
+      const step=new THREE.Mesh(new THREE.BoxGeometry(2.4,0.28,1.9),stepMat);
+      step.position.set(sx,y,sz);scene.add(step);
+      // Chaque marche = plateforme
+      addPlatform(sx,sz,1.2,0.95,y+0.14);
+    }
+  });
+})();
+
+// ── STATUE DE LA LIBERTÉ ──────────────────────────────────
+const SLX=185,SLZ=-70,SL_TOP=93;
+loadSceneGLB('statue_of_liberty.glb',SLX,0,SLZ,93,Math.PI,()=>{
+  addCol(SLX,SLZ,10,10,93);
+});
+(()=>{
+  const stepMat=new THREE.MeshLambertMaterial({color:0x5a8a50});
+  const steps=32;
+  for(let i=0;i<steps;i++){
+    const t=i/steps;const angle=t*Math.PI*4;const r=9-t*6;const y=t*(SL_TOP-5);
+    const sx=SLX+Math.cos(angle)*r;const sz=SLZ+Math.sin(angle)*r;
+    const step=new THREE.Mesh(new THREE.BoxGeometry(1.6,0.3,1.6),stepMat);
+    step.position.set(sx,y,sz);scene.add(step);
+    addPlatform(sx,sz,0.8,0.8,y+0.15);
+  }
+  const platMat=new THREE.MeshLambertMaterial({color:0x4a7a44});
+  const plat=new THREE.Mesh(new THREE.CylinderGeometry(4,4,0.4,10),platMat);
+  plat.position.set(SLX,SL_TOP-4,SLZ);scene.add(plat);
+  addPlatform(SLX,SLZ,4,4,SL_TOP-3.8);
+  const railMat=new THREE.MeshLambertMaterial({color:0x3a5a38});
+  for(let i=0;i<10;i++){
+    const ang=i/10*Math.PI*2;
+    const bar=new THREE.Mesh(new THREE.CylinderGeometry(0.08,0.08,1.4,5),railMat);
+    bar.position.set(SLX+Math.cos(ang)*4.2,SL_TOP-3.3,SLZ+Math.sin(ang)*4.2);scene.add(bar);
+  }
+})();
+
+// ── MÉTRO AÉRIEN (visuel + train) ────────────────────────
+// AJOUT : stations souterraines physiques avec escaliers accessibles
+const METRO_ELEV=18;
+
+// Définitions stations (surface + souterrain)
+const METRO_STATIONS=[
+  {id:'shinjuku',  name:'🏙 Shinjuku',  x:-60,z:-30, label:'東京 Shinjuku',  color:0x1a3a6a},
+  {id:'akihabara', name:'⚡ Akihabara', x: 60,z:-30, label:'東京 Akihabara', color:0x1a5a2a},
+  {id:'shibuya',   name:'🌸 Shibuya',   x: 60,z: 60, label:'東京 Shibuya',   color:0x3a1a5a},
+  {id:'asakusa',   name:'⛩ Asakusa',   x:-60,z: 60, label:'東京 Asakusa',   color:0x5a2a1a},
+  {id:'port',      name:'⚓ Port',      x:110,z:-40, label:'Port de Tokyo',  color:0x1a4a5a},
 ];
+const METRO_TRACK=[{x:-60,z:-30},{x:60,z:-30},{x:60,z:60},{x:-60,z:60},{x:-60,z:-30}];
 
-floorDefs.forEach(fl=>{
-// Plancher annulaire (4 quarts)
-for(let s=0;s<4;s++){
-const angle=s*Math.PI/2;
-const px=EX+Math.cos(angle)*fl.r*0.5;
-const pz=EZ+Math.sin(angle)*fl.r*0.5;
-const platform=new THREE.Mesh(new THREE.BoxGeometry(fl.r,0.25,fl.r),platMat);
-platform.position.set(px,fl.y,pz);
-scene.add(platform);
-addPlatform(px,pz,fl.r/2,fl.r/2,fl.y+0.125);
-}
-// Rambarde (4 côtés)
-for(let s=0;s<8;s++){
-const a=s*Math.PI/4;
-const rx=EX+Math.cos(a)*(fl.r-0.5);
-const rz=EZ+Math.sin(a)*(fl.r-0.5);
-const rail=new THREE.Mesh(new THREE.BoxGeometry(0.12,1.0,0.12),railMat);
-rail.position.set(rx,fl.y+0.65,rz);
-scene.add(rail);
-}
-});
-
-// ── Rampes d’escaliers droites (3 volées) ──────────────
-// Chaque volée = rampe inclinée depuis le sol / l’étage précédent
-// Le joueur marche dessus grâce au système getFloorY
-const rampDefs = [
-// {yBottom, yTop, angle(rad), len, cx, cz, sideOffset}
-{yBot:0,   yTop:55,  len:48, angle:0,       side:22, label:‘Est → Étage 1’},
-{yBot:55,  yTop:110, len:36, angle:Math.PI/2,side:10, label:‘Nord → Étage 2’},
-{yBot:110, yTop:165, len:28, angle:Math.PI,  side:5,  label:‘Ouest → Sommet’},
-];
-
-rampDefs.forEach(rd=>{
-const steps = Math.ceil(rd.len/1.6);
-for(let i=0;i<=steps;i++){
-const t    = i/steps;
-const y    = rd.yBot+(rd.yTop-rd.yBot)*t;
-// Position le long de la direction de la rampe
-const dist = (rd.side)*(1-t);   // part du bord, arrive au centre
-const sx   = EX + Math.cos(rd.angle)*dist;
-const sz   = EZ + Math.sin(rd.angle)*dist;
-// Step plat (marche individuelle)
-const step = new THREE.Mesh(new THREE.BoxGeometry(2.2,0.22,1.8),stepMat);
-step.position.set(sx, y, sz);
-scene.add(step);
-// Chaque step = petite plateforme
-addPlatform(sx, sz, 1.1, 0.9, y+0.11);
-}
-// Collider latéral pour garder le joueur sur la rampe
-addCol(EX+Math.cos(rd.angle)*rd.side*0.5, EZ+Math.sin(rd.angle)*rd.side*0.5,
-1.8, rd.len/2+2, rd.yTop+2);
-});
-
-// ── Markers étages ──────────────────────────────────────
-floorDefs.forEach(fl=>{
-// (les markers 3D sont affichés via la boucle updateMarkers existante)
-// On ajoute juste un repère visuel lumineux au niveau de chaque étage
-const gem=new THREE.Mesh(
-new THREE.OctahedronGeometry(0.5,0),
-new THREE.MeshLambertMaterial({color:0xffdd44,emissive:new THREE.Color(0xffaa00),emissiveIntensity:0.8})
-);
-gem.position.set(EX+floorDefs.indexOf(fl)*0+18, fl.y+0.6, EZ);
-scene.add(gem);
-// Petite lumière ponctuelle
-const pl=new THREE.PointLight(0xffcc55,1.5,18);
-pl.position.set(EX,fl.y+1,EZ);
-scene.add(pl);
-});
-
-// ════════════════════════════════════════════════════════════════════
-//  MÉTRO — STATION SOUTERRAINE PHYSIQUE
-//  Remplace l’ancien système metro (téléportation dans le vide)
-// ════════════════════════════════════════════════════════════════════
-
-// Positions des stations (surface)
-const METRO_STATIONS_DEF = [
-{id:‘shinjuku’, label:‘新宿 Shinjuku’,   sx:0,   sz:0,    color:0x1a3a6a},
-{id:‘shibuya’,  label:‘渋谷 Shibuya’,    sx:-80, sz:80,   color:0x3a1a5a},
-{id:‘asakusa’,  label:‘浅草 Asakusa’,    sx:80,  sz:-80,  color:0x1a5a2a},
-{id:‘odaiba’,   label:‘お台場 Odaiba’,   sx:100, sz:50,   color:0x1a4a5a},
-];
-
-const STATION_DEPTH = -9;   // Y du sol de la station
-const STATION_W     = 24;
-const STATION_D     = 40;
-
-// Matériaux station
-const stationFloorMat   = new THREE.MeshLambertMaterial({color:0x303038});
-const stationWallMat    = new THREE.MeshLambertMaterial({color:0x252530});
-const stationCeilMat    = new THREE.MeshLambertMaterial({color:0x1a1a22});
-const stationTileMat    = new THREE.MeshLambertMaterial({color:0xc8c0b0});
-const stationRailMat    = new THREE.MeshLambertMaterial({color:0x555550});
-const stationSignMat    = new THREE.MeshLambertMaterial({color:0x1144aa,emissive:new THREE.Color(0x0033aa),emissiveIntensity:0.5});
-
-// Sortie téléportation : quand le joueur entre dans un tunnel, il ressort à la prochaine station
-// On garde la liste pour le UI
-const metroStationsList = [];
-
-METRO_STATIONS_DEF.forEach(def=>{
-
-// ── Entrée surface : escalier descendant ────────────────
-const entryX = def.sx;
-const entryZ = def.sz + 14;  // légèrement devant la station
-
-// Kiosque d’entrée (boîte verte métro)
-const kiosk = new THREE.Mesh(new THREE.BoxGeometry(5,3,3),
-new THREE.MeshLambertMaterial({color:def.color,emissive:new THREE.Color(def.color).multiplyScalar(0.3),emissiveIntensity:0.4}));
-kiosk.position.set(entryX, 1.5, entryZ);
-scene.add(kiosk);
-// Panneau M
-const signM = new THREE.Mesh(new THREE.BoxGeometry(1.5,1.5,0.1),
-new THREE.MeshLambertMaterial({color:0xffffff,emissive:new THREE.Color(0xffffff),emissiveIntensity:0.6}));
-signM.position.set(entryX, 2.8, entryZ+1.55);
-scene.add(signM);
-addCol(entryX, entryZ, 2.5, 1.5, 3.5);
-
-// Escaliers souterrains (12 marches, descend de y=0 à y=STATION_DEPTH+3)
-const NSTEPS = 12;
-for(let i=0;i<NSTEPS;i++){
-const t    = i/NSTEPS;
-const sy   = -(t*(Math.abs(STATION_DEPTH)-2));
-const sz2  = entryZ - 1 - i*1.2;
-const step = new THREE.Mesh(new THREE.BoxGeometry(3.5,0.22,1.2),stationTileMat);
-step.position.set(entryX, sy, sz2);
-scene.add(step);
-addPlatform(entryX, sz2, 1.75, 0.6, sy+0.11);
-}
-// Murs d’escalier
-for(let s=0;s<2;s++){
-const wall=new THREE.Mesh(new THREE.BoxGeometry(0.2,Math.abs(STATION_DEPTH)+1,NSTEPS*1.2+1),stationWallMat);
-wall.position.set(entryX+(s?1.85:-1.85), STATION_DEPTH/2, entryZ-NSTEPS*0.6);
-scene.add(wall);
-addCol(entryX+(s?1.85:-1.85), entryZ-NSTEPS*0.6, 0.3, NSTEPS*0.6+1, 1);
+// ── Structure aérienne (viaduc) ──
+const deckMat=new THREE.MeshLambertMaterial({color:0x555560});
+const pilMat=new THREE.MeshLambertMaterial({color:0x666676});
+for(let i=0;i<METRO_TRACK.length-1;i++){
+  const a=METRO_TRACK[i],b=METRO_TRACK[i+1];
+  const dx=b.x-a.x,dz=b.z-a.z;const len=Math.sqrt(dx*dx+dz*dz);
+  const cx=(a.x+b.x)/2,cz=(a.z+b.z)/2;const ang=Math.atan2(dx,dz);
+  const deck=new THREE.Mesh(new THREE.BoxGeometry(3.5,0.4,len),deckMat);deck.position.set(cx,METRO_ELEV,cz);deck.rotation.y=ang;scene.add(deck);
+  const nb=Math.floor(len/15);
+  for(let k=1;k<nb;k++){
+    const t=k/nb;const px=a.x+dx*t,pz=a.z+dz*t;
+    const pil=new THREE.Mesh(new THREE.CylinderGeometry(0.4,0.55,METRO_ELEV,8),pilMat);pil.position.set(px,METRO_ELEV/2,pz);scene.add(pil);addCol(px,pz,0.65,0.65,METRO_ELEV+0.5);
+  }
 }
 
-// ── Boîte principale de la station (souterraine) ────────
-const stY = STATION_DEPTH;   // centre Y du sol station
+// Matériaux souterrain
+const stFloorMat =new THREE.MeshLambertMaterial({color:0x303038});
+const stWallMat  =new THREE.MeshLambertMaterial({color:0x252530});
+const stCeilMat  =new THREE.MeshLambertMaterial({color:0x1a1a22});
+const stTileMat  =new THREE.MeshLambertMaterial({color:0xc8c0b0});
+const stRailMat  =new THREE.MeshLambertMaterial({color:0x555550});
+const stSignMat  =new THREE.MeshLambertMaterial({color:0x1144aa,emissive:new THREE.Color(0x0033aa),emissiveIntensity:0.5});
 
-// Sol
-const floor=new THREE.Mesh(new THREE.BoxGeometry(STATION_W,0.3,STATION_D),stationFloorMat);
-floor.position.set(def.sx, stY-0.15, def.sz);
-scene.add(floor);
-addPlatform(def.sx, def.sz, STATION_W/2, STATION_D/2, stY);
+const STATION_Y  =-9;   // Y sol station souterraine
+const STATION_W  =20;
+const STATION_D  =36;
 
-// Quai surélevé (côtés)
-[-1,1].forEach(side=>{
-const quai2=new THREE.Mesh(new THREE.BoxGeometry(5,0.4,STATION_D-2),stationTileMat);
-quai2.position.set(def.sx+side*8, stY+0.2, def.sz);
-scene.add(quai2);
-addPlatform(def.sx+side*8, def.sz, 2.5, STATION_D/2-1, stY+0.4);
-// Rambarde quai
-for(let q=-1;q<=1;q+=2){
-const ramp2=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.8,STATION_D-2),railMat);
-ramp2.position.set(def.sx+side*10.3, stY+0.8, def.sz);
-scene.add(ramp2);
-}
+// Tableau des entrées métro pour le trigger d'interaction
+const metroEntries=[];  // {stationId, entryX, entryZ, stationX, stationZ}
+
+METRO_STATIONS.forEach(st=>{
+  // ── Quai aérien ──
+  const statMat=new THREE.MeshLambertMaterial({color:0x3a3a5a});
+  const q=new THREE.Mesh(new THREE.BoxGeometry(12,0.5,5),statMat);q.position.set(st.x,METRO_ELEV+0.25,st.z);scene.add(q);
+  addPlatform(st.x,st.z,6,2.5,METRO_ELEV+0.5);
+  const rf=new THREE.Mesh(new THREE.BoxGeometry(13,0.2,6),new THREE.MeshLambertMaterial({color:0x1a1a2a,transparent:true,opacity:0.85}));rf.position.set(st.x,METRO_ELEV+3.5,st.z);scene.add(rf);
+  addCol(st.x,st.z,6.1,2.6,METRO_ELEV+0.5);
+
+  // ── Kiosque d'entrée souterrain (surface) ──
+  // Décalé de +12 en Z pour ne pas chevaucher les bâtiments
+  const eX=st.x, eZ=st.z+14;
+  const kiosk=new THREE.Mesh(new THREE.BoxGeometry(5,3.2,3),
+    new THREE.MeshLambertMaterial({color:st.color,emissive:new THREE.Color(st.color).multiplyScalar(0.25),emissiveIntensity:0.35}));
+  kiosk.position.set(eX,1.6,eZ);scene.add(kiosk);
+  // Panneau M vert lumineux
+  const panM=new THREE.Mesh(new THREE.BoxGeometry(1.6,1.6,0.1),
+    new THREE.MeshLambertMaterial({color:0x22cc44,emissive:new THREE.Color(0x00aa22),emissiveIntensity:0.8}));
+  panM.position.set(eX,3.8,eZ+1.6);scene.add(panM);
+  addCol(eX,eZ,2.6,1.6,3.5);
+
+  // ── Escaliers descendants vers station souterraine ──
+  // 12 marches de Y=0 à Y=STATION_Y+2 (≈-7), avancent vers Z négatif
+  const NSTEPS_DOWN=12;
+  const stepW=3.5,stepD=1.2;
+  const totalDepth=NSTEPS_DOWN*stepD;
+  for(let i=0;i<NSTEPS_DOWN;i++){
+    const t=i/NSTEPS_DOWN;
+    const sy=-(t*Math.abs(STATION_Y-2));  // descend vers STATION_Y+2
+    const sz2=eZ-2-(i*stepD);             // avance en Z-
+    const step=new THREE.Mesh(new THREE.BoxGeometry(stepW,0.25,stepD),stTileMat);
+    step.position.set(eX,sy,sz2);scene.add(step);
+    addPlatform(eX,sz2,stepW/2,stepD/2,sy+0.125);
+  }
+  // Murs latéraux de l'escalier
+  [-1.9,1.9].forEach(ox=>{
+    const wall=new THREE.Mesh(new THREE.BoxGeometry(0.2,Math.abs(STATION_Y)+1,totalDepth+0.5),stWallMat);
+    wall.position.set(eX+ox,STATION_Y/2,eZ-2-totalDepth/2);scene.add(wall);
+    addCol(eX+ox,eZ-2-totalDepth/2,0.25,totalDepth/2+0.4,1);
+  });
+
+  // ── Station souterraine ──
+  const sY=STATION_Y;
+  // Sol
+  const floor=new THREE.Mesh(new THREE.BoxGeometry(STATION_W,0.3,STATION_D),stFloorMat);
+  floor.position.set(st.x,sY-0.15,st.z);scene.add(floor);
+  addPlatform(st.x,st.z,STATION_W/2,STATION_D/2,sY);
+
+  // Quais surélevés (2 côtés)
+  [-1,1].forEach(side=>{
+    const quai2=new THREE.Mesh(new THREE.BoxGeometry(4.5,0.4,STATION_D-2),stTileMat);
+    quai2.position.set(st.x+side*7,sY+0.2,st.z);scene.add(quai2);
+    addPlatform(st.x+side*7,st.z,2.25,STATION_D/2-1,sY+0.4);
+    // Rambarde
+    const ramp2=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.85,STATION_D-2),stRailMat);
+    ramp2.position.set(st.x+side*9.2,sY+0.9,st.z);scene.add(ramp2);
+  });
+
+  // Rails centraux
+  [-1.4,1.4].forEach(rx=>{
+    const rail=new THREE.Mesh(new THREE.BoxGeometry(0.15,0.12,STATION_D),stRailMat);
+    rail.position.set(st.x+rx,sY+0.06,st.z);scene.add(rail);
+  });
+
+  // Plafond
+  const ceil=new THREE.Mesh(new THREE.BoxGeometry(STATION_W+0.5,0.4,STATION_D+0.5),stCeilMat);
+  ceil.position.set(st.x,sY+4.2,st.z);scene.add(ceil);
+
+  // Murs (4 faces) — avec ouverture pour les tunnels
+  [[STATION_W/2+0.2,0,0,false],[-(STATION_W/2+0.2),0,0,false],[0,0,STATION_D/2+0.2,true],[0,0,-(STATION_D/2+0.2),true]].forEach(([ox,oy,oz,isZ])=>{
+    const w2=new THREE.Mesh(new THREE.BoxGeometry(isZ?STATION_W:0.3,4.4,isZ?0.3:STATION_D),stWallMat);
+    w2.position.set(st.x+ox,sY+2.2,st.z+oz);scene.add(w2);
+    if(!isZ)addCol(st.x+ox,st.z+oz,0.4,STATION_D/2+0.5,1);
+    else addCol(st.x+ox,st.z+oz,STATION_W/2+0.5,0.4,1);
+  });
+
+  // Néons plafond
+  [-10,-3,3,10].forEach(lz=>{
+    const neon=new THREE.Mesh(new THREE.BoxGeometry(STATION_W-2,0.1,0.35),
+      new THREE.MeshLambertMaterial({color:0xffffff,emissive:new THREE.Color(0xddeeff),emissiveIntensity:1.0}));
+    neon.position.set(st.x,sY+3.8,st.z+lz);scene.add(neon);
+    const pl=new THREE.PointLight(0xaabbff,1.0,18);
+    pl.position.set(st.x,sY+3.5,st.z+lz);scene.add(pl);
+  });
+
+  // Panneau de station (fond mur)
+  const signBoard=new THREE.Mesh(new THREE.BoxGeometry(7,1.1,0.1),stSignMat);
+  signBoard.position.set(st.x,sY+3.4,st.z-STATION_D/2+0.15);scene.add(signBoard);
+
+  // Tunnels visuels (entrées/sorties)
+  [-1,1].forEach(dir=>{
+    const tun=new THREE.Mesh(new THREE.CylinderGeometry(2.6,2.6,5,10,1,true),
+      new THREE.MeshLambertMaterial({color:0x101018,side:THREE.BackSide}));
+    tun.rotation.x=Math.PI/2;
+    tun.position.set(st.x,sY+1.8,st.z+dir*(STATION_D/2+2.5));scene.add(tun);
+  });
+
+  // Enregistrer l'entrée
+  metroEntries.push({
+    stationId:st.id,
+    entryX:eX, entryZ:eZ,
+    stationX:st.x, stationZ:st.z, stationY:sY,
+    label:st.label
+  });
+  // Stocker dans l'objet station pour le HUD (atterrissage sur quai)
+  st.stationY=sY;
+  st.entryX=eX;st.entryZ=eZ;
 });
 
-// Rails (deux lignes centrales)
-[-1.5,1.5].forEach(rx=>{
-const rail=new THREE.Mesh(new THREE.BoxGeometry(0.15,0.12,STATION_D),stationRailMat);
-rail.position.set(def.sx+rx, stY+0.06, def.sz);
-scene.add(rail);
-});
-
-// Plafond
-const ceil=new THREE.Mesh(new THREE.BoxGeometry(STATION_W+0.5,0.4,STATION_D+0.5),stationCeilMat);
-ceil.position.set(def.sx, stY+4.0, def.sz);
-scene.add(ceil);
-
-// Murs
-[[STATION_W/2+0.2,0,0,STATION_D],[-(STATION_W/2+0.2),0,0,STATION_D],
-[0,0,STATION_D/2+0.2,STATION_W],[0,0,-(STATION_D/2+0.2),STATION_W]
-].forEach(([ox,oy,oz,len],i)=>{
-const isZ=i<2;
-const w = new THREE.Mesh(
-new THREE.BoxGeometry(isZ?0.3:len,4.2,isZ?len:0.3),
-stationWallMat
-);
-w.position.set(def.sx+ox, stY+2, def.sz+oz);
-scene.add(w);
-addCol(def.sx+ox, def.sz+oz,
-isZ?0.5:len/2+0.5, isZ?len/2+0.5:0.5, 1);
-});
-
-// Lumières néon station
-[-12,-4,4,12].forEach(lz=>{
-const neon=new THREE.Mesh(new THREE.BoxGeometry(STATION_W-2,0.12,0.4),
-new THREE.MeshLambertMaterial({color:0xffffff,emissive:new THREE.Color(0xddddff),emissiveIntensity:1.0}));
-neon.position.set(def.sx, stY+3.6, def.sz+lz);
-scene.add(neon);
-const pl=new THREE.PointLight(0xbbbbff,1.2,20);
-pl.position.set(def.sx, stY+3.4, def.sz+lz);
-scene.add(pl);
-});
-
-// Panneau de station
-const signBoard=new THREE.Mesh(new THREE.BoxGeometry(8,1.2,0.1),stationSignMat);
-signBoard.position.set(def.sx, stY+3.2, def.sz-STATION_D/2+0.15);
-scene.add(signBoard);
-
-// Tunnel de connexion (cylindre) vers la prochaine station
-// (visuel seulement — le joueur utilise le HUD pour choisir destination)
-[-1,1].forEach(dir=>{
-const tunnel=new THREE.Mesh(
-new THREE.CylinderGeometry(2.8,2.8,6,12,1,true),
-new THREE.MeshLambertMaterial({color:0x151520,side:THREE.BackSide})
-);
-tunnel.rotation.x=Math.PI/2;
-tunnel.position.set(def.sx, stY+1.5, def.sz+dir*(STATION_D/2+3));
-scene.add(tunnel);
-});
-
-metroStationsList.push({
-id:def.id, label:def.label,
-entryX, entryZ,
-stationX:def.sx, stationZ:def.sz, stationY:stY
-});
-});
-
-// ── Tunnels visuels entre stations (lignes de métro) ────────────────
-// Connecte Shinjuku→Shibuya, Shinjuku→Asakusa, etc. visuellement
-const TUNNEL_PAIRS = [
-[0,1],[0,2],[1,3]
-];
+// ── Tunnels souterrains entre stations ──────────────────
+// AJOUT : couloirs visuels reliant les stations
+const TUNNEL_PAIRS=[[0,1],[1,2],[2,3],[3,0]];
 TUNNEL_PAIRS.forEach(([a,b])=>{
-const sa=METRO_STATIONS_DEF[a], sb=METRO_STATIONS_DEF[b];
-const midX=(sa.sx+sb.sx)/2, midZ=(sa.sz+sb.sz)/2;
-const dx=sb.sx-sa.sx, dz=sb.sz-sa.sz;
-const len=Math.sqrt(dx*dx+dz*dz);
-const angle=Math.atan2(dx,dz);
-// Sol tunnel souterrain
-const tFloor=new THREE.Mesh(new THREE.BoxGeometry(4,0.2,len),stationFloorMat);
-tFloor.position.set(midX, STATION_DEPTH-0.1, midZ);
-tFloor.rotation.y=angle;
-scene.add(tFloor);
-addPlatform(midX, midZ, 2, len/2, STATION_DEPTH);
-// Voûte tunnel
-const tCeil=new THREE.Mesh(
-new THREE.CylinderGeometry(2.8,2.8,len,12,1,true),
-new THREE.MeshLambertMaterial({color:0x151520,side:THREE.BackSide})
-);
-tCeil.rotation.x=Math.PI/2;
-tCeil.rotation.y=angle;
-tCeil.position.set(midX,STATION_DEPTH+1.5,midZ);
-scene.add(tCeil);
-// Rails tunnel
-[-1.4,1.4].forEach(rx=>{
-const tr=new THREE.Mesh(new THREE.BoxGeometry(0.12,0.1,len),stationRailMat);
-tr.position.set(midX+rx,STATION_DEPTH+0.05,midZ);
-tr.rotation.y=angle;
-scene.add(tr);
-});
+  const sa=METRO_STATIONS[a],sb=METRO_STATIONS[b];
+  const midX=(sa.x+sb.x)/2,midZ=(sa.z+sb.z)/2;
+  const dx=sb.x-sa.x,dz=sb.z-sa.z;
+  const len=Math.sqrt(dx*dx+dz*dz);
+  const angle=Math.atan2(dx,dz);
+  // Sol tunnel
+  const tFloor=new THREE.Mesh(new THREE.BoxGeometry(3.8,0.2,len),stFloorMat);
+  tFloor.position.set(midX,STATION_Y-0.1,midZ);tFloor.rotation.y=angle;scene.add(tFloor);
+  addPlatform(midX,midZ,2,len/2,STATION_Y);
+  // Voûte
+  const vault=new THREE.Mesh(new THREE.CylinderGeometry(2.5,2.5,len,10,1,true),
+    new THREE.MeshLambertMaterial({color:0x101018,side:THREE.BackSide}));
+  vault.rotation.x=Math.PI/2;vault.rotation.y=angle;vault.position.set(midX,STATION_Y+1.5,midZ);scene.add(vault);
+  // Rails
+  [-1.3,1.3].forEach(rx=>{
+    const tr=new THREE.Mesh(new THREE.BoxGeometry(0.12,0.1,len),stRailMat);
+    tr.position.set(midX+rx,STATION_Y+0.05,midZ);tr.rotation.y=angle;scene.add(tr);
+  });
 });
 
-// ── METRO HUD — remplacement du système de téléportation ────────────
-// Reconstruit la liste des stations dans le HUD
-function buildMetroHUD(){
-const container=document.getElementById(‘metro-stations’);
-container.innerHTML=’’;
-metroStationsList.forEach(st=>{
-const btn=document.createElement(‘button’);
-btn.className=‘metro-station-btn’;
-btn.textContent=st.label;
-btn.addEventListener(‘click’,()=>{
-closeMetroHUD();
-// Téléporte le joueur DANS la station (sur le quai)
-playerMesh.position.set(st.stationX+8.5, st.stationY+0.5, st.stationZ);
-vel.set(0,0,0);
-showToast(’🚇 ’+st.label,‘boat’);
-document.getElementById(‘altitude-hud’).classList.add(‘show’);
-document.getElementById(‘altitude-val’).textContent=(st.stationY).toFixed(0);
+// ── Train métro aérien ──────────────────────────────────
+const metroTrain={group:new THREE.Group(),trackIdx:0,progress:0,speed:22,atStation:null,waitTimer:0};
+scene.add(metroTrain.group);metroTrain.group.position.set(METRO_TRACK[0].x,METRO_ELEV+0.6,METRO_TRACK[0].z);
+gltfLoader.load(BASE+'train.glb',gltf=>{
+  const model=gltf.scene;model.traverse(n=>{if(n.isMesh){n.castShadow=false;n.receiveShadow=false;}});
+  _box.setFromObject(model);_box.getSize(_sz);const s=Math.min(27/_sz.z,4/_sz.y,6/_sz.x);model.scale.setScalar(s);_box.setFromObject(model);model.position.y=-_box.min.y;metroTrain.group.add(model);
+},undefined,()=>{
+  const bodyMat=new THREE.MeshLambertMaterial({color:0x2266cc});
+  const body=new THREE.Mesh(new THREE.BoxGeometry(3,2.5,26),bodyMat);body.position.y=1.25;metroTrain.group.add(body);
+  const strip=new THREE.Mesh(new THREE.BoxGeometry(3.05,0.35,26),new THREE.MeshLambertMaterial({color:0xffffff}));strip.position.y=1.2;metroTrain.group.add(strip);
 });
-container.appendChild(btn);
-});
+function updateMetroTrain(dt){
+  if(metroTrain.waitTimer>0){metroTrain.waitTimer-=dt;return;}
+  const from=METRO_TRACK[metroTrain.trackIdx];const to=METRO_TRACK[(metroTrain.trackIdx+1)%METRO_TRACK.length];
+  const dx=to.x-from.x,dz=to.z-from.z;const segLen=Math.sqrt(dx*dx+dz*dz);
+  metroTrain.progress+=metroTrain.speed*dt;
+  if(metroTrain.progress>=segLen){
+    metroTrain.trackIdx=(metroTrain.trackIdx+1)%(METRO_TRACK.length-1);metroTrain.progress=0;
+    const np=METRO_TRACK[metroTrain.trackIdx];
+    const foundSt=METRO_STATIONS.find(s=>Math.abs(s.x-np.x)<2&&Math.abs(s.z-np.z)<2);
+    if(foundSt){metroTrain.waitTimer=4;metroTrain.atStation=foundSt.id;}return;
+  }
+  const t=metroTrain.progress/segLen;
+  metroTrain.group.position.set(from.x+dx*t,METRO_ELEV+0.6,from.z+dz*t);metroTrain.group.rotation.y=Math.atan2(dx,dz);
 }
-function openMetroHUD(){
-buildMetroHUD();
-document.getElementById(‘metro-hud’).classList.add(‘show’);
-}
-function closeMetroHUD(){
-document.getElementById(‘metro-hud’).classList.remove(‘show’);
-}
-document.getElementById(‘metro-close’).addEventListener(‘click’,closeMetroHUD);
 
-// Trigger d’entrée métro : si le joueur s’approche d’un kiosque
-function checkMetroEntry(){
-const px=playerMesh.position.x, pz=playerMesh.position.z;
-for(const st of metroStationsList){
-const dx=px-st.entryX, dz=pz-st.entryZ;
-if(Math.sqrt(dx*dx+dz*dz)<3.5){
-if(!document.getElementById(‘metro-hud’).classList.contains(‘show’)){
-openMetroHUD();
-}
-return;
-}
-}
-}
-// Appeler checkMetroEntry() dans la boucle animate()
-
-// ════════════════════════════════════════════════════════════════════
-//  PHYSIQUE SOL — remplace getFloor / la détection de sol dans animate
-// ════════════════════════════════════════════════════════════════════
-/*
-Dans animate(), remplacer la ligne qui calcule targetY par :
-
-const targetY = getFloorY(playerMesh.position.x, playerMesh.position.z, playerMesh.position.y);
-
-Et getFloorY retourne le Y de la plateforme la plus haute sous le joueur.
-*/
-
-// ════════════════════════════════════════════════════════════════════
-//  RÉSUMÉ DES CHANGEMENTS
-// ════════════════════════════════════════════════════════════════════
-/*
-
-1. Tour Eiffel :
-- 3 plateformes d’étage avec addPlatform() → sol solide
-- 3 rampes d’escaliers avec steps individuels addPlatform()
-- Gemmes lumineuses et PointLights à chaque étage
-- Rambardes visuelles
-1. Métro :
-- 4 stations souterraines à Y=-9 avec sol/murs/plafond/quais/rails/néons
-- Escaliers physiques avec addPlatform() depuis la surface
-- Kiosques d’entrée en surface (trigger à distance 3.5)
-- Tunnels visuels entre stations
-- HUD reconstruit : téléporte SUR LE QUAI de la station choisie
-- checkMetroEntry() à appeler dans animate()
-1. Physique :
-- Tableau platforms[] + addPlatform() + getFloorY()
-- À ajouter après const colliders=[]
-- getFloorY() à utiliser dans animate() pour le sol
-  */
-
-// ── VOITURES GLB ─────────────────────────────────────────
+// ── Voitures GLB ────────────────────────────────────────
 const glbCars=[];
 const GLB_CAR_ROUTES=[
-  {file:'1965_alfa_romeo_giulia_sprint_gta_1600.glb',          len:4.2,axis:'x',fixedZ:-4,  min:-140,max:140, dir:1, speed:13},
-  {file:'1967_alfa_romeo_giulia_sprint_zagato_sacalino.glb',   len:4.0,axis:'z',fixedX:-4,  min:-140,max:140, dir:1, speed:11},
-  {file:'renault_5_tl_1974.glb',                               len:3.5,axis:'x',fixedZ:-28, min:-100,max:100, dir:1, speed:9},
+  {file:'1965_alfa_romeo_giulia_sprint_gta_1600.glb',        len:4.2,axis:'x',fixedZ:-4,  min:-140,max:140,dir:1, speed:13},
+  {file:'1967_alfa_romeo_giulia_sprint_zagato_sacalino.glb', len:4.0,axis:'z',fixedX:-4,  min:-140,max:140,dir:1, speed:11},
+  {file:'renault_5_tl_1974.glb',                             len:3.5,axis:'x',fixedZ:-28, min:-100,max:100,dir:1, speed:9},
 ];
 const carGLBCache={};
 function loadCarGLB(file,targetLength,cb){
@@ -868,7 +815,7 @@ GLB_CAR_ROUTES.forEach((route,i)=>{
 });
 function updateGLBCars(dt){glbCars.forEach(dc=>{const r=dc.route;const lo=r.axis==='x'?dc.mesh.position.x:dc.mesh.position.z;let nlo=lo+r.dir*r.speed*dt;if(r.dir>0&&nlo>r.max)nlo=r.min;if(r.dir<0&&nlo<r.max)nlo=r.min;if(r.axis==='x'){dc.mesh.position.x=nlo;}else{dc.mesh.position.z=nlo;}});}
 
-// ── BATEAUX ───────────────────────────────────────────────
+// ── BATEAUX ──────────────────────────────────────────────
 function makeBoat(type='cargo'){
   const g=new THREE.Group();
   const hullMat=new THREE.MeshLambertMaterial({color:type==='ferry'?0x2244aa:type==='tanker'?0xaa2200:0x2a2a2a});
@@ -924,19 +871,18 @@ const lgM=new THREE.MeshLambertMaterial({color:0xfffce0,emissive:new THREE.Color
 function lamp(x,z){const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.1,7,6),lpM);pole.position.set(x,3.5,z);scene.add(pole);const gl=new THREE.Mesh(new THREE.BoxGeometry(0.42,0.09,0.24),lgM);gl.position.set(x+1.88,6.93,z);scene.add(gl);}
 for(let x=-120;x<=120;x+=25)for(let z=-130;z<=120;z+=25)lamp(x,z);
 
-// ── ZONES DE MISSION ──────────────────────────────────────
+// ── ZONES DE MISSION ─────────────────────────────────────
 const ladderZones=[],puddleZones=[],wallPassZones=[],sewerZones=[],missionZones=[];
-// Échelle
 (()=>{
   const BX=44,BZ=-24,LH=60;
   const ladderMat=new THREE.MeshLambertMaterial({color:0x8a8a70});
   for(let y=1;y<LH;y+=0.9){const rung=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,1.6,6),ladderMat);rung.rotation.z=Math.PI/2;rung.position.set(BX+0.5,y,BZ+5.6);scene.add(rung);}
   [-0.7,0.7].forEach(sx=>{const rail=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,LH,6),ladderMat);rail.position.set(BX+0.5+sx,LH/2,BZ+5.6);scene.add(rail);});
   const plat=new THREE.Mesh(new THREE.BoxGeometry(6,0.2,4),new THREE.MeshLambertMaterial({color:0x606068}));plat.position.set(BX,LH+0.1,BZ);scene.add(plat);
+  addPlatform(BX,BZ,3,2,LH+0.1);
   const chest=new THREE.Mesh(new THREE.BoxGeometry(1.2,0.9,0.9),new THREE.MeshLambertMaterial({color:0xc8a020,emissive:new THREE.Color(0x402000),emissiveIntensity:0.5}));chest.position.set(BX,LH+0.55,BZ-1);scene.add(chest);
   ladderZones.push({x:BX+0.5,z:BZ+5.6,topY:LH,platX:BX,platZ:BZ});
 })();
-// Flaque
 (()=>{
   const PX=-45,PZ=45;
   const puddleMat=new THREE.MeshLambertMaterial({color:0x2255aa,transparent:true,opacity:0.7});
@@ -951,7 +897,6 @@ const ladderZones=[],puddleZones=[],wallPassZones=[],sewerZones=[],missionZones=
   const coin=new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,0.12,10),coinMat);coin.rotation.z=Math.PI/2;coin.position.set(PX+15,-3.5,PZ);scene.add(coin);
   sewerZones.push({entryX:PX,entryZ:PZ,exitX:PX+30,exitZ:PZ,coin,coinCollected:false});
 })();
-// Mur magique
 (()=>{
   const WX=60,WZ=-80;
   const wallMat=new THREE.MeshLambertMaterial({color:0x4488cc,transparent:true,opacity:0.45,emissive:new THREE.Color(0x001144),emissiveIntensity:0.5,side:THREE.DoubleSide});
@@ -960,7 +905,6 @@ const ladderZones=[],puddleZones=[],wallPassZones=[],sewerZones=[],missionZones=
   const treasure=new THREE.Mesh(new THREE.SphereGeometry(0.7,10,8),tMat);treasure.position.set(WX-8,0.8,WZ);scene.add(treasure);
   wallPassZones.push({x:WX,z:WZ,halfW:4.1,halfD:0.6,treasure,treasureCollected:false});
 })();
-// Égouts mission 4
 (()=>{
   const EX2=-90,EZ2=-70;
   const arrowMat=new THREE.MeshLambertMaterial({color:0x80ff40,emissive:new THREE.Color(0x204010),emissiveIntensity:1.0});
@@ -973,7 +917,7 @@ const ladderZones=[],puddleZones=[],wallPassZones=[],sewerZones=[],missionZones=
   missionZones.push({type:'sewer',entryX:EX2,entryZ:EZ2,floorY:-6,arrow,sewerCoins});
 })();
 
-// ── MISSIONS ──────────────────────────────────────────────
+// ── MISSIONS ─────────────────────────────────────────────
 const missions=[
   {id:'ladder',  title:'🪜 Grimpeur Urbain',   desc:'Montez en haut du gratte-ciel',           progress:0,total:1,done:false},
   {id:'puddle',  title:'💧 Passage Secret',     desc:'Sautez dans la flaque magique',           progress:0,total:1,done:false},
@@ -1063,30 +1007,56 @@ document.getElementById('jump-btn').addEventListener('click',doJump);
 document.getElementById('super-jump-btn').addEventListener('touchstart',e=>{e.preventDefault();if(!onGround)return;jtc=0;clearTimeout(jtt);jumpVel=JVS;onGround=false;showToast('🚀 SUPER SAUT!');},{passive:false});
 document.getElementById('super-jump-btn').addEventListener('click',()=>{if(!onGround)return;jtc=0;clearTimeout(jtt);jumpVel=JVS;onGround=false;showToast('🚀 SUPER SAUT!');});
 
-// ── MÉTRO UI ──────────────────────────────────────────────
+// ── MÉTRO UI ─────────────────────────────────────────────
+// AJOUT : gestion du HUD métro — téléporte sur le quai souterrain
 let inMetro=false,metroStationsVisited=new Set(),metroMenuOpen=false;
-function openMetroMenu(fromStation){
-  metroMenuOpen=true;document.getElementById('metro-hud').classList.add('show');
+let currentMetroStation=null;  // station depuis laquelle on ouvre le menu
+
+function openMetroMenu(fromStationId){
+  metroMenuOpen=true;currentMetroStation=fromStationId;
+  document.getElementById('metro-hud').classList.add('show');
   const stDiv=document.getElementById('metro-stations');stDiv.innerHTML='';
-  METRO_STATIONS.filter(s=>s.id!==fromStation).forEach(st=>{
+  METRO_STATIONS.filter(s=>s.id!==fromStationId).forEach(st=>{
     const btn=document.createElement('button');btn.className='metro-station-btn';btn.textContent=st.name;
     btn.onclick=()=>rideMetroTo(st);stDiv.appendChild(btn);
   });
 }
 document.getElementById('metro-close').addEventListener('click',()=>{metroMenuOpen=false;document.getElementById('metro-hud').classList.remove('show');});
+
 function rideMetroTo(targetStation){
   metroMenuOpen=false;document.getElementById('metro-hud').classList.remove('show');
-  inMetro=true;showToast('🚇 En route vers '+targetStation.name,'boat');addChat('🚇 Direction '+targetStation.name+'…','Métro');
+  inMetro=true;
+  showToast('🚇 En route vers '+targetStation.name,'boat');
+  addChat('🚇 Direction '+targetStation.name+'…','Métro');
   setTimeout(()=>{
     inMetro=false;
-    // Arriver au bas des escaliers de la station cible
-    pp.x=targetStation.x;pp.z=targetStation.stairsTopZ||targetStation.z+3;pp.y=METRO_ELEV+0.6;
+    // AJOUT : atterrissage sur le quai souterrain de la station cible
+    const sY=targetStation.stationY!==undefined?targetStation.stationY:STATION_Y;
+    pp.x=targetStation.x+8;  // côté quai droit
+    pp.z=targetStation.z;
+    pp.y=sY+0.5;
+    jumpVel=0;onGround=true;
     document.getElementById('zone-label').textContent=targetStation.label;
     showToast('✅ Arrivée à '+targetStation.name,'mission');
     metroStationsVisited.add(targetStation.id);
     updateMissionProgress('metro',metroStationsVisited.size);
     if(metroStationsVisited.size>=3)completeMission('metro','Tu as visité 3 stations !');
-  },3500);
+  },2800);
+}
+
+// Vérification proximité entrée métro (kiosques) — AJOUT
+function checkMetroEntry(){
+  if(inBoat||inMetro||metroMenuOpen)return;
+  for(const entry of metroEntries){
+    const d=Math.sqrt((pp.x-entry.entryX)**2+(pp.z-entry.entryZ)**2);
+    if(d<5&&pp.y<3){
+      const st=METRO_STATIONS.find(s=>s.id===entry.stationId);
+      if(st){
+        setInteractPrompt('🚇 Métro — '+st.name,()=>{openMetroMenu(st.id);clearInteractPrompt();});
+        return;
+      }
+    }
+  }
 }
 
 // INTERACT PROMPT
@@ -1155,10 +1125,7 @@ function animate(){
   if(puddleZones.length){const pz=puddleZones[0];pz.arrow.rotation.y=time*2;pz.arrow.position.y=1.2+0.2*Math.sin(time*2);}
   if(missionZones.length){const sz2=missionZones[0];sz2.arrow.rotation.y=time*1.5;sz2.arrow.position.y=1.5+0.25*Math.sin(time*1.8);sz2.sewerCoins.forEach(c=>{if(!c.collected)c.mesh.rotation.z=time*2;});}
   if(wallPassZones.length&&!wallPassZones[0].treasureCollected)wallPassZones[0].treasure.rotation.y=time;
-
-  // Clignotement antennes (liste propre, pas scene.children.forEach)
   blinkMeshes.forEach(b=>{b.mesh.material.emissiveIntensity=0.4+0.4*Math.sin(time*4+(b.t||0));});
-
   updateMetroTrain(dt);updateGLBCars(dt);updateCars(dt);
   if(inBoat){updateBoat(dt);setWalkSwap(false);}
 
@@ -1175,29 +1142,23 @@ function animate(){
   // Altitude HUD
   if(pp.y>5){altHud.classList.add('show');altVal.textContent=Math.round(pp.y);}else altHud.classList.remove('show');
 
-  // Interactions proximité
+  // ── Interactions proximité ──
+  // AJOUT : checkMetroEntry() en priorité, puis bateau
   if(!inBoat&&!inMetro&&!metroMenuOpen){
+    checkMetroEntry();
     const dBoat=Math.sqrt((pp.x-boatX)**2+(pp.z-boatZ)**2);
-    // Station métro : détection au pied des escaliers (au sol ou sur le quai)
-    const nearStation=METRO_STATIONS.find(s=>{
-      const d=Math.sqrt((pp.x-s.x)**2+(pp.z-s.z)**2);
-      // Au sol près des escaliers OU sur le quai
-      const onQuai=Math.abs(pp.y-METRO_ELEV)<2;
-      const atBase=d<8&&pp.y<3;
-      return (atBase||onQuai)&&d<9;
-    });
-    if(nearStation){
-      setInteractPrompt('🚇 Prendre le métro — '+nearStation.name,()=>{openMetroMenu(nearStation.id);clearInteractPrompt();});
-    }else if(dBoat<8&&pp.y<3){
+    if(dBoat<8&&pp.y<3&&!document.getElementById('interact-prompt').classList.contains('show')){
       setInteractPrompt('⛵ Monter sur le bateau',()=>{
         inBoat=true;boatX=playerBoat.position.x;boatZ=playerBoat.position.z;boatVel=0;
         document.getElementById('boat-hud').classList.add('show');clearInteractPrompt();
         showToast('⛵ Tu pilotes le bateau!','boat');completeMission('boat','Capitaine de la baie !');
       });
-    }else clearInteractPrompt();
+    }else if(!metroEntries.some(e=>Math.sqrt((pp.x-e.entryX)**2+(pp.z-e.entryZ)**2)<5&&pp.y<3)){
+      clearInteractPrompt();
+    }
   }
 
-  // Physique
+  // ── Physique ──
   if(!inBoat){
     const lz=ladderZones[0];
     const distLadder=Math.sqrt((pp.x-lz.x)**2+(pp.z-lz.z)**2);
@@ -1221,7 +1182,16 @@ function animate(){
         while(diff>Math.PI)diff-=2*Math.PI;while(diff<-Math.PI)diff+=2*Math.PI;
         cameraYaw+=diff*Math.min(4*dt,1.0);
       }
-      if(!onGround){jumpVel-=GR*dt;pp.y+=jumpVel*dt;if(pp.y<=0){pp.y=0;jumpVel=0;onGround=true;}}
+      // AJOUT : sol dynamique via getFloorY (plateformes Eiffel + métro + échelle)
+      const floorY=getFloorY(pp.x,pp.z,pp.y);
+      if(!onGround){
+        jumpVel-=GR*dt;pp.y+=jumpVel*dt;
+        if(pp.y<=floorY){pp.y=floorY;jumpVel=0;onGround=true;}
+      }else{
+        // Colle au sol de la plateforme
+        if(pp.y>floorY+0.05){onGround=false;}
+        else{pp.y=floorY;}
+      }
       if(onGround&&!isOnLadder)setWalkSwap(moving);
     }else{
       if(moving){
@@ -1244,15 +1214,15 @@ function animate(){
     if(missionZones.length){const sz2=missionZones[0];const dSewer=Math.sqrt((pp.x-sz2.entryX)**2+(pp.z-sz2.entryZ)**2);if(dSewer<2&&!isInSewer&&onGround){enterSewer();pp.y=sewerFloorY+0.1;}}
     if(sewerZones.length&&isInSewer){const sv=sewerZones[0];const dExit=Math.sqrt((pp.x-sv.exitX)**2+(pp.z-sv.exitZ)**2);if(dExit<2){exitSewer();pp.y=0.1;}if(!sv.coinCollected){const dCoin=Math.sqrt((pp.x-sv.coin.position.x)**2+(pp.z-sv.coin.position.z)**2);if(dCoin<1.5){sv.coinCollected=true;sv.coin.visible=false;showToast('🪙 Pièce du tunnel!','mission');}}}
 
-    // ── MISSIONS TOUR EIFFEL ──
+    // AJOUT : Missions Tour Eiffel via plateformes
     const dEiffel=Math.sqrt((pp.x-EX)**2+(pp.z-EZ)**2);
-    if(dEiffel<30){
-      if(pp.y>=50&&pp.y<105)completeMission('eiffel1','1er étage de la Tour Eiffel !');
-      if(pp.y>=105&&pp.y<155)completeMission('eiffel2','2e étage de la Tour Eiffel !');
-      if(pp.y>=155)completeMission('eiffel3','Sommet de la Tour Eiffel !');
+    if(dEiffel<40){
+      if(pp.y>=52&&pp.y<108)completeMission('eiffel1','1er étage de la Tour Eiffel !');
+      if(pp.y>=108&&pp.y<160)completeMission('eiffel2','2e étage de la Tour Eiffel !');
+      if(pp.y>=160)completeMission('eiffel3','Sommet de la Tour Eiffel !');
     }
 
-    // ── MISSION STATUE ──
+    // Mission Statue
     const dStatue=Math.sqrt((pp.x-SLX)**2+(pp.z-SLZ)**2);
     if(dStatue<15&&pp.y>=SL_TOP-8)completeMission('statue','Sommet de la Statue de la Liberté !');
   }
@@ -1263,7 +1233,7 @@ function animate(){
   else{avatarGroup.position.set(boatX,5,boatZ);avatarGroup.rotation.y=boatRot;}
   blob.position.x=pp.x;blob.position.z=pp.z;blob.position.y=isInSewer?sewerFloorY+0.02:0.012;
 
-  // Caméra — distance augmentée en hauteur pour voir les tours
+  // Caméra
   const camDist=inBoat?20:isShrunk?3:isInSewer?4:8;
   const camH=inBoat?10:isShrunk?1:isInSewer?1.5:2.6;
   const camLookY=inBoat?4:isShrunk?.5:isInSewer?.5:1.2;
@@ -1281,11 +1251,7 @@ function animate(){
   renderer.render(scene,camera);
 }
 animate();
-  // Ancien : quelque chose comme   const groundY = 0;
-// Nouveau :
-const groundY = getFloorY(playerMesh.position.x, playerMesh.position.z, playerMesh.position.y);
-checkMetroEntry();
-
 </script>
+
 </body>
 </html>
