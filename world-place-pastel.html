@@ -1281,6 +1281,11 @@ function animate(){
   renderer.render(scene,camera);
 }
 animate();
+  // Ancien : quelque chose comme   const groundY = 0;
+// Nouveau :
+const groundY = getFloorY(playerMesh.position.x, playerMesh.position.z, playerMesh.position.y);
+checkMetroEntry();
+
 </script>
 </body>
 </html>
